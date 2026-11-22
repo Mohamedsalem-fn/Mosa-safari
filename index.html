@@ -35,7 +35,8 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="mosasafari.com | Luxury Sharm El Sheikh &amp; Sinai Desert Safaris">
 
-    <link rel="icon" type="image/jpeg" href="assets/images/logo.jpg">
+    <link rel="icon" type="image/svg+xml" href="assets/images/logo-icon.svg">
+    <link rel="alternate icon" type="image/jpeg" href="assets/images/logo.jpg">
     <meta property="og:image" content="https://mosasafari.com/assets/images/hero-atv-sunset.jpg">
 
     <!-- Stylesheets -->
@@ -140,21 +141,15 @@
         class="glass-nav sticky top-0 z-50 bg-[#F6F3EC]/70 dark:bg-carbon-950/60 backdrop-blur-xl border border-carbon-900/10 dark:border-white/10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3 flex items-center justify-between gap-4">
             <!-- Brand -->
-            <a href="#hero" class="flex items-center gap-3 shrink-0">
-                <div class="relative w-10 h-10 rounded-xl p-0.5 bg-gradient-to-tr from-champagne to-copper shadow-md">
-                    <img src="assets/images/logo.jpg" alt="شعار موسى سفاري mosasafari"
-                        class="w-full h-full object-cover rounded-[10px]">
-                </div>
-                <div class="leading-tight">
-                    <span class="block text-base font-black tracking-tight" data-i18n="brand_name">موسى سفاري</span>
-                    <span
-                        class="block text-[10px] font-bold tracking-[0.22em] uppercase text-champagne-dark dark:text-champagne">MOSASAFARI.COM</span>
-                </div>
+            <a href="#hero" class="flex items-center gap-3 shrink-0 group">
+                <img src="assets/images/logo.svg" alt="شعار موسى سفاري Mosa Safari"
+                    class="h-11 sm:h-12 w-auto object-contain drop-shadow-sm group-hover:scale-[1.03] transition-transform duration-300">
             </a>
 
             <!-- Center Nav -->
             <nav class="hidden lg:flex items-center gap-7 text-xs font-extrabold tracking-wide">
-                <a href="#hero" class="text-champagne-dark dark:text-champagne transition" data-i18n="nav_home">الرئيسية</a>
+                <a href="#hero" class="text-champagne-dark dark:text-champagne transition"
+                    data-i18n="nav_home">الرئيسية</a>
                 <a href="#programs" class="hover:text-champagne transition flex items-center gap-1.5"
                     data-i18n="nav_programs">برامج السفاري</a>
                 <a href="#why-us" class="hover:text-champagne transition" data-i18n="nav_why">لماذا نحن؟</a>
@@ -231,12 +226,15 @@
         <div id="mobile-menu"
             class="hidden lg:hidden px-4 pb-4 pt-2 border-t border-carbon-900/10 dark:border-white/10 space-y-2 text-sm font-bold">
             <a href="#hero" class="block py-2 px-3 rounded-lg hover:bg-champagne/10" data-i18n="nav_home">الرئيسية</a>
-            <a href="#programs" class="block py-2 px-3 rounded-lg hover:bg-champagne/10" data-i18n="nav_programs">برامج السفاري</a>
-            <a href="#why-us" class="block py-2 px-3 rounded-lg hover:bg-champagne/10" data-i18n="nav_why">لماذا نحن؟</a>
-            <a href="#seo-guide" class="block py-2 px-3 rounded-lg hover:bg-champagne/10" data-i18n="nav_guide">الأسعار والأسئلة</a>
+            <a href="#programs" class="block py-2 px-3 rounded-lg hover:bg-champagne/10" data-i18n="nav_programs">برامج
+                السفاري</a>
+            <a href="#why-us" class="block py-2 px-3 rounded-lg hover:bg-champagne/10" data-i18n="nav_why">لماذا
+                نحن؟</a>
+            <a href="#seo-guide" class="block py-2 px-3 rounded-lg hover:bg-champagne/10" data-i18n="nav_guide">الأسعار
+                والأسئلة</a>
             <button id="mobile-book-btn" type="button"
-                class="w-full py-2.5 px-3 rounded-lg bg-champagne text-carbon-950 font-black"
-                data-i18n="nav_book">احجز رحلتك</button>
+                class="w-full py-2.5 px-3 rounded-lg bg-champagne text-carbon-950 font-black" data-i18n="nav_book">احجز
+                رحلتك</button>
         </div>
     </header>
 
@@ -271,7 +269,8 @@
                     </h1>
 
                     <p class="hero-enter text-sm sm:text-base text-carbon-900/75 dark:text-[#B5B0A8] leading-relaxed max-w-xl"
-                        style="--d:3" data-i18n="hero_subtitle">منصة متخصصة تضم 8 برامج سفاري معتمدة في شرم الشيخ: بيتش باجي ATV، باجي صحراوي، محمية نبق، وجلسات النجوم البدوية مع الدفع عند الوصول.</p>
+                        style="--d:3" data-i18n="hero_subtitle">منصة متخصصة تضم 8 برامج سفاري معتمدة في شرم الشيخ: بيتش
+                        باجي ATV، باجي صحراوي، محمية نبق، وجلسات النجوم البدوية مع الدفع عند الوصول.</p>
 
                     <!-- Compact Architectural Search Console (Filters by Safari Category & Guests) -->
                     <form id="hero-search-form" style="--d:4"
@@ -282,11 +281,16 @@
                                 data-i18n="search_type">نوع المغامرة</label>
                             <select id="search-category"
                                 class="w-full bg-transparent text-xs sm:text-sm font-bold focus:outline-none cursor-pointer">
-                                <option value="all" class="text-carbon-950" data-i18n="opt_cat_all">جميع رحلات السفاري (8 برامج)</option>
-                                <option value="atv" class="text-carbon-950" data-i18n="opt_cat_atv">بيتش باجي ATV وباجي (3)</option>
-                                <option value="nabq" class="text-carbon-950" data-i18n="opt_cat_nabq">سفاري محمية نبق (3)</option>
-                                <option value="night" class="text-carbon-950" data-i18n="opt_cat_night">سفاري ليلية ومراقبة النجوم (1)</option>
-                                <option value="canyon" class="text-carbon-950" data-i18n="opt_cat_canyon">الوادي الملون ودهب (1)</option>
+                                <option value="all" class="text-carbon-950" data-i18n="opt_cat_all">جميع رحلات السفاري
+                                    (8 برامج)</option>
+                                <option value="atv" class="text-carbon-950" data-i18n="opt_cat_atv">بيتش باجي ATV وباجي
+                                    (3)</option>
+                                <option value="nabq" class="text-carbon-950" data-i18n="opt_cat_nabq">سفاري محمية نبق
+                                    (3)</option>
+                                <option value="night" class="text-carbon-950" data-i18n="opt_cat_night">سفاري ليلية
+                                    ومراقبة النجوم (1)</option>
+                                <option value="canyon" class="text-carbon-950" data-i18n="opt_cat_canyon">الوادي الملون
+                                    ودهب (1)</option>
                             </select>
                         </div>
                         <div class="sm:col-span-4 px-3 py-1.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900">
@@ -298,7 +302,8 @@
                                 <option value="1" class="text-carbon-950" data-i18n="opt_g1">1 مسافر</option>
                                 <option value="2" selected class="text-carbon-950" data-i18n="opt_g2">2 مسافرين</option>
                                 <option value="4" class="text-carbon-950" data-i18n="opt_g4">4 مسافرين</option>
-                                <option value="5" class="text-carbon-950" data-i18n="opt_g5">5+ مجموعة (خصم 10%)</option>
+                                <option value="5" class="text-carbon-950" data-i18n="opt_g5">5+ مجموعة (خصم 10%)
+                                </option>
                             </select>
                         </div>
                         <div class="sm:col-span-3">
@@ -338,7 +343,8 @@
                                 </path>
                                 <path d="m9 12 2 2 4-4"></path>
                             </svg>
-                            <span class="text-xs font-bold" data-i18n="hero_pay_badge">الدفع عند الوصول · إلغاء مجاني</span>
+                            <span class="text-xs font-bold" data-i18n="hero_pay_badge">الدفع عند الوصول · إلغاء
+                                مجاني</span>
                         </div>
 
                         <div class="absolute bottom-5 inset-x-5 flex items-end justify-between gap-4">
@@ -390,7 +396,8 @@
                     <span
                         class="eyebrow text-[11px] font-extrabold uppercase tracking-[0.2em] text-champagne-dark dark:text-champagne"
                         data-i18n="prog_eyebrow">برامج معتمدة · شرم الشيخ</span>
-                    <h2 class="text-2xl sm:text-3xl font-black mt-1" data-i18n="prog_title">اختر مغامرة السفاري المناسبة لك</h2>
+                    <h2 class="text-2xl sm:text-3xl font-black mt-1" data-i18n="prog_title">اختر مغامرة السفاري المناسبة
+                        لك</h2>
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2">
@@ -460,12 +467,15 @@
                     </div>
                     <div class="glow-card stagger-item p-6 rounded-2xl bg-carbon-800 border border-white/10"
                         style="--i:3">
-                        <div class="text-3xl sm:text-4xl font-black text-sea counter" data-target="8" data-suffix="">0</div>
-                        <div class="text-xs text-[#B5B0A8] mt-1 font-bold" data-i18n="stat_tours">برنامج سفاري معتمد</div>
+                        <div class="text-3xl sm:text-4xl font-black text-sea counter" data-target="8" data-suffix="">0
+                        </div>
+                        <div class="text-xs text-[#B5B0A8] mt-1 font-bold" data-i18n="stat_tours">برنامج سفاري معتمد
+                        </div>
                     </div>
                     <div class="glow-card stagger-item p-6 rounded-2xl bg-carbon-800 border border-white/10"
                         style="--i:4">
-                        <div class="text-3xl sm:text-4xl font-black text-sea counter" data-target="98" data-suffix="%">0</div>
+                        <div class="text-3xl sm:text-4xl font-black text-sea counter" data-target="98" data-suffix="%">0
+                        </div>
                         <div class="text-xs text-[#B5B0A8] mt-1 font-bold" data-i18n="stat_sat">رضا العملاء (4.9★)</div>
                     </div>
                 </div>
@@ -483,7 +493,8 @@
                             <path d="m9 16 2 2 4-4"></path>
                         </svg>
                         <h3 class="text-base font-black mb-1.5" data-i18n="why_1_t">حجز فوري في 5 خطوات</h3>
-                        <p class="text-xs text-[#B5B0A8] leading-relaxed" data-i18n="why_1_d">اختر البرنامج، حدد الضيوف ونوع المركبة، فندق الاستلام، وطبق كود الخصم MOSA20 في ثوانٍ.</p>
+                        <p class="text-xs text-[#B5B0A8] leading-relaxed" data-i18n="why_1_d">اختر البرنامج، حدد الضيوف
+                            ونوع المركبة، فندق الاستلام، وطبق كود الخصم MOSA20 في ثوانٍ.</p>
                     </div>
                     <div class="glow-card stagger-item p-6 rounded-2xl bg-carbon-800/70 border border-white/10"
                         style="--i:6">
@@ -496,7 +507,8 @@
                             <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"></path>
                         </svg>
                         <h3 class="text-base font-black mb-1.5" data-i18n="why_2_t">الدفع عند الوصول أو أونلاين</h3>
-                        <p class="text-xs text-[#B5B0A8] leading-relaxed" data-i18n="why_2_d">ادفع يوم الرحلة بدون مقدم أو مخاطرة، أو أونلاين بـ Visa / Mastercard / المحافظ الإلكترونية.</p>
+                        <p class="text-xs text-[#B5B0A8] leading-relaxed" data-i18n="why_2_d">ادفع يوم الرحلة بدون مقدم
+                            أو مخاطرة، أو أونلاين بـ Visa / Mastercard / المحافظ الإلكترونية.</p>
                     </div>
                     <div class="glow-card stagger-item p-6 rounded-2xl bg-carbon-800/70 border border-white/10"
                         style="--i:7">
@@ -512,7 +524,8 @@
                             <path d="M5 18H3"></path>
                         </svg>
                         <h3 class="text-base font-black mb-1.5" data-i18n="why_3_t">مساعد MOSA AI بـ 4 لغات</h3>
-                        <p class="text-xs text-[#B5B0A8] leading-relaxed" data-i18n="why_3_d">مساعد ذكي 24/7 يرشح لك الرحلة الأنسب، يبني جدولك، ويحولك مباشرة للدعم عبر واتساب.</p>
+                        <p class="text-xs text-[#B5B0A8] leading-relaxed" data-i18n="why_3_d">مساعد ذكي 24/7 يرشح لك
+                            الرحلة الأنسب، يبني جدولك، ويحولك مباشرة للدعم عبر واتساب.</p>
                     </div>
                 </div>
             </div>
@@ -525,7 +538,8 @@
                     <span
                         class="text-[11px] font-extrabold uppercase tracking-[0.2em] text-champagne-dark dark:text-champagne"
                         data-i18n="guide_eyebrow">دليل شرم الشيخ 2026</span>
-                    <h2 class="text-2xl sm:text-3xl font-black mt-1" data-i18n="guide_title">جدول أسعار السفاري والأسئلة الشائعة</h2>
+                    <h2 class="text-2xl sm:text-3xl font-black mt-1" data-i18n="guide_title">جدول أسعار السفاري والأسئلة
+                        الشائعة</h2>
                 </div>
                 <div class="hub-tabs flex gap-2">
                     <button type="button" onclick="switchHubTab('prices')" id="hub-tab-prices"
@@ -541,7 +555,9 @@
             <div id="hub-panel-prices"
                 class="p-6 sm:p-8 rounded-3xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 reveal">
                 <p class="text-sm text-carbon-900/75 dark:text-[#B5B0A8] leading-relaxed mb-5" data-i18n="guide_intro">
-                    تُعد رحلات سفاري شرم الشيخ التجربة الصحراوية الأبرز على ساحل البحر الأحمر؛ حيث تمتد مسارات البيتش باجي (ATV Quad) والـ Dune Buggy بين جبال الصدى ومحمية نبق الطبيعية، وصولاً إلى القرى البدوية ومراقبة النجوم في سماء سيناء. جميع الأسعار تتحدث تلقائياً حسب العملة المختارة.
+                    تُعد رحلات سفاري شرم الشيخ التجربة الصحراوية الأبرز على ساحل البحر الأحمر؛ حيث تمتد مسارات البيتش
+                    باجي (ATV Quad) والـ Dune Buggy بين جبال الصدى ومحمية نبق الطبيعية، وصولاً إلى القرى البدوية ومراقبة
+                    النجوم في سماء سيناء. جميع الأسعار تتحدث تلقائياً حسب العملة المختارة.
                 </p>
                 <div class="overflow-x-auto rounded-2xl border border-carbon-900/10 dark:border-white/10">
                     <table class="w-full text-xs sm:text-sm text-start">
@@ -576,7 +592,8 @@
                         </svg>
                     </button>
                     <div class="faq-body hidden px-4 pb-4 text-xs sm:text-sm text-carbon-900/70 dark:text-[#B5B0A8]"
-                        data-i18n="faq_a1">نعم تماماً! الدراجات أوتوماتيك بالكامل وسهلة القيادة مع خوذات أمان وتدريب عملي قبل الانطلاق، ويمكن للأطفال من 6 سنوات الركوب بأمان مع مرافق بالغ.</div>
+                        data-i18n="faq_a1">نعم تماماً! الدراجات أوتوماتيك بالكامل وسهلة القيادة مع خوذات أمان وتدريب
+                        عملي قبل الانطلاق، ويمكن للأطفال من 6 سنوات الركوب بأمان مع مرافق بالغ.</div>
                 </div>
                 <div
                     class="faq-item rounded-2xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 overflow-hidden">
@@ -590,7 +607,8 @@
                         </svg>
                     </button>
                     <div class="faq-body hidden px-4 pb-4 text-xs sm:text-sm text-carbon-900/70 dark:text-[#B5B0A8]"
-                        data-i18n="faq_a2">تحجز رحلتك في أقل من دقيقة بدون أي دفعة مقدمة، وتدفع للمندوب يوم الرحلة عند الاستلام من الفندق نقداً أو بالبطاقة، كما يتوفر الدفع الإلكتروني.</div>
+                        data-i18n="faq_a2">تحجز رحلتك في أقل من دقيقة بدون أي دفعة مقدمة، وتدفع للمندوب يوم الرحلة عند
+                        الاستلام من الفندق نقداً أو بالبطاقة، كما يتوفر الدفع الإلكتروني.</div>
                 </div>
                 <div
                     class="faq-item rounded-2xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 overflow-hidden">
@@ -604,7 +622,8 @@
                         </svg>
                     </button>
                     <div class="faq-body hidden px-4 pb-4 text-xs sm:text-sm text-carbon-900/70 dark:text-[#B5B0A8]"
-                        data-i18n="faq_a3">إلغاء مجاني وتعديل مرن للموعد حتى ساعتين قبل انطلاق الرحلة بدون أي رسوم، مع دعم فوري عبر واتساب على مدار الساعة.</div>
+                        data-i18n="faq_a3">إلغاء مجاني وتعديل مرن للموعد حتى ساعتين قبل انطلاق الرحلة بدون أي رسوم، مع
+                        دعم فوري عبر واتساب على مدار الساعة.</div>
                 </div>
                 <div
                     class="faq-item rounded-2xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 overflow-hidden">
@@ -618,7 +637,8 @@
                         </svg>
                     </button>
                     <div class="faq-body hidden px-4 pb-4 text-xs sm:text-sm text-carbon-900/70 dark:text-[#B5B0A8]"
-                        data-i18n="faq_a4">نعم، جميع برامج السفاري الثمانية تشمل خدمة الاستلام والتوصيل بسيارات مكيفة من كافة فنادق ومنتجعات شرم الشيخ.</div>
+                        data-i18n="faq_a4">نعم، جميع برامج السفاري الثمانية تشمل خدمة الاستلام والتوصيل بسيارات مكيفة من
+                        كافة فنادق ومنتجعات شرم الشيخ.</div>
                 </div>
             </div>
         </section>
@@ -628,18 +648,21 @@
     <footer class="bg-carbon-950 text-[#9E9990] py-12 border-t border-white/10">
         <div
             class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div class="flex items-center gap-3">
-                <img src="assets/images/logo.jpg" alt="mosasafari Logo" class="w-10 h-10 rounded-xl object-cover">
+            <div class="flex items-center gap-3.5">
+                <img src="assets/images/logo.svg" alt="Mosa Safari Logo" class="h-11 w-auto object-contain">
                 <div>
-                    <div class="text-white font-black text-base" data-i18n="footer_brand">موسى سفاري · mosasafari.com</div>
-                    <div class="text-xs" data-i18n="footer_addr">خليج نعمة، شرم الشيخ، جنوب سيناء · info@mosasafari.com</div>
+                    <div class="text-white font-black text-base" data-i18n="footer_brand">موسى سفاري · mosasafari.com
+                    </div>
+                    <div class="text-xs" data-i18n="footer_addr">خليج نعمة، شرم الشيخ، جنوب سيناء · info@mosasafari.com
+                    </div>
                 </div>
             </div>
             <div class="flex flex-wrap items-center gap-5 text-xs font-bold">
                 <button type="button" onclick="openBookingModal()" class="hover:text-champagne transition"
                     data-i18n="footer_quick_book">الحجز السريع</button>
-                <button type="button" onclick="toggleAiWidget(true)" class="hover:text-champagne transition">MOSA AI</button>
-                <a href="https://wa.me/201118748922" target="_blank" rel="noopener noreferrer"
+                <button type="button" onclick="toggleAiWidget(true)" class="hover:text-champagne transition">MOSA
+                    AI</button>
+                <a href="https://wa.me/201023355550" target="_blank" rel="noopener noreferrer"
                     class="hover:text-sea transition">WhatsApp</a>
                 <span>© 2026 mosasafari.com</span>
             </div>
@@ -652,7 +675,7 @@
             class="hidden w-[92vw] sm:w-96 max-h-[75vh] flex flex-col rounded-2xl bg-white dark:bg-carbon-800 border border-carbon-900/15 dark:border-white/15 shadow-2xl overflow-hidden">
             <div class="p-4 bg-carbon-950 text-white flex items-center justify-between border-b border-white/10">
                 <div class="flex items-center gap-2.5">
-                    <img src="assets/images/logo.jpg" alt="MOSA AI" class="w-8 h-8 rounded-lg border border-champagne">
+                    <img src="assets/images/logo-icon.svg" alt="MOSA AI" class="w-8 h-8 rounded-lg shadow-sm">
                     <div>
                         <div class="text-sm font-black" data-i18n="ai_title">MOSA AI · مساعد موسى</div>
                         <div class="text-[10px] text-champagne">24/7 · AR / EN / IT / RU</div>
@@ -666,10 +689,10 @@
                         <option value="it" class="text-carbon-950">Italiano</option>
                         <option value="ru" class="text-carbon-950">Русский</option>
                     </select>
-                    <button id="ai-close-btn" type="button" aria-label="Close AI" class="p-1 rounded-md hover:bg-white/15"><svg
-                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="w-4 h-4">
+                    <button id="ai-close-btn" type="button" aria-label="Close AI"
+                        class="p-1 rounded-md hover:bg-white/15"><svg xmlns="http://www.w3.org/2000/svg" width="24"
+                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
                             <path d="M18 6 6 18"></path>
                             <path d="m6 6 12 12"></path>
                         </svg></button>
@@ -693,9 +716,11 @@
             </div>
 
             <form id="ai-form" class="p-3 border-t border-carbon-900/10 dark:border-white/10 flex items-center gap-2">
-                <input id="ai-input" type="text" data-i18n-placeholder="ai_placeholder" placeholder="اسأل موسى الذكي عن الرحلات والأسعار..."
+                <input id="ai-input" type="text" data-i18n-placeholder="ai_placeholder"
+                    placeholder="اسأل موسى الذكي عن الرحلات والأسعار..."
                     class="flex-1 px-3 py-2 rounded-lg bg-[#F6F3EC] dark:bg-carbon-900 text-xs sm:text-sm focus:outline-none">
-                <button type="submit" aria-label="Send" class="p-2.5 rounded-lg bg-champagne text-carbon-950 font-black"><svg
+                <button type="submit" aria-label="Send"
+                    class="p-2.5 rounded-lg bg-champagne text-carbon-950 font-black"><svg
                         xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         class="w-4 h-4">
@@ -704,7 +729,7 @@
                         </path>
                         <path d="m21.854 2.147-10.94 10.939"></path>
                     </svg></button>
-                <a href="https://wa.me/201118748922" target="_blank" rel="noopener noreferrer"
+                <a href="https://wa.me/201023355550" target="_blank" rel="noopener noreferrer"
                     title="واتساب الدعم البشري" class="p-2.5 rounded-lg bg-sea text-carbon-950"><svg
                         xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -717,8 +742,7 @@
         <button id="ai-fab" type="button"
             class="animate-pulse-halo flex items-center gap-2 px-4 py-3 rounded-full bg-champagne text-carbon-950 font-black text-xs sm:text-sm shadow-2xl hover:scale-105 transition">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="w-4 h-4">
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
                 <path
                     d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z">
                 </path>
@@ -738,13 +762,14 @@
             class="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl bg-white dark:bg-carbon-800 border border-white/15 shadow-2xl overflow-hidden">
             <div class="p-5 bg-carbon-950 text-white flex items-center justify-between border-b border-white/10">
                 <div>
-                    <h3 class="text-lg font-black"><span data-i18n="bk_modal_title">حجز رحلة سفاري — موسى سفاري</span></h3>
+                    <h3 class="text-lg font-black"><span data-i18n="bk_modal_title">حجز رحلة سفاري — موسى سفاري</span>
+                    </h3>
                     <p class="text-xs text-champagne" id="booking-step-label">الخطوة 1 من 5: اختر برامج السفاري</p>
                 </div>
-                <button id="close-booking-btn" type="button" aria-label="Close" class="p-2 rounded-lg hover:bg-white/10"><svg
-                        xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="w-5 h-5">
+                <button id="close-booking-btn" type="button" aria-label="Close"
+                    class="p-2 rounded-lg hover:bg-white/10"><svg xmlns="http://www.w3.org/2000/svg" width="24"
+                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
                         <path d="M18 6 6 18"></path>
                         <path d="m6 6 12 12"></path>
                     </svg></button>
@@ -774,10 +799,10 @@
             class="w-full max-w-4xl max-h-[85vh] flex flex-col rounded-2xl bg-white dark:bg-carbon-800 border border-white/15 shadow-2xl overflow-hidden">
             <div class="p-5 bg-carbon-950 text-white flex items-center justify-between border-b border-white/10">
                 <h3 class="text-lg font-black" data-i18n="cmp_modal_title">مقارنة برامج السفاري</h3>
-                <button id="close-compare-btn" type="button" aria-label="Close" class="p-2 rounded-lg hover:bg-white/10"><svg
-                        xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="w-5 h-5">
+                <button id="close-compare-btn" type="button" aria-label="Close"
+                    class="p-2 rounded-lg hover:bg-white/10"><svg xmlns="http://www.w3.org/2000/svg" width="24"
+                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
                         <path d="M18 6 6 18"></path>
                         <path d="m6 6 12 12"></path>
                     </svg></button>

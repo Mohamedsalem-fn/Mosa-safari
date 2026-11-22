@@ -27,7 +27,7 @@ export const NOTIFICATION_CONFIG = {
 /**
  * Normalize a phone number into Green API chatId format (e.g. "201207823884@c.us")
  * @param {string} rawPhone
- * @returns {string|null}
+ * @returns {string|null}201023355550
  */
 export function formatWhatsAppChatId(rawPhone) {
     if (!rawPhone) return null;
@@ -110,7 +110,7 @@ export function buildCustomerConfirmationContent(payload) {
             `• الإجمالي: ${payload.totalFormatted}`,
             "",
             "سيتواصل معك فريق العمليات في شرم الشيخ لتأكيد موعد التحرك الدقيق من الفندق.",
-            "للتواصل السريع عبر واتساب: +201207823884",
+            "للتواصل السريع عبر واتساب: +201023355550",
             "شكراً لاختيارك موسى سفاري!"
         ].join("\n")
         : [

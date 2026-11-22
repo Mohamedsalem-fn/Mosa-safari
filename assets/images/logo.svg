@@ -1,0 +1,41 @@
+<!--
+  Author: Mohamed Salem (Expert AI Engineer & Automation Architect)
+  Focus: AI Engineering | Automation | Agentic Systems
+  Copyright (c) 2026. All Rights Reserved.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 128" fill="none" role="img" aria-label="Mosa Safari Logo">
+  <defs>
+    <!-- Deep Ocean Navy-Blue Gradient for M Badge -->
+    <linearGradient id="mosaBlueBadge" x1="0" y1="0" x2="96" y2="96" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#144A64"/>
+      <stop offset="55%" stop-color="#0D3446"/>
+      <stop offset="100%" stop-color="#082230"/>
+    </linearGradient>
+
+    <!-- Warm Desert Copper to Champagne Gold Gradient for SAFARI -->
+    <linearGradient id="safariGoldGrad" x1="112" y1="88" x2="348" y2="112" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D96B38"/>
+      <stop offset="52%" stop-color="#E08A49"/>
+      <stop offset="100%" stop-color="#D9B36C"/>
+    </linearGradient>
+
+    <!-- Subtle Champagne Rim Border for M Badge -->
+    <linearGradient id="badgeRim" x1="0" y1="0" x2="96" y2="96" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#EDD29B" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#D96B38" stop-opacity="0.35"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded Square Blue Badge with White 'M' -->
+  <rect x="6" y="10" width="86" height="86" rx="16" fill="url(#mosaBlueBadge)" stroke="url(#badgeRim)" stroke-width="2.5"/>
+  <path d="M22 76V30H35.5L49 58.5L62.5 30H76V76H64.5V47.5L53 72H45L33.5 47.5V76H22Z" fill="#FFFFFF"/>
+
+  <!-- 'osa' in bold geometric sans-serif with adaptive fill and subtle champagne outline -->
+  <text x="104" y="76" font-family="'Inter', 'Cairo', system-ui, -apple-system, sans-serif" font-size="84" font-weight="900" letter-spacing="-1.5" fill="#123A4D" stroke="#D9B36C" stroke-width="1.4" paint-order="stroke fill">osa</text>
+
+  <!-- 'SAFARI' aligned underneath 'osa' -->
+  <text x="108" y="113" font-family="'Inter', 'Cairo', system-ui, -apple-system, sans-serif" font-size="37" font-weight="900" letter-spacing="4.5" fill="url(#safariGoldGrad)">SAFARI</text>
+
+  <!-- Subtle Desert Dune Accent Line under SAFARI -->
+  <path d="M108 122C162 115 215 127 338 118" stroke="url(#safariGoldGrad)" stroke-width="2.6" stroke-linecap="round" opacity="0.85"/>
+</svg>
