@@ -5,4 +5,6 @@ Thumbs.db
 .env
 .env.*
 assets/js/env.local.js
+__pycache__/
+*.pyc
 dist/
