@@ -124,6 +124,8 @@ export function applyLanguage(lang, onLanguageApplied) {
     if (I18N[lang].doc_title) document.title = I18N[lang].doc_title;
     const sel = document.getElementById("lang-select");
     if (sel) sel.value = lang;
+    const aiSel = document.getElementById("ai-lang-select");
+    if (aiSel) aiSel.value = lang;
     document.querySelectorAll("[data-i18n]").forEach(el => {
         const k = el.dataset.i18n;
         if (I18N[lang][k]) el.textContent = I18N[lang][k];
