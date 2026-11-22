@@ -7,7 +7,7 @@
  */
 
 /**
- * Green API & Resend Email Booking Notification Configuration
+ * Green API & Booking Notification Configuration
  * Instance Phone (Sender): 201207823884
  * Owner WhatsApp (Recipient): Receives instant booking alerts via Green API
  */
@@ -18,13 +18,6 @@ export const NOTIFICATION_CONFIG = {
         idInstance: "710722810410",
         apiTokenInstance: "e31928ad1ee743c2a88c7c3e40b62da24cb618dd4e3549d984",
         instancePhone: "201207823884"
-    },
-    resend: {
-        apiKey: "",
-        fromAddresses: [
-            "Mosa Safari <bookings@mosasafari.com>",
-            "Mosa Safari <onboarding@resend.dev>"
-        ]
     },
     // Owner WhatsApp number(s) that receive new booking notifications
     ownerPhones: ["201207823884", "201118748922"],
@@ -164,7 +157,7 @@ export function buildCustomerConfirmationContent(payload) {
 }
 
 /**
- * Send a WhatsApp message directly via Green API.
+ * Send a WhatsApp message directly via Green API (supports browser CORS).
  * @param {string} chatId - Format: "201207823884@c.us"
  * @param {string} message
  * @returns {Promise<{ok: boolean, idMessage?: string, error?: string}>}
@@ -190,52 +183,10 @@ export async function sendGreenApiWhatsApp(chatId, message) {
 }
 
 /**
- * Send confirmation email via Resend API directly (or via serverless function).
- * @param {{to: string, subject: string, html: string, text: string}} params
- * @returns {Promise<boolean>}
- */
-async function sendDirectResendEmail({ to, subject, html, text }) {
-    let apiKey = NOTIFICATION_CONFIG.resend.apiKey;
-    if (!apiKey) {
-        try {
-            const envMod = await import("../env.local.js");
-            apiKey = envMod?.LOCAL_ENV?.RESEND_API_KEY || "";
-        } catch {
-            // env.local.js not present on remote static host (handled by Netlify function)
-        }
-    }
-    const { fromAddresses } = NOTIFICATION_CONFIG.resend;
-    if (!apiKey || !to) return false;
-
-    for (const fromAddr of fromAddresses) {
-        try {
-            const res = await fetch("https://api.resend.com/emails", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${apiKey}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    from: fromAddr,
-                    to: [to],
-                    subject,
-                    html,
-                    text
-                })
-            });
-            if (res.ok) return true;
-        } catch {
-            // If CORS blocks direct browser call, Netlify serverless function or fallback handles it
-        }
-    }
-    return false;
-}
-
-/**
  * Dispatch booking notifications:
  * 1) Direct Green API dispatch to Owner WhatsApp (+ customer WhatsApp confirmation)
- * 2) Netlify serverless function (/.netlify/functions/notify-booking) using Resend API
- * 3) Direct Resend API call & FormSubmit fallback for pure static environments
+ * 2) Server-side endpoint (/.netlify/functions/notify-booking) on Netlify or dev_server.py for Resend Email (zero browser CORS errors)
+ * 3) Client-side FormSubmit AJAX fallback if running on a basic static server without backend POST support
  * @param {object} payload
  * @returns {Promise<{whatsappSent: boolean, customerWaSent: boolean, emailSent: boolean}>}
  */
@@ -269,7 +220,7 @@ export async function dispatchBookingNotifications(payload) {
         }
     }
 
-    // 3. Trigger Netlify serverless function (sends Resend email server-side without CORS restrictions)
+    // 3. Trigger server-side endpoint (/.netlify/functions/notify-booking) for Resend Email
     try {
         const srvRes = await fetch("/.netlify/functions/notify-booking", {
             method: "POST",
@@ -288,20 +239,10 @@ export async function dispatchBookingNotifications(payload) {
             if (srvData.whatsappSent) result.whatsappSent = true;
         }
     } catch {
-        // Running on local static server without Netlify functions
+        // Fallback below if running on a static server without POST handler
     }
 
-    // 4. Try direct Resend API call if serverless wasn't reached
-    if (!result.emailSent && payload.email) {
-        result.emailSent = await sendDirectResendEmail({
-            to: payload.email,
-            subject: customerContent.subject,
-            html: customerContent.html,
-            text: customerContent.text
-        });
-    }
-
-    // 5. Final client-side AJAX fallback if needed on local static server
+    // 4. Fallback client-side email relay (CORS-friendly) if server endpoint was not active
     if (!result.emailSent && payload.email) {
         try {
             const emailRes = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(payload.email)}`, {
@@ -330,7 +271,7 @@ export async function dispatchBookingNotifications(payload) {
                 result.emailSent = true;
             }
         } catch {
-            // Handled gracefully
+            // Handled silently
         }
     }
 

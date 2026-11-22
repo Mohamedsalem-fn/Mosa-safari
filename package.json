@@ -6,7 +6,7 @@
   "author": "Mohamed Salem",
   "license": "SEE LICENSE IN README.md",
   "scripts": {
-    "dev": "python3 -m http.server 8080",
+    "dev": "python3 dev_server.py",
     "preview": "npx --yes serve . -l 8080",
     "build:css": "npx tailwindcss -i ./assets/css/input.css -o ./assets/css/tailwind.css --minify",
     "watch:css": "npx tailwindcss -i ./assets/css/input.css -o ./assets/css/tailwind.css --watch",

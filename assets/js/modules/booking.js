@@ -33,11 +33,9 @@ export const UI_EXTRAs = {
         card_cvv: "رمز الأمان (CVV)",
         group_disc_badge: "🎉 تم تطبيق خصم المجموعات التلقائي (10% لـ 5 أفراد أو أكثر)!",
         promo_applied_badge: "✓ كود الخصم MOSA20 مفعّل (خصم 20%)",
-        sending_booking: "جاري تأكيد الحجز وإرسال الإشعارات...",
+        sending_booking: "جاري تأكيد الحجز...",
         conf_title: "تم تأكيد حجزك بنجاح!",
-        conf_sub: "تم إرسال إشعار فوري للإدارة عبر واتساب (Green API) وتذكرة التأكيد لبريدك الإلكتروني.",
-        conf_wa_owner_ok: "✓ تم إرسال إشعار الحجز لواتساب المالك عبر Green API",
-        conf_email_ok: "✓ تم إرسال رسالة التأكيد إلى إيميل العميل",
+        conf_email_ok: "✓ تم إرسال تفاصيل وتأكيد الحجز إلى بريدك الإلكتروني",
         conf_new_btn: "حجز جديد / إغلاق",
         err_invalid_email: "يرجى إدخال بريد إلكتروني صحيح لإرسال رسالة التأكيد"
     },
@@ -60,11 +58,9 @@ export const UI_EXTRAs = {
         card_cvv: "Security Code (CVV)",
         group_disc_badge: "🎉 Automatic 10% Group Discount Applied (5+ Guests)!",
         promo_applied_badge: "✓ Promo Code MOSA20 Active (20% OFF)",
-        sending_booking: "Confirming booking & dispatching notifications...",
+        sending_booking: "Confirming your booking...",
         conf_title: "Booking Confirmed Successfully!",
-        conf_sub: "Instant WhatsApp notification sent to the owner via Green API and confirmation sent to your email.",
-        conf_wa_owner_ok: "✓ Owner WhatsApp notified via Green API",
-        conf_email_ok: "✓ Confirmation dispatched to customer email",
+        conf_email_ok: "✓ Booking confirmation sent to your email",
         conf_new_btn: "Done / Close",
         err_invalid_email: "Please enter a valid email address to receive your confirmation"
     },
@@ -87,11 +83,9 @@ export const UI_EXTRAs = {
         card_cvv: "Codice CVV",
         group_disc_badge: "🎉 Sconto Gruppo 10% Applicato (5+ Ospiti)!",
         promo_applied_badge: "✓ Codice MOSA20 Attivo (20% di Sconto)",
-        sending_booking: "Conferma in corso e invio notifiche...",
+        sending_booking: "Conferma in corso...",
         conf_title: "Prenotazione Confermata!",
-        conf_sub: "Notifica inviata su WhatsApp al proprietario tramite Green API ed email di conferma inviata.",
-        conf_wa_owner_ok: "✓ Notifica WhatsApp proprietario inviata (Green API)",
-        conf_email_ok: "✓ Email di conferma inviata al cliente",
+        conf_email_ok: "✓ Conferma inviata alla tua email",
         conf_new_btn: "Chiudi",
         err_invalid_email: "Inserisci un indirizzo email valido per ricevere la conferma"
     },
@@ -114,11 +108,9 @@ export const UI_EXTRAs = {
         card_cvv: "Код CVV",
         group_disc_badge: "🎉 Применена групповая скидка 10% (5+ гостей)!",
         promo_applied_badge: "✓ Промокод MOSA20 активен (скидка 20%)",
-        sending_booking: "Подтверждение брони и отправка уведомлений...",
+        sending_booking: "Подтверждение брони...",
         conf_title: "Бронирование успешно подтверждено!",
-        conf_sub: "Уведомление отправлено владельцу в WhatsApp (Green API) и на ваш email.",
-        conf_wa_owner_ok: "✓ Уведомление владельцу в WhatsApp отправлено (Green API)",
-        conf_email_ok: "✓ Подтверждение отправлено на email клиента",
+        conf_email_ok: "✓ Подтверждение отправлено на ваш email",
         conf_new_btn: "Закрыть",
         err_invalid_email: "Пожалуйста, введите корректный email для получения подтверждения"
     }
@@ -339,18 +331,11 @@ export function renderBookingStep() {
             <div>
                 <span class="inline-block px-3 py-1 rounded-full bg-champagne/20 text-champagne-dark dark:text-champagne text-xs font-black tracking-wider">${c.ref}</span>
                 <h4 class="text-xl font-black mt-2">${u.conf_title}</h4>
-                <p class="text-xs text-carbon-900/70 dark:text-[#B5B0A8] mt-1 max-w-md mx-auto">${u.conf_sub}</p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-start text-xs">
-                <div class="p-3 rounded-xl bg-sea/10 border border-sea/30 text-sea font-bold flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-sea shrink-0"></span>
-                    <span>${u.conf_wa_owner_ok}</span>
-                </div>
-                <div class="p-3 rounded-xl bg-champagne/15 border border-champagne/35 text-champagne-dark dark:text-champagne font-bold flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-champagne shrink-0"></span>
-                    <span>${u.conf_email_ok} (${c.email})</span>
-                </div>
+            <div class="p-3 rounded-xl bg-champagne/15 border border-champagne/35 text-champagne-dark dark:text-champagne font-bold text-xs flex items-center justify-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-champagne shrink-0"></span>
+                <span>${u.conf_email_ok} (${c.email})</span>
             </div>
 
             <div class="p-4 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 text-start text-xs sm:text-sm space-y-2">
