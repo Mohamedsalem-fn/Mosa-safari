@@ -47,24 +47,29 @@ window.openBookingWithTrip = openBookingWithTrip;
 window.toggleBookingTrip = toggleBookingTrip;
 window.renderBookingStep = renderBookingStep;
 
+function bindEvent(id, event, handler) {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener(event, handler);
+}
+
 window.addEventListener("DOMContentLoaded", () => {
     initParticles();
     initObservers();
     renderTrips();
 
-    document.getElementById("theme-toggle").addEventListener("click", () => {
+    bindEvent("theme-toggle", "click", () => {
         document.documentElement.classList.toggle("dark");
         if (window.lucide) window.lucide.createIcons();
     });
 
     detectLanguageByCountry(renderTrips);
 
-    document.getElementById("lang-select").addEventListener("change", e => {
+    bindEvent("lang-select", "change", e => {
         safeSetStorage("mosa_lang", e.target.value);
         applyLanguage(e.target.value, renderTrips);
     });
 
-    document.getElementById("currency-select").addEventListener("change", e => {
+    bindEvent("currency-select", "change", e => {
         state.currency = e.target.value;
         renderTrips();
     });
@@ -80,22 +85,22 @@ window.addEventListener("DOMContentLoaded", () => {
             });
             renderTrips();
             if (btn.classList.contains("dest-card") || btn.classList.contains("hero-tab")) {
-                document.getElementById("programs").scrollIntoView({ behavior: "smooth" });
+                document.getElementById("programs")?.scrollIntoView({ behavior: "smooth" });
             }
         });
     });
 
-    document.getElementById("sort-select").addEventListener("change", e => {
+    bindEvent("sort-select", "change", e => {
         state.sortBy = e.target.value;
         renderTrips();
     });
 
-    document.getElementById("hero-search-form").addEventListener("submit", e => {
+    bindEvent("hero-search-form", "submit", e => {
         e.preventDefault();
-        state.cityFilter = document.getElementById("search-where").value;
-        state.booking.adults = +document.getElementById("search-who").value;
+        state.cityFilter = document.getElementById("search-where")?.value || "all";
+        state.booking.adults = +(document.getElementById("search-who")?.value || 2);
         renderTrips();
-        document.getElementById("programs").scrollIntoView({ behavior: "smooth" });
+        document.getElementById("programs")?.scrollIntoView({ behavior: "smooth" });
         showToast(I18N[state.lang].toast_filtered);
     });
 
@@ -107,21 +112,21 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    document.getElementById("nav-book-btn").addEventListener("click", openBookingModal);
-    document.getElementById("mobile-book-btn").addEventListener("click", openBookingModal);
-    document.getElementById("close-booking-btn").addEventListener("click", closeBookingModal);
-    document.getElementById("booking-prev-btn").addEventListener("click", () => {
+    bindEvent("nav-book-btn", "click", openBookingModal);
+    bindEvent("mobile-book-btn", "click", openBookingModal);
+    bindEvent("close-booking-btn", "click", closeBookingModal);
+    bindEvent("booking-prev-btn", "click", () => {
         if (state.booking.step > 1) {
             state.booking.step--;
             renderBookingStep();
         }
     });
 
-    document.getElementById("booking-next-btn").addEventListener("click", () => {
+    bindEvent("booking-next-btn", "click", () => {
         const b = state.booking;
         if (b.step === 3) {
-            b.name = document.getElementById("bk-name").value.trim();
-            b.phone = document.getElementById("bk-phone").value.trim();
+            b.name = document.getElementById("bk-name")?.value.trim() || "";
+            b.phone = document.getElementById("bk-phone")?.value.trim() || "";
             const em = document.getElementById("bk-email");
             const nt = document.getElementById("bk-nat");
             if (em) b.email = em.value.trim();
@@ -131,7 +136,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 return;
             }
         }
-        if (b.step === 5) b.pickupHotel = document.getElementById("bk-hotel").value.trim();
+        if (b.step === 5) b.pickupHotel = document.getElementById("bk-hotel")?.value.trim() || "";
         if (b.step < 6) {
             b.step++;
             renderBookingStep();
@@ -143,21 +148,21 @@ window.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    document.getElementById("ai-fab").addEventListener("click", () => toggleAiWidget());
-    document.getElementById("ai-close-btn").addEventListener("click", () => toggleAiWidget(false));
-    document.getElementById("ai-lang-select").addEventListener("change", e => appendAiMsg(AI_GREETINGS[e.target.value], "bot"));
+    bindEvent("ai-fab", "click", () => toggleAiWidget());
+    bindEvent("ai-close-btn", "click", () => toggleAiWidget(false));
+    bindEvent("ai-lang-select", "change", e => appendAiMsg(AI_GREETINGS[e.target.value], "bot"));
     document.querySelectorAll(".ai-chip").forEach(c => c.addEventListener("click", () => handleAiQuery(c.textContent)));
-    document.getElementById("ai-form").addEventListener("submit", e => {
+    bindEvent("ai-form", "submit", e => {
         e.preventDefault();
         const i = document.getElementById("ai-input");
-        if (!i.value.trim()) return;
+        if (!i || !i.value.trim()) return;
         handleAiQuery(i.value.trim());
         i.value = "";
     });
 
-    document.getElementById("open-compare-btn").addEventListener("click", openCompareModal);
-    document.getElementById("close-compare-btn").addEventListener("click", () => document.getElementById("compare-modal").classList.add("hidden"));
-    document.getElementById("mobile-menu-btn").addEventListener("click", () => document.getElementById("mobile-menu").classList.toggle("hidden"));
+    bindEvent("open-compare-btn", "click", openCompareModal);
+    bindEvent("close-compare-btn", "click", () => document.getElementById("compare-modal")?.classList.add("hidden"));
+    bindEvent("mobile-menu-btn", "click", () => document.getElementById("mobile-menu")?.classList.toggle("hidden"));
 
     if (window.lucide) window.lucide.createIcons();
 });
