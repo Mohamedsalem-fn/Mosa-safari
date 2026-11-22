@@ -40,7 +40,13 @@ export const state = {
         pickupHotel: "",
         tripDate: "",
         paymentMethod: "arrival",
-        promoCode: ""
+        promoCode: "",
+        cardHolder: "",
+        cardNumber: "",
+        cardExpiry: "",
+        cardCvv: "",
+        isSubmitting: false,
+        lastConfirmation: null
     }
 };
 

@@ -7,10 +7,8 @@
  */
 
 import { I18N, AI_GREETINGS } from "./data/i18n.js";
-import { SAFARI_TRIPS } from "./data/trips.js";
 import {
     state,
-    fmtPrice,
     getActiveRateText,
     fetchLiveExchangeRates,
     safeGetStorage,
@@ -27,19 +25,24 @@ import {
 } from "./modules/ui.js";
 import {
     renderTrips,
-    getTripTitle,
     toggleFav,
     toggleCompare,
     openCompareModal
 } from "./modules/trips.js";
 import {
-    calcBookingTotal,
     openBookingWithTrip,
     openBookingModal,
     closeBookingModal,
     toggleBookingTrip,
+    adjustGuests,
+    selectPaymentMethod,
+    formatCardNumberInput,
+    formatCardExpiryInput,
     applyPromoCode,
-    renderBookingStep
+    saveCurrentStepInputs,
+    submitBookingOrder,
+    renderBookingStep,
+    UI_EXTRAs
 } from "./modules/booking.js";
 import {
     appendAiMsg,
@@ -57,6 +60,10 @@ window.toggleFav = toggleFav;
 window.toggleCompare = toggleCompare;
 window.openBookingWithTrip = openBookingWithTrip;
 window.toggleBookingTrip = toggleBookingTrip;
+window.adjustGuests = adjustGuests;
+window.selectPaymentMethod = selectPaymentMethod;
+window.formatCardNumberInput = formatCardNumberInput;
+window.formatCardExpiryInput = formatCardExpiryInput;
 window.applyPromoCode = applyPromoCode;
 window.renderBookingStep = renderBookingStep;
 window.openBookingModal = openBookingModal;
@@ -212,54 +219,40 @@ window.addEventListener("DOMContentLoaded", () => {
     });
     bindEvent("close-booking-btn", "click", closeBookingModal);
     bindEvent("booking-prev-btn", "click", () => {
+        saveCurrentStepInputs();
         if (state.booking.step > 1) {
             state.booking.step--;
             renderBookingStep();
         }
     });
 
-    bindEvent("booking-next-btn", "click", () => {
+    bindEvent("booking-next-btn", "click", async () => {
         const b = state.booking;
+        if (b.lastConfirmation) {
+            b.step = 1;
+            closeBookingModal();
+            return;
+        }
+
+        saveCurrentStepInputs();
+
         if (b.step === 2) {
-            b.name = document.getElementById("bk-name")?.value.trim() || "";
-            b.phone = document.getElementById("bk-phone")?.value.trim() || "";
-            const em = document.getElementById("bk-email");
-            const nt = document.getElementById("bk-nat");
-            if (em) b.email = em.value.trim();
-            if (nt) b.nationality = nt.value.trim();
             if (!b.name || !b.phone) {
                 showToast(I18N[state.lang].toast_req_info, "error");
                 return;
             }
-        }
-        if (b.step === 4) {
-            b.pickupHotel = document.getElementById("bk-hotel")?.value.trim() || "";
-            b.tripDate = document.getElementById("bk-date")?.value || "";
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!b.email || !emailRegex.test(b.email)) {
+                const u = UI_EXTRAs[state.lang] || UI_EXTRAs.en;
+                showToast(u.err_invalid_email, "error");
+                return;
+            }
         }
         if (b.step < 5) {
             b.step++;
             renderBookingStep();
         } else {
-            const ref = "MOSA-" + Math.floor(100000 + Math.random() * 900000);
-            const selectedTours = SAFARI_TRIPS.filter(t => b.selectedIds.includes(t.id))
-                .map(t => getTripTitle(t))
-                .join(" + ");
-            const totalStr = fmtPrice(calcBookingTotal());
-            const waText = encodeURIComponent(
-                `مرحباً موسى سفاري، أود تأكيد حجزي (${ref}):\n` +
-                `• البرامج: ${selectedTours}\n` +
-                `• الاسم: ${b.name}\n` +
-                `• الهاتف: ${b.phone}\n` +
-                `• الضيوف: ${b.adults} بالغين، ${b.children} أطفال\n` +
-                `• المركبة: ${b.vehicleOpt}\n` +
-                (b.pickupHotel ? `• الفندق: ${b.pickupHotel}\n` : "") +
-                (b.tripDate ? `• التاريخ: ${b.tripDate}\n` : "") +
-                `• الإجمالي: ${totalStr}`
-            );
-            closeBookingModal();
-            showToast(`${I18N[state.lang].toast_bk_ok} ${ref}`);
-            window.open(`https://wa.me/201118748922?text=${waText}`, "_blank", "noopener,noreferrer");
-            state.booking.step = 1;
+            await submitBookingOrder();
         }
     });
 

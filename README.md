@@ -15,6 +15,9 @@ Mosa-safari/
 ├── robots.txt                        # Search engine crawler directives
 ├── sitemap.xml                       # XML sitemap for production indexing
 ├── .gitignore                        # Repository ignore rules
+├── netlify/
+│   └── functions/
+│       └── notify-booking.js         # Serverless webhook for Green API WhatsApp & Email dispatch
 └── assets/
     ├── css/
     │   ├── input.css                 # Tailwind CSS entry source
@@ -29,14 +32,15 @@ Mosa-safari/
     └── js/
         ├── main.js                   # Application entry point, persistent preferences & DOM bindings
         ├── cinematic.js              # Anime.js v4 motion layer, 3D card tilt & magnetic controls
-        ├── state.js                  # Reactive app state, currency formatting, storage helpers
+        ├── state.js                  # Reactive app state, live exchange rate fetcher, storage helpers
         ├── data/
         │   ├── trips.js              # HERO_SLIDES & SAFARI_TRIPS catalog (4 languages: ar, en, it, ru)
         │   └── i18n.js               # Complete translations for Arabic, English, Italian, Russian
         └── modules/
             ├── ui.js                 # Particles canvas, scroll reveal, counters, toasts, language switching
             ├── trips.js              # Dynamic trip grid, category filtering, live price table & comparison
-            ├── booking.js            # Streamlined 5-step booking modal, date picker & MOSA20 promo code
+            ├── booking.js            # Upgraded 5-step booking UI, Pay on Arrival + Visa placeholder gateway
+            ├── notifications.js      # Green API WhatsApp owner/customer alerts & customer email dispatch
             └── ai-assistant.js       # MOSA AI floating concierge widget & quick prompts
 ```
 
