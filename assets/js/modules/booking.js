@@ -11,7 +11,7 @@ import { I18N, STEP_TITLES_I18N, BOOKING_I18N } from "../data/i18n.js";
 import { state, fmtPrice } from "../state.js";
 import { getTripTitle, getTripDuration } from "./trips.js";
 import { showToast } from "./ui.js";
-import { dispatchBookingNotifications } from "./notifications.js?v=1.2.2";
+import { dispatchBookingNotifications } from "./notifications.js";
 
 export const UI_EXTRAs = {
     ar: {
@@ -413,20 +413,20 @@ export function renderBookingStep() {
         body.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
                 <label class="block text-xs font-extrabold mb-1.5">${t.full_name}</label>
-                <input id="bk-name" type="text" value="${b.name}" required placeholder="Mohamed..." class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
+                <input id="bk-name" type="text" value="${b.name}" oninput="state.booking.name=this.value" onchange="state.booking.name=this.value" required placeholder="Mohamed..." class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
             </div>
             <div>
                 <label class="block text-xs font-extrabold mb-1.5">${t.whatsapp}</label>
-                <input id="bk-phone" type="tel" value="${b.phone}" required placeholder="+20 10..." class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
+                <input id="bk-phone" type="tel" value="${b.phone}" oninput="state.booking.phone=this.value" onchange="state.booking.phone=this.value" required placeholder="+20 10..." class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
             </div>
             <div class="sm:col-span-2">
                 <label class="block text-xs font-extrabold mb-1.5 text-champagne-dark dark:text-champagne">${u.email_req}</label>
-                <input id="bk-email" type="email" value="${b.email}" required placeholder="name@example.com" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-champagne/40 text-sm focus:border-champagne focus:outline-none" />
+                <input id="bk-email" type="email" value="${b.email}" oninput="state.booking.email=this.value" onchange="state.booking.email=this.value" required placeholder="name@example.com" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-champagne/40 text-sm focus:border-champagne focus:outline-none" />
                 <span class="block text-[11px] opacity-65 mt-1">${u.email_hint}</span>
             </div>
             <div class="sm:col-span-2">
                 <label class="block text-xs font-extrabold mb-1.5">${t.nationality}</label>
-                <input id="bk-nat" type="text" value="${b.nationality}" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
+                <input id="bk-nat" type="text" value="${b.nationality}" oninput="state.booking.nationality=this.value" onchange="state.booking.nationality=this.value" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
             </div>
         </div>`;
     } else if (b.step === 3) {
@@ -481,11 +481,11 @@ export function renderBookingStep() {
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
                     <label class="block text-xs font-extrabold mb-1.5">${t.pickup_hotel}</label>
-                    <input id="bk-hotel" type="text" value="${b.pickupHotel}" placeholder="${t.hotel_placeholder}" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
+                    <input id="bk-hotel" type="text" value="${b.pickupHotel}" oninput="state.booking.pickupHotel=this.value" onchange="state.booking.pickupHotel=this.value" placeholder="${t.hotel_placeholder}" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
                 </div>
                 <div>
                     <label class="block text-xs font-extrabold mb-1.5">${t.trip_date}</label>
-                    <input id="bk-date" type="date" min="${today}" value="${b.tripDate || today}" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
+                    <input id="bk-date" type="date" min="${today}" value="${b.tripDate || today}" oninput="state.booking.tripDate=this.value" onchange="state.booking.tripDate=this.value" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
                 </div>
             </div>
 
