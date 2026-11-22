@@ -41,8 +41,8 @@ export function renderTrips() {
               <div class="absolute inset-0 bg-gradient-to-t from-carbon-950/90 via-transparent to-carbon-950/30"></div>
               <span class="absolute top-3 start-3 px-2.5 py-1 rounded-md bg-carbon-950/75 backdrop-blur-md border border-white/15 text-champagne text-[11px] font-extrabold">${badgeText}</span>
               <div class="absolute top-3 end-3 flex gap-1.5">
-                <button type="button" onclick="toggleCompare('${trip.id}')" title="مقارنة" class="p-2 rounded-lg ${isCmp ? 'bg-champagne text-carbon-950' : 'bg-carbon-950/60 text-white hover:bg-carbon-950'} backdrop-blur-md transition"><i data-lucide="git-compare" class="w-3.5 h-3.5"></i></button>
-                <button type="button" onclick="toggleFav('${trip.id}')" title="مفضلة" class="p-2 rounded-lg ${isFav ? 'bg-rose-500 text-white' : 'bg-carbon-950/60 text-white hover:bg-carbon-950'} backdrop-blur-md transition"><i data-lucide="heart" class="w-3.5 h-3.5"></i></button>
+                <button type="button" onclick="toggleCompare('${trip.id}')" title="مقارنة" class="p-2 rounded-lg ${isCmp ? 'bg-champagne text-carbon-950' : 'bg-carbon-950/60 text-white hover:bg-carbon-950'} backdrop-blur-md transition"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/></svg></button>
+                <button type="button" onclick="toggleFav('${trip.id}')" title="مفضلة" class="p-2 rounded-lg ${isFav ? 'bg-rose-500 text-white' : 'bg-carbon-950/60 text-white hover:bg-carbon-950'} backdrop-blur-md transition"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></button>
               </div>
               <div class="absolute bottom-3 inset-x-3 flex items-end justify-between text-white">
                 <div>
@@ -51,7 +51,7 @@ export function renderTrips() {
                   <span class="text-[10px] text-[#B5B0A8]">(${fmtPrice(trip.adultPrice)})</span>
                 </div>
                 <span class="px-2 py-1 rounded-md bg-carbon-950/75 text-champagne text-xs font-black flex items-center gap-1">
-                  <i data-lucide="star" class="w-3 h-3 fill-champagne"></i> ${trip.rating}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3 fill-champagne"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> ${trip.rating}
                 </span>
               </div>
             </div>
@@ -70,7 +70,7 @@ export function renderTrips() {
               </div>
               <button type="button" onclick="openBookingWithTrip('${trip.id}')" class="w-full py-2.5 px-4 rounded-xl bg-carbon-900 dark:bg-champagne hover:bg-champagne hover:text-carbon-950 text-white dark:text-carbon-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition">
                 <span>${I18N[state.lang].book_now}</span>
-                <i data-lucide="arrow-left" class="w-4 h-4 ${state.lang !== 'ar' ? 'rotate-180' : ''}"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 ${state.lang !== 'ar' ? 'rotate-180' : ''}"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
               </button>
             </div>
           </article>`;

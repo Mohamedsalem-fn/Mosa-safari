@@ -142,23 +142,6 @@ export function detectLanguageByCountry(onLanguageApplied) {
         applyLanguage(saved, onLanguageApplied);
         return;
     }
-    const nav = (navigator.language || "en").slice(0, 2).toLowerCase();
-    applyLanguage(I18N[nav] ? nav : "en", onLanguageApplied);
-    try {
-        const ctrl = new AbortController();
-        const tid = setTimeout(() => ctrl.abort(), 2000);
-        fetch("https://ipapi.co/json/", { signal: ctrl.signal })
-            .then(r => r.json())
-            .then(d => {
-                clearTimeout(tid);
-                const cc = (d && d.country_code || "").toUpperCase();
-                if (["IT", "SM", "VA"].includes(cc)) applyLanguage("it", onLanguageApplied);
-                else if (["RU", "BY", "KZ", "KG", "TJ", "UZ", "MD"].includes(cc)) applyLanguage("ru", onLanguageApplied);
-                else if (["EG", "SA", "AE", "KW", "QA", "BH", "OM", "JO", "LB", "IQ", "SY", "PS", "YE", "LY", "TN", "DZ", "MA", "SD", "MR", "SO", "DJ", "KM"].includes(cc)) applyLanguage("ar", onLanguageApplied);
-                else applyLanguage("en", onLanguageApplied);
-            })
-            .catch(() => clearTimeout(tid));
-    } catch {
-        // Ignore network errors
-    }
+    const nav = (navigator.language || "ar").slice(0, 2).toLowerCase();
+    applyLanguage(I18N[nav] ? nav : "ar", onLanguageApplied);
 }

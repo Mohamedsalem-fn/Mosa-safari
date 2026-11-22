@@ -8,7 +8,9 @@
   "scripts": {
     "dev": "python3 -m http.server 8080",
     "preview": "npx --yes serve . -l 8080",
-    "check": "node --check assets/js/main.js assets/js/state.js assets/js/tailwind-config.js assets/js/data/trips.js assets/js/data/i18n.js assets/js/modules/ui.js assets/js/modules/trips.js assets/js/modules/booking.js assets/js/modules/ai-assistant.js"
+    "build:css": "npx tailwindcss -i ./assets/css/input.css -o ./assets/css/tailwind.css --minify",
+    "watch:css": "npx tailwindcss -i ./assets/css/input.css -o ./assets/css/tailwind.css --watch",
+    "check": "node --check assets/js/main.js assets/js/state.js assets/js/data/trips.js assets/js/data/i18n.js assets/js/modules/ui.js assets/js/modules/trips.js assets/js/modules/booking.js assets/js/modules/ai-assistant.js"
   },
   "keywords": [
     "safari",
@@ -17,5 +19,8 @@
     "booking",
     "egypt",
     "mosasafari"
-  ]
+  ],
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
 }

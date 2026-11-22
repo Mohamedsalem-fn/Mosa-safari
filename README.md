@@ -9,13 +9,16 @@ A modern, multilingual, launch-ready web platform for booking luxury desert safa
 ```text
 Mosa-safari/
 ├── index.html                        # Clean semantic entry point (SEO, JSON-LD, UI layout)
-├── package.json                      # Project metadata, dev server, and JS syntax check scripts
+├── package.json                      # Project metadata, dev server, CSS build, and JS check scripts
+├── tailwind.config.js                # Tailwind CSS configuration (custom theme & content paths)
 ├── netlify.toml                      # Static hosting headers, caching, and security policy
 ├── robots.txt                        # Search engine crawler directives
 ├── sitemap.xml                       # XML sitemap for production indexing
 ├── .gitignore                        # Repository ignore rules
 └── assets/
     ├── css/
+    │   ├── input.css                 # Tailwind CSS entry source
+    │   ├── tailwind.css              # Pre-compiled & minified Tailwind CSS bundle (zero CDN dependency)
     │   └── styles.css                # Custom keyframe animations, scrollbars, reveal transitions
     ├── images/
     │   ├── logo.jpg                  # Brand logo
@@ -26,7 +29,6 @@ Mosa-safari/
     └── js/
         ├── main.js                   # Application entry point & DOM event bindings
         ├── state.js                  # Reactive app state, currency formatting, storage helpers
-        ├── tailwind-config.js        # Custom Tailwind theme (champagne, copper, sea, carbon)
         ├── data/
         │   ├── trips.js              # HERO_SLIDES & SAFARI_TRIPS catalog (single source of truth)
         │   └── i18n.js               # Translations for Arabic (ar), English (en), Italian (it), Russian (ru)
