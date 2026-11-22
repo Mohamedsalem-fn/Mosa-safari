@@ -1,6 +1,6 @@
 # Mosa Safari (`mosasafari.com`) — Sharm El Sheikh & Sinai Desert Safari Platform
 
-A modern, multilingual, launch-ready web platform for booking luxury desert safari experiences in Sharm El Sheikh, South Sinai. Designed with a modular vanilla ES Modules architecture, Tailwind CSS theming, multi-currency conversion, a 6-step booking flow, tour comparison, and an integrated 4-language MOSA AI concierge widget.
+A modern, multilingual, launch-ready web platform for booking luxury desert safari experiences in Sharm El Sheikh, South Sinai. Designed with a modular vanilla ES Modules architecture, Tailwind CSS theming, Anime.js v4 cinematic animations, multi-currency conversion, a streamlined 5-step booking flow with direct WhatsApp confirmation, tour comparison, and an integrated 4-language MOSA AI concierge widget.
 
 ---
 
@@ -8,7 +8,7 @@ A modern, multilingual, launch-ready web platform for booking luxury desert safa
 
 ```text
 Mosa-safari/
-├── index.html                        # Clean semantic entry point (SEO, JSON-LD, UI layout)
+├── index.html                        # Clean Arabic-first semantic entry point (SEO, JSON-LD, UI layout)
 ├── package.json                      # Project metadata, dev server, CSS build, and JS check scripts
 ├── tailwind.config.js                # Tailwind CSS configuration (custom theme & content paths)
 ├── netlify.toml                      # Static hosting headers, caching, and security policy
@@ -27,15 +27,16 @@ Mosa-safari/
     │   ├── safari-night-stars.jpg    # Night safari & stargazing photography
     │   └── safari-canyon-dahab.jpg   # Colored Canyon & Dahab photography
     └── js/
-        ├── main.js                   # Application entry point & DOM event bindings
+        ├── main.js                   # Application entry point, persistent preferences & DOM bindings
+        ├── cinematic.js              # Anime.js v4 motion layer, 3D card tilt & magnetic controls
         ├── state.js                  # Reactive app state, currency formatting, storage helpers
         ├── data/
-        │   ├── trips.js              # HERO_SLIDES & SAFARI_TRIPS catalog (single source of truth)
-        │   └── i18n.js               # Translations for Arabic (ar), English (en), Italian (it), Russian (ru)
+        │   ├── trips.js              # HERO_SLIDES & SAFARI_TRIPS catalog (4 languages: ar, en, it, ru)
+        │   └── i18n.js               # Complete translations for Arabic, English, Italian, Russian
         └── modules/
-            ├── ui.js                 # Particles canvas, scroll reveal, counters, toasts, language detection
-            ├── trips.js              # Dynamic trip grid rendering, filtering, sorting, favorites, comparison
-            ├── booking.js            # 6-step booking modal, pricing, group & MOSA20 promo discounts
+            ├── ui.js                 # Particles canvas, scroll reveal, counters, toasts, language switching
+            ├── trips.js              # Dynamic trip grid, category filtering, live price table & comparison
+            ├── booking.js            # Streamlined 5-step booking modal, date picker & MOSA20 promo code
             └── ai-assistant.js       # MOSA AI floating concierge widget & quick prompts
 ```
 
@@ -43,18 +44,18 @@ Mosa-safari/
 
 ## Key Features
 
-- **4-Language Support (`ar`, `en`, `it`, `ru`):** Automatic RTL/LTR direction switching, country-based language detection, and persistent user preference.
-- **Multi-Currency Pricing (`USD`, `EGP`, `EUR`):** Live price conversion across trip cards, comparison tables, and booking totals.
-- **6-Step Interactive Booking Modal:** City selection, multi-tour selection, traveler details validation, guest count & vehicle type, hotel pickup & payment method (Pay on Arrival / Online), and promo code (`MOSA20` for 20% off, plus automatic 10% group discount for 5+ guests).
-- **Tour Comparison & Favorites:** Side-by-side comparison of up to 3 safari programs.
-- **MOSA AI Concierge Widget:** Interactive 4-language assistant with quick-action chips and direct WhatsApp handoff.
+- **Full 4-Language Support (`ar`, `en`, `it`, `ru`):** Clean Arabic-first default HTML with zero flash of unstyled/wrong-language text, full RTL/LTR switching, and complete translations across all 8 trip titles, descriptions, FAQs, booking steps, and AI quick chips.
+- **Smart Safari Category Filtering:** Filter the 8 Sharm El Sheikh tours by adventure type (`ATV & Buggy`, `Nabq Reserve`, `Night & Stars`, `Canyon & Dahab`) from either the hero search console or the filter bar.
+- **Multi-Currency Pricing (`USD`, `EGP`, `EUR`):** Live price conversion across trip cards, the complete 8-tour price table, comparison modal, and booking totals, with local storage persistence.
+- **Streamlined 5-Step Interactive Booking Modal:** Direct tour selection, traveler details validation, guest count & localized vehicle type, hotel pickup & preferred tour date, promo code validation (`MOSA20` for 20% off + automatic 10% group discount for 5+ guests), and instant WhatsApp booking handoff.
+- **Anime.js v4 Cinematic Motion Layer (`assets/js/cinematic.js`):** Staggered hero and card entrances, 3D interactive card tilt, magnetic header buttons, and scroll-reactive floating glass navigation.
 - **SEO & Structured Data Ready:** Embedded JSON-LD schemas (`TravelAgency`, `ItemList`, `FAQPage`, `BreadcrumbList`), Open Graph metadata, `robots.txt`, and `sitemap.xml`.
 
 ---
 
 ## Prerequisites & Local Setup
 
-- **Python 3** (for zero-dependency local HTTP serving) or **Node.js 18+** (for syntax verification and `serve`).
+- **Python 3** (for zero-dependency local HTTP serving) or **Node.js 18+** (for Tailwind CSS compilation, syntax verification, and `serve`).
 
 ### Run Locally
 
@@ -70,35 +71,14 @@ npm run preview
 
 Then open `http://localhost:8080` in your browser.
 
-### Verify JavaScript Modules
+### Build CSS & Verify JavaScript Modules
 
 ```bash
+npm run build:css
 npm run check
 ```
 
 ---
-
-## Customization & Scaling Guide
-
-- **Add or Edit Safari Programs:** Update `SAFARI_TRIPS` in `assets/js/data/trips.js`. All trip cards, booking step 2 options, and comparison tables render automatically from this array.
-- **Add or Update Translations:** Edit `I18N`, `BADGE_I18N`, `STEP_TITLES_I18N`, and `AI_GREETINGS` in `assets/js/data/i18n.js`.
-- **Replace or Optimize Images:** Place new images in `assets/images/` and reference them in `index.html` or `assets/js/data/trips.js`.
-- **Adjust Theme Colors / Typography:** Edit `assets/js/tailwind-config.js` and `assets/css/styles.css`.
-
----
-
-## Deployment
-
-The project is a static web application with zero build step required:
-
-- **Netlify:** Connect the GitHub repository; `netlify.toml` is preconfigured with security and asset-caching headers.
-- **Vercel / GitHub Pages / Cloudflare Pages:** Set the publish directory to `/` (root).
-
----
-
-## Cinematic Motion Layer
-
-`assets/js/cinematic.js` adds the luxury motion layer (floating glass header, magnetic controls, hero depth parallax, staggered trip-card reveals with 3D tilt, sliding filter pill) on top of `main.js` without touching its logic. Styles live at the bottom of `assets/css/styles.css`; particles and the hero crossfade live in `assets/js/modules/ui.js`. All motion respects `prefers-reduced-motion`.
 
 ## Credits / Author
 

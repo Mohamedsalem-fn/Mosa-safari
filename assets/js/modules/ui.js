@@ -23,11 +23,11 @@ export function showToast(msg, type = "success") {
 export function setHeroPreview(idx) {
     const s = HERO_SLIDES[idx];
     if (!s) return;
+    state.heroSlideIdx = idx;
     const img = document.getElementById("hero-showcase-img");
+    if (!img) return;
     const nextSrc = new URL(s.img, document.baseURI).href;
     if (img.src !== nextSrc) {
-        // Crossfade: freeze the outgoing frame on top, then fade it away while the new
-        // frame restarts its Ken Burns drift underneath.
         const ghost = img.cloneNode();
         ghost.removeAttribute("id");
         ghost.className = "hero-xfade";
@@ -44,9 +44,11 @@ export function setHeroPreview(idx) {
     }
     const tag = document.getElementById("hero-showcase-tag");
     const title = document.getElementById("hero-showcase-title");
-    tag.textContent = s.tag;
-    title.textContent = s.title;
+    const lang = state.lang || "ar";
+    if (tag) tag.textContent = typeof s.tag === "object" ? (s.tag[lang] || s.tag.en) : s.tag;
+    if (title) title.textContent = typeof s.title === "object" ? (s.title[lang] || s.title.en) : s.title;
     [tag, title].forEach(el => {
+        if (!el) return;
         el.classList.remove("caption-in");
         void el.offsetWidth;
         el.classList.add("caption-in");
@@ -59,14 +61,20 @@ export function setHeroPreview(idx) {
 }
 
 export function switchHubTab(tab) {
-    document.getElementById("hub-panel-prices").classList.toggle("hidden", tab !== "prices");
-    document.getElementById("hub-panel-faq").classList.toggle("hidden", tab !== "faq");
-    document.getElementById("hub-tab-prices").className = tab === "prices"
-        ? "px-4 py-2 rounded-lg text-xs font-extrabold bg-champagne text-carbon-950 transition"
-        : "px-4 py-2 rounded-lg text-xs font-extrabold border border-carbon-900/15 dark:border-white/15 transition";
-    document.getElementById("hub-tab-faq").className = tab === "faq"
-        ? "px-4 py-2 rounded-lg text-xs font-extrabold bg-champagne text-carbon-950 transition"
-        : "px-4 py-2 rounded-lg text-xs font-extrabold border border-carbon-900/15 dark:border-white/15 transition";
+    document.getElementById("hub-panel-prices")?.classList.toggle("hidden", tab !== "prices");
+    document.getElementById("hub-panel-faq")?.classList.toggle("hidden", tab !== "faq");
+    const pBtn = document.getElementById("hub-tab-prices");
+    const fBtn = document.getElementById("hub-tab-faq");
+    if (pBtn) {
+        pBtn.className = tab === "prices"
+            ? "px-4 py-2 rounded-lg text-xs font-extrabold bg-champagne text-carbon-950 transition"
+            : "px-4 py-2 rounded-lg text-xs font-extrabold border border-carbon-900/15 dark:border-white/15 transition";
+    }
+    if (fBtn) {
+        fBtn.className = tab === "faq"
+            ? "px-4 py-2 rounded-lg text-xs font-extrabold bg-champagne text-carbon-950 transition"
+            : "px-4 py-2 rounded-lg text-xs font-extrabold border border-carbon-900/15 dark:border-white/15 transition";
+    }
 }
 
 export function initParticles() {
@@ -78,7 +86,6 @@ export function initParticles() {
     const mouse = { x: -9999, y: -9999 };
     let w = 0, h = 0, dpr = 1, motes = [], running = false, inView = true, raf = 0;
 
-    // Pre-rendered golden glow sprite: one drawImage per mote instead of per-frame gradients.
     const sprite = document.createElement("canvas");
     sprite.width = sprite.height = 48;
     const sctx = sprite.getContext("2d");
@@ -207,19 +214,35 @@ export function initObservers() {
 }
 
 export function applyLanguage(lang, onLanguageApplied) {
-    if (!I18N[lang]) lang = "en";
+    if (!I18N[lang]) lang = "ar";
     state.lang = lang;
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
     if (I18N[lang].doc_title) document.title = I18N[lang].doc_title;
+
     const sel = document.getElementById("lang-select");
     if (sel) sel.value = lang;
     const aiSel = document.getElementById("ai-lang-select");
     if (aiSel) aiSel.value = lang;
+
     document.querySelectorAll("[data-i18n]").forEach(el => {
         const k = el.dataset.i18n;
         if (I18N[lang][k]) el.textContent = I18N[lang][k];
     });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+        const k = el.dataset.i18nPlaceholder;
+        if (I18N[lang][k]) el.placeholder = I18N[lang][k];
+    });
+
+    // Sync active hero slide caption with the selected language
+    const slide = HERO_SLIDES[state.heroSlideIdx || 0];
+    if (slide) {
+        const tag = document.getElementById("hero-showcase-tag");
+        const title = document.getElementById("hero-showcase-title");
+        if (tag && typeof slide.tag === "object") tag.textContent = slide.tag[lang] || slide.tag.en;
+        if (title && typeof slide.title === "object") title.textContent = slide.title[lang] || slide.title.en;
+    }
+
     if (onLanguageApplied) onLanguageApplied();
 }
 
@@ -229,6 +252,5 @@ export function detectLanguageByCountry(onLanguageApplied) {
         applyLanguage(saved, onLanguageApplied);
         return;
     }
-    const nav = (navigator.language || "ar").slice(0, 2).toLowerCase();
-    applyLanguage(I18N[nav] ? nav : "ar", onLanguageApplied);
+    applyLanguage("ar", onLanguageApplied);
 }

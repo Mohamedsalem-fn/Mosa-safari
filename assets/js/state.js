@@ -11,13 +11,13 @@ export const state = {
     currency: "USD",
     rates: { USD: 1, EGP: 49.5, EUR: 0.92 },
     symbols: { USD: "$", EGP: "ج.م ", EUR: "€" },
-    cityFilter: "all",
+    categoryFilter: "all",
     sortBy: "featured",
+    heroSlideIdx: 0,
     favorites: new Set(),
     compareIds: [],
     booking: {
         step: 1,
-        city: "Sharm El Sheikh",
         selectedIds: ["sharm-sunset-echo"],
         name: "",
         phone: "",
@@ -27,6 +27,7 @@ export const state = {
         children: 0,
         vehicleOpt: "Double ATV Quad",
         pickupHotel: "",
+        tripDate: "",
         paymentMethod: "arrival",
         promoCode: ""
     }

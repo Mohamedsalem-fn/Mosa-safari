@@ -7,8 +7,10 @@
  */
 
 import { SAFARI_TRIPS } from "../data/trips.js";
-import { I18N, STEP_TITLES_I18N } from "../data/i18n.js";
+import { I18N, STEP_TITLES_I18N, BOOKING_I18N } from "../data/i18n.js";
 import { state, fmtPrice } from "../state.js";
+import { getTripTitle, getTripDuration } from "./trips.js";
+import { showToast } from "./ui.js";
 
 export function calcBookingTotal() {
     const sel = SAFARI_TRIPS.filter(t => state.booking.selectedIds.includes(t.id));
@@ -21,55 +23,162 @@ export function calcBookingTotal() {
 export function openBookingWithTrip(id) {
     const t = SAFARI_TRIPS.find(x => x.id === id);
     if (t) {
-        state.booking.city = t.city;
         state.booking.selectedIds = [t.id];
     }
-    state.booking.step = 3;
+    state.booking.step = 2;
     openBookingModal();
 }
 
 export function openBookingModal() {
-    document.getElementById("booking-modal").classList.remove("hidden");
+    document.getElementById("booking-modal")?.classList.remove("hidden");
     renderBookingStep();
 }
 
 export function closeBookingModal() {
-    document.getElementById("booking-modal").classList.add("hidden");
+    document.getElementById("booking-modal")?.classList.add("hidden");
 }
 
 export function toggleBookingTrip(id) {
     const a = state.booking.selectedIds;
     const i = a.indexOf(id);
-    if (i > -1) a.splice(i, 1);
-    else a.push(id);
+    if (i > -1) {
+        if (a.length > 1) a.splice(i, 1);
+    } else {
+        a.push(id);
+    }
     renderBookingStep();
+}
+
+export function applyPromoCode() {
+    const input = document.getElementById("bk-promo");
+    if (!input) return;
+    const code = input.value.trim().toUpperCase();
+    state.booking.promoCode = code;
+    renderBookingStep();
+    if (code === "MOSA20") {
+        showToast(I18N[state.lang].toast_promo_ok);
+    } else {
+        showToast(I18N[state.lang].toast_promo_err, "error");
+    }
 }
 
 export function renderBookingStep() {
     const b = state.booking;
-    document.getElementById("booking-step-label").textContent = (STEP_TITLES_I18N[state.lang] || STEP_TITLES_I18N.en)[b.step - 1];
-    document.getElementById("booking-total-display").textContent = fmtPrice(calcBookingTotal());
-    document.getElementById("booking-progress-bars").innerHTML = [1, 2, 3, 4, 5, 6]
-        .map(n => `<div class="h-1 rounded-full ${n <= b.step ? 'bg-champagne' : 'bg-white/10'}"></div>`)
-        .join("");
-    document.getElementById("booking-prev-btn").classList.toggle("hidden", b.step === 1);
-    document.getElementById("booking-next-btn").textContent = b.step === 6 ? I18N[state.lang].bk_confirm : I18N[state.lang].bk_next;
+    const t = BOOKING_I18N[state.lang] || BOOKING_I18N.en;
+    const stepTitles = STEP_TITLES_I18N[state.lang] || STEP_TITLES_I18N.en;
 
-    const body = document.getElementById("booking-body");
-    if (b.step === 1) {
-        body.innerHTML = `<div class="grid grid-cols-1 gap-3"><button type="button" onclick="state.booking.city='Sharm El Sheikh'; renderBookingStep();" class="p-4 rounded-xl border text-start border-champagne bg-champagne/10"><div class="font-black">${I18N[state.lang].city_sharm}</div><div class="text-xs opacity-60 mt-1">Sharm El Sheikh</div></button></div>`;
-    } else if (b.step === 2) {
-        body.innerHTML = `<div class="space-y-2">${SAFARI_TRIPS.filter(t => t.city === b.city).map(t => `<label class="flex items-center justify-between gap-3 p-3 rounded-xl border cursor-pointer ${b.selectedIds.includes(t.id) ? 'border-champagne bg-champagne/10' : 'border-white/10'}"><div class="flex items-center gap-3"><input type="checkbox" ${b.selectedIds.includes(t.id) ? 'checked' : ''} onchange="toggleBookingTrip('${t.id}')" class="accent-champagne" /><div><div class="text-sm font-black">${state.lang === "ar" ? t.titleAr : t.titleEn}</div><div class="text-xs opacity-60">${state.lang === "ar" ? t.duration : t.durationEn}</div></div></div><span class="font-black text-champagne">${fmtPrice(t.adultPrice)}</span></label>`).join("")}</div>`;
-    } else if (b.step === 3) {
-        body.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div><label class="block text-xs font-bold mb-1">${{ ar: "الاسم الكامل *", en: "Full Name *", it: "Nome Completo *", ru: "Полное имя *" }[state.lang]}</label><input id="bk-name" type="text" value="${b.name}" class="w-full px-3 py-2.5 rounded-lg bg-[#F6F3EC] dark:bg-carbon-900 border border-white/10 text-sm" /></div><div><label class="block text-xs font-bold mb-1">${{ ar: "رقم الواتساب *", en: "WhatsApp Number *", it: "Numero WhatsApp *", ru: "Номер WhatsApp *" }[state.lang]}</label><input id="bk-phone" type="tel" value="${b.phone}" class="w-full px-3 py-2.5 rounded-lg bg-[#F6F3EC] dark:bg-carbon-900 border border-white/10 text-sm" /></div><div><label class="block text-xs font-bold mb-1">${{ ar: "البريد الإلكتروني", en: "Email", it: "Email", ru: "Эл. почта" }[state.lang]}</label><input id="bk-email" type="email" value="${b.email}" class="w-full px-3 py-2.5 rounded-lg bg-[#F6F3EC] dark:bg-carbon-900 border border-white/10 text-sm" /></div><div><label class="block text-xs font-bold mb-1">${{ ar: "الجنسية", en: "Nationality", it: "Nazionalità", ru: "Гражданство" }[state.lang]}</label><input id="bk-nat" type="text" value="${b.nationality}" class="w-full px-3 py-2.5 rounded-lg bg-[#F6F3EC] dark:bg-carbon-900 border border-white/10 text-sm" /></div></div>`;
-    } else if (b.step === 4) {
-        body.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div><label class="block text-xs font-bold mb-1">البالغين</label><input type="number" min="1" value="${b.adults}" onchange="state.booking.adults=Math.max(1,+this.value); renderBookingStep();" class="w-full px-3 py-2.5 rounded-lg bg-[#F6F3EC] dark:bg-carbon-900 text-sm font-bold" /></div><div><label class="block text-xs font-bold mb-1">الأطفال (50%)</label><input type="number" min="0" value="${b.children}" onchange="state.booking.children=Math.max(0,+this.value); renderBookingStep();" class="w-full px-3 py-2.5 rounded-lg bg-[#F6F3EC] dark:bg-carbon-900 text-sm font-bold" /></div><div class="sm:col-span-2"><label class="block text-xs font-bold mb-1">نوع المركبة</label><select onchange="state.booking.vehicleOpt=this.value" class="w-full px-3 py-2.5 rounded-lg bg-[#F6F3EC] dark:bg-carbon-900 text-sm font-bold">${["Single ATV Quad", "Double ATV Quad", "Shared Dune Buggy", "Private 4x4 Jeep"].map(v => `<option value="${v}" ${b.vehicleOpt === v ? 'selected' : ''}>${v}</option>`).join("")}</select></div></div>`;
-    } else if (b.step === 5) {
-        body.innerHTML = `<div class="space-y-4"><div><label class="block text-xs font-bold mb-1">${{ ar: "فندق الاستلام", en: "Pickup Hotel", it: "Hotel per il ritiro", ru: "Отель для трансфера" }[state.lang]}</label><input id="bk-hotel" type="text" value="${b.pickupHotel}" placeholder="مثال: Rixos Sharm" class="w-full px-3 py-2.5 rounded-lg bg-[#F6F3EC] dark:bg-carbon-900 text-sm" /></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><button type="button" onclick="state.booking.paymentMethod='arrival'; renderBookingStep();" class="p-4 rounded-xl border text-start ${b.paymentMethod === 'arrival' ? 'border-sea bg-sea/10' : 'border-white/10'}"><div class="font-black text-sea">الدفع عند الوصول</div><div class="text-xs opacity-70 mt-1">بدون مقدم</div></button><button type="button" onclick="state.booking.paymentMethod='online'; renderBookingStep();" class="p-4 rounded-xl border text-start ${b.paymentMethod === 'online' ? 'border-champagne bg-champagne/10' : 'border-white/10'}"><div class="font-black text-champagne">الدفع الإلكتروني</div><div class="text-xs opacity-70 mt-1">Visa · Mastercard · ميزة · محافظ</div></button></div></div>`;
-    } else if (b.step === 6) {
-        const ch = SAFARI_TRIPS.filter(t => b.selectedIds.includes(t.id));
-        body.innerHTML = `<div class="space-y-3"><div class="p-4 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 text-xs sm:text-sm space-y-1.5"><div><strong>المدينة:</strong> ${b.city}</div><div><strong>البرامج:</strong> ${ch.map(c => state.lang === "ar" ? c.titleAr : c.titleEn).join(" + ")}</div><div><strong>الضيوف:</strong> ${b.adults} بالغين، ${b.children} أطفال</div><div><strong>الدفع:</strong> ${b.paymentMethod === 'arrival' ? 'عند الوصول' : 'إلكتروني'}</div></div><div class="flex gap-2"><input id="bk-promo" type="text" value="${b.promoCode}" placeholder="كود الخصم: MOSA20" class="flex-1 px-3 py-2 rounded-lg bg-[#F6F3EC] dark:bg-carbon-900 text-sm font-bold uppercase" /><button type="button" onclick="state.booking.promoCode=document.getElementById('bk-promo').value; renderBookingStep(); showToast('تم تطبيق الخصم!');" class="px-4 py-2 rounded-lg bg-champagne text-carbon-950 text-xs font-black">تطبيق</button></div></div>`;
+    const lbl = document.getElementById("booking-step-label");
+    if (lbl) lbl.textContent = stepTitles[b.step - 1];
+
+    const tot = document.getElementById("booking-total-display");
+    if (tot) tot.textContent = fmtPrice(calcBookingTotal());
+
+    const bars = document.getElementById("booking-progress-bars");
+    if (bars) {
+        bars.innerHTML = [1, 2, 3, 4, 5]
+            .map(n => `<div class="h-1.5 rounded-full ${n <= b.step ? 'bg-champagne' : 'bg-carbon-900/15 dark:bg-white/10'}"></div>`)
+            .join("");
     }
 
-    if (window.lucide) window.lucide.createIcons();
+    const prevBtn = document.getElementById("booking-prev-btn");
+    if (prevBtn) prevBtn.classList.toggle("hidden", b.step === 1);
+
+    const nextBtn = document.getElementById("booking-next-btn");
+    if (nextBtn) nextBtn.textContent = b.step === 5 ? I18N[state.lang].bk_confirm : I18N[state.lang].bk_next;
+
+    const body = document.getElementById("booking-body");
+    if (!body) return;
+
+    if (b.step === 1) {
+        body.innerHTML = `<div class="space-y-2">${SAFARI_TRIPS.map(trip => {
+            const checked = b.selectedIds.includes(trip.id);
+            return `<label class="flex items-center justify-between gap-3 p-3.5 rounded-xl border cursor-pointer transition ${checked ? 'border-champagne bg-champagne/10' : 'border-carbon-900/10 dark:border-white/10 hover:border-champagne/50'}">
+                <div class="flex items-center gap-3">
+                    <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleBookingTrip('${trip.id}')" class="accent-champagne w-4 h-4" />
+                    <div>
+                        <div class="text-sm font-black">${getTripTitle(trip)}</div>
+                        <div class="text-xs opacity-60">${getTripDuration(trip)} · ${trip.vehicle}</div>
+                    </div>
+                </div>
+                <span class="font-black text-champagne-dark dark:text-champagne whitespace-nowrap">${fmtPrice(trip.adultPrice)}</span>
+            </label>`;
+        }).join("")}</div>`;
+    } else if (b.step === 2) {
+        body.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div>
+                <label class="block text-xs font-bold mb-1.5">${t.full_name}</label>
+                <input id="bk-name" type="text" value="${b.name}" required class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 text-sm focus:border-champagne focus:outline-none" />
+            </div>
+            <div>
+                <label class="block text-xs font-bold mb-1.5">${t.whatsapp}</label>
+                <input id="bk-phone" type="tel" value="${b.phone}" required placeholder="+20..." class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 text-sm focus:border-champagne focus:outline-none" />
+            </div>
+            <div>
+                <label class="block text-xs font-bold mb-1.5">${t.email}</label>
+                <input id="bk-email" type="email" value="${b.email}" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 text-sm focus:border-champagne focus:outline-none" />
+            </div>
+            <div>
+                <label class="block text-xs font-bold mb-1.5">${t.nationality}</label>
+                <input id="bk-nat" type="text" value="${b.nationality}" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 text-sm focus:border-champagne focus:outline-none" />
+            </div>
+        </div>`;
+    } else if (b.step === 3) {
+        const vehicleKeys = Object.keys(t.vehicles);
+        body.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div>
+                <label class="block text-xs font-bold mb-1.5">${t.adults}</label>
+                <input type="number" min="1" max="30" value="${b.adults}" onchange="state.booking.adults=Math.max(1,+this.value); renderBookingStep();" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 text-sm font-bold focus:outline-none" />
+            </div>
+            <div>
+                <label class="block text-xs font-bold mb-1.5">${t.children}</label>
+                <input type="number" min="0" max="20" value="${b.children}" onchange="state.booking.children=Math.max(0,+this.value); renderBookingStep();" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 text-sm font-bold focus:outline-none" />
+            </div>
+            <div class="sm:col-span-2">
+                <label class="block text-xs font-bold mb-1.5">${t.vehicle_type}</label>
+                <select onchange="state.booking.vehicleOpt=this.value" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 text-sm font-bold focus:outline-none">
+                    ${vehicleKeys.map(v => `<option value="${v}" ${b.vehicleOpt === v ? 'selected' : ''}>${t.vehicles[v]}</option>`).join("")}
+                </select>
+            </div>
+        </div>`;
+    } else if (b.step === 4) {
+        const today = new Date().toISOString().split("T")[0];
+        body.innerHTML = `<div class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                    <label class="block text-xs font-bold mb-1.5">${t.pickup_hotel}</label>
+                    <input id="bk-hotel" type="text" value="${b.pickupHotel}" placeholder="${t.hotel_placeholder}" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 text-sm focus:border-champagne focus:outline-none" />
+                </div>
+                <div>
+                    <label class="block text-xs font-bold mb-1.5">${t.trip_date}</label>
+                    <input id="bk-date" type="date" min="${today}" value="${b.tripDate || today}" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 text-sm focus:border-champagne focus:outline-none" />
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button type="button" onclick="state.booking.paymentMethod='arrival'; renderBookingStep();" class="p-4 rounded-xl border text-start transition ${b.paymentMethod === 'arrival' ? 'border-sea bg-sea/10' : 'border-carbon-900/10 dark:border-white/10'}">
+                    <div class="font-black text-sea">${t.pay_arrival}</div>
+                    <div class="text-xs opacity-70 mt-1">${t.pay_arrival_sub}</div>
+                </button>
+                <button type="button" onclick="state.booking.paymentMethod='online'; renderBookingStep();" class="p-4 rounded-xl border text-start transition ${b.paymentMethod === 'online' ? 'border-champagne bg-champagne/10' : 'border-carbon-900/10 dark:border-white/10'}">
+                    <div class="font-black text-champagne-dark dark:text-champagne">${t.pay_online}</div>
+                    <div class="text-xs opacity-70 mt-1">${t.pay_online_sub}</div>
+                </button>
+            </div>
+        </div>`;
+    } else if (b.step === 5) {
+        const ch = SAFARI_TRIPS.filter(trip => b.selectedIds.includes(trip.id));
+        const vehicleDisplay = t.vehicles[b.vehicleOpt] || b.vehicleOpt;
+        body.innerHTML = `<div class="space-y-3.5">
+            <div class="p-4 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 text-xs sm:text-sm space-y-2">
+                <div><strong>${t.sum_tours}</strong> ${ch.map(c => getTripTitle(c)).join(" + ")}</div>
+                <div><strong>${t.sum_guests}</strong> ${b.adults} ${t.adults_lbl}${b.children ? ` · ${b.children} ${t.children_lbl}` : ""}</div>
+                <div><strong>${t.sum_vehicle}</strong> ${vehicleDisplay}</div>
+                ${b.pickupHotel ? `<div><strong>${t.sum_hotel}</strong> ${b.pickupHotel} ${b.tripDate ? `(${b.tripDate})` : ""}</div>` : ""}
+                <div><strong>${t.sum_payment}</strong> ${b.paymentMethod === 'arrival' ? t.pay_arrival : t.pay_online}</div>
+            </div>
+            <div class="flex gap-2">
+                <input id="bk-promo" type="text" value="${b.promoCode}" placeholder="${t.promo_placeholder}" class="flex-1 px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 text-sm font-bold uppercase focus:border-champagne focus:outline-none" />
+                <button type="button" onclick="applyPromoCode()" class="px-4 py-2.5 rounded-xl bg-champagne hover:bg-champagne-light text-carbon-950 text-xs font-black transition">${t.promo_apply}</button>
+            </div>
+        </div>`;
+    }
 }
