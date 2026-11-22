@@ -20,7 +20,7 @@ export const NOTIFICATION_CONFIG = {
         instancePhone: "201207823884"
     },
     // Owner WhatsApp number(s) that receive new booking notifications
-    ownerPhones: ["201207823884", "201118748922"],
+    ownerPhones: ["201207823884", "201023355550"],
     ownerEmail: "info@mosasafari.com"
 };
 
@@ -200,7 +200,7 @@ export async function dispatchBookingNotifications(payload) {
     const ownerMessage = buildOwnerWhatsAppMessage(payload);
     const customerContent = buildCustomerConfirmationContent(payload);
 
-    // 1. Send WhatsApp notification to Owner via Green API
+    // 1. Send WhatsApp notification ONLY to Owner (201023355550) via Green API
     const uniqueOwnerPhones = [...new Set(NOTIFICATION_CONFIG.ownerPhones)];
     for (const phone of uniqueOwnerPhones) {
         const chatId = formatWhatsAppChatId(phone);
@@ -211,16 +211,7 @@ export async function dispatchBookingNotifications(payload) {
         }
     }
 
-    // 2. Also send a polite WhatsApp booking confirmation copy to the customer's WhatsApp via Green API
-    const customerChatId = formatWhatsAppChatId(payload.phone);
-    if (customerChatId) {
-        const custWaRes = await sendGreenApiWhatsApp(customerChatId, customerContent.text);
-        if (custWaRes.ok) {
-            result.customerWaSent = true;
-        }
-    }
-
-    // 3. Trigger server-side endpoint (/.netlify/functions/notify-booking) for Resend Email
+    // 2. Trigger server-side endpoint (/.netlify/functions/notify-booking) for Customer Confirmation Email via Resend
     try {
         const srvRes = await fetch("/.netlify/functions/notify-booking", {
             method: "POST",

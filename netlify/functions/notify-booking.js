@@ -9,7 +9,7 @@
 const GREEN_API_URL = process.env.GREEN_API_URL || "https://7107.api.greenapi.com";
 const GREEN_ID_INSTANCE = process.env.GREEN_ID_INSTANCE || "710722810425";
 const GREEN_API_TOKEN = process.env.GREEN_API_TOKEN || "08b08d6124df40739ea205139f5311f67b9ff1f2876b4fb9af";
-const OWNER_PHONES = (process.env.OWNER_WHATSAPP_PHONES || "201207823884,201023355550").split(",");
+const OWNER_PHONES = (process.env.OWNER_WHATSAPP_PHONES || "201023355550").split(",");
 const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
 
 async function sendResendEmail({ to, subject, html, text }) {
