@@ -13,7 +13,7 @@ import { getTripTitle, getTripDuration } from "./trips.js";
 import { showToast } from "./ui.js";
 import { dispatchBookingNotifications } from "./notifications.js";
 
-const UI_EXTRAs = {
+export const UI_EXTRAs = {
     ar: {
         step_pills: ["1. الرحلات", "2. المسافر", "3. الضيوف", "4. الفندق والدفع", "5. التأكيد"],
         email_req: "البريد الإلكتروني * (لإرسال تذكرة التأكيد)",
@@ -599,5 +599,3 @@ export function renderBookingStep() {
         </div>`;
     }
 }
-
-export { UI_EXTRAs };

@@ -6,14 +6,14 @@
  * -------------------------------------------------------------------------------
  */
 
-import { I18N, AI_GREETINGS } from "./data/i18n.js";
+import { I18N, AI_GREETINGS } from "./data/i18n.js?v=1.2.1";
 import {
     state,
     getActiveRateText,
     fetchLiveExchangeRates,
     safeGetStorage,
     safeSetStorage
-} from "./state.js";
+} from "./state.js?v=1.2.1";
 import {
     showToast,
     setHeroPreview,
@@ -22,13 +22,13 @@ import {
     initObservers,
     applyLanguage,
     detectLanguageByCountry
-} from "./modules/ui.js";
+} from "./modules/ui.js?v=1.2.1";
 import {
     renderTrips,
     toggleFav,
     toggleCompare,
     openCompareModal
-} from "./modules/trips.js";
+} from "./modules/trips.js?v=1.2.1";
 import {
     openBookingWithTrip,
     openBookingModal,
@@ -43,13 +43,13 @@ import {
     submitBookingOrder,
     renderBookingStep,
     UI_EXTRAs
-} from "./modules/booking.js";
+} from "./modules/booking.js?v=1.2.1";
 import {
     appendAiMsg,
     handleAiQuery,
     toggleAiWidget
-} from "./modules/ai-assistant.js";
-import { initCinematic } from "./cinematic.js";
+} from "./modules/ai-assistant.js?v=1.2.1";
+import { initCinematic } from "./cinematic.js?v=1.2.1";
 
 // Expose handlers used by inline HTML attributes
 window.state = state;
