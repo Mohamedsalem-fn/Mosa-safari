@@ -12,7 +12,6 @@ import {
     showToast,
     setHeroPreview,
     switchHubTab,
-    openSeoModal,
     initParticles,
     initObservers,
     applyLanguage,
@@ -42,7 +41,6 @@ window.state = state;
 window.showToast = showToast;
 window.setHeroPreview = setHeroPreview;
 window.switchHubTab = switchHubTab;
-window.openSeoModal = openSeoModal;
 window.toggleFav = toggleFav;
 window.toggleCompare = toggleCompare;
 window.openBookingWithTrip = openBookingWithTrip;
@@ -155,31 +153,6 @@ window.addEventListener("DOMContentLoaded", () => {
         if (!i.value.trim()) return;
         handleAiQuery(i.value.trim());
         i.value = "";
-    });
-
-    document.getElementById("close-seo-btn").addEventListener("click", () => document.getElementById("seo-modal").classList.add("hidden"));
-    document.getElementById("copy-schema-btn").addEventListener("click", () => {
-        const t = document.getElementById("schema-preview").textContent;
-        const fallback = () => {
-            const ta = document.createElement("textarea");
-            ta.value = t;
-            ta.style.position = "fixed";
-            ta.style.opacity = "0";
-            document.body.appendChild(ta);
-            ta.select();
-            try {
-                document.execCommand("copy");
-            } catch {
-                // Ignore
-            }
-            ta.remove();
-        };
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(t).catch(fallback);
-        } else {
-            fallback();
-        }
-        showToast("تم نسخ JSON-LD Schema");
     });
 
     document.getElementById("open-compare-btn").addEventListener("click", openCompareModal);

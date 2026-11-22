@@ -44,11 +44,6 @@ export function switchHubTab(tab) {
         : "px-4 py-2 rounded-lg text-xs font-extrabold border border-carbon-900/15 dark:border-white/15 transition";
 }
 
-export function openSeoModal() {
-    document.getElementById("schema-preview").textContent = document.getElementById("schema-agency").textContent.trim();
-    document.getElementById("seo-modal").classList.remove("hidden");
-}
-
 export function initParticles() {
     const c = document.getElementById("desert-particles");
     if (!c) return;
