@@ -51,7 +51,7 @@ async function handleNotifyBooking(request, env) {
 
         // 1. Send Owner WhatsApp via Green API if not already sent by client
         const greenUrl = env.GREEN_API_URL || "https://7107.api.greenapi.com";
-        const greenInstance = env.GREEN_ID_INSTANCE || "710722810410";
+        const greenInstance = env.GREEN_ID_INSTANCE || "710722810425";
         const greenToken = env.GREEN_API_TOKEN || "";
         const ownerPhones = (env.OWNER_WHATSAPP_PHONES || "201207823884,201118748922").split(",");
 

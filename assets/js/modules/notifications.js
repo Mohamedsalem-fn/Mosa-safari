@@ -15,8 +15,8 @@ export const NOTIFICATION_CONFIG = {
     greenApi: {
         apiUrl: "https://7107.api.greenapi.com",
         mediaUrl: "https://7107.api.greenapi.com",
-        idInstance: "710722810410",
-        apiTokenInstance: "e31928ad1ee743c2a88c7c3e40b62da24cb618dd4e3549d984",
+        idInstance: "710722810425",
+        apiTokenInstance: "08b08d6124df40739ea205139f5311f67b9ff1f2876b4fb9af",
         instancePhone: "201207823884"
     },
     // Owner WhatsApp number(s) that receive new booking notifications
