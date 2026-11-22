@@ -96,6 +96,10 @@ The project is a static web application with zero build step required:
 
 ---
 
+## Cinematic Motion Layer
+
+`assets/js/cinematic.js` adds the luxury motion layer (floating glass header, magnetic controls, hero depth parallax, staggered trip-card reveals with 3D tilt, sliding filter pill) on top of `main.js` without touching its logic. Styles live at the bottom of `assets/css/styles.css`; particles and the hero crossfade live in `assets/js/modules/ui.js`. All motion respects `prefers-reduced-motion`.
+
 ## Credits / Author
 
 - **Author:** Mohamed Salem — *Expert AI Engineer & Automation Architect*

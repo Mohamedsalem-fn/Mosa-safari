@@ -46,6 +46,8 @@ window.toggleCompare = toggleCompare;
 window.openBookingWithTrip = openBookingWithTrip;
 window.toggleBookingTrip = toggleBookingTrip;
 window.renderBookingStep = renderBookingStep;
+window.openBookingModal = openBookingModal;
+window.toggleAiWidget = toggleAiWidget;
 
 function bindEvent(id, event, handler) {
     const el = document.getElementById(id);

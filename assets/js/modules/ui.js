@@ -23,9 +23,34 @@ export function showToast(msg, type = "success") {
 export function setHeroPreview(idx) {
     const s = HERO_SLIDES[idx];
     if (!s) return;
-    document.getElementById("hero-showcase-img").src = s.img;
-    document.getElementById("hero-showcase-tag").textContent = s.tag;
-    document.getElementById("hero-showcase-title").textContent = s.title;
+    const img = document.getElementById("hero-showcase-img");
+    const nextSrc = new URL(s.img, document.baseURI).href;
+    if (img.src !== nextSrc) {
+        // Crossfade: freeze the outgoing frame on top, then fade it away while the new
+        // frame restarts its Ken Burns drift underneath.
+        const ghost = img.cloneNode();
+        ghost.removeAttribute("id");
+        ghost.className = "hero-xfade";
+        ghost.setAttribute("aria-hidden", "true");
+        ghost.style.transform = getComputedStyle(img).transform;
+        img.parentNode.insertBefore(ghost, img.nextSibling);
+        ghost.addEventListener("animationend", () => ghost.remove(), { once: true });
+        setTimeout(() => ghost.remove(), 1600);
+
+        img.classList.remove("is-switching");
+        void img.offsetWidth;
+        img.src = s.img;
+        img.classList.add("is-switching");
+    }
+    const tag = document.getElementById("hero-showcase-tag");
+    const title = document.getElementById("hero-showcase-title");
+    tag.textContent = s.tag;
+    title.textContent = s.title;
+    [tag, title].forEach(el => {
+        el.classList.remove("caption-in");
+        void el.offsetWidth;
+        el.classList.add("caption-in");
+    });
     document.querySelectorAll(".hero-thumb").forEach((el, i) => {
         el.classList.toggle("border-champagne", i === idx);
         el.classList.toggle("border-transparent", i !== idx);
@@ -48,41 +73,106 @@ export function initParticles() {
     const c = document.getElementById("desert-particles");
     if (!c) return;
     const ctx = c.getContext("2d");
-    let w, h, pts;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const hero = c.parentElement;
+    const mouse = { x: -9999, y: -9999 };
+    let w = 0, h = 0, dpr = 1, motes = [], running = false, inView = true, raf = 0;
+
+    // Pre-rendered golden glow sprite: one drawImage per mote instead of per-frame gradients.
+    const sprite = document.createElement("canvas");
+    sprite.width = sprite.height = 48;
+    const sctx = sprite.getContext("2d");
+    const g = sctx.createRadialGradient(24, 24, 0, 24, 24, 24);
+    g.addColorStop(0, "rgba(255,236,190,1)");
+    g.addColorStop(0.25, "rgba(237,210,155,0.55)");
+    g.addColorStop(1, "rgba(217,179,108,0)");
+    sctx.fillStyle = g;
+    sctx.fillRect(0, 0, 48, 48);
 
     function resize() {
-        w = c.width = c.offsetWidth;
-        h = c.height = c.offsetHeight;
-        pts = Array.from({ length: 36 }, () => ({
-            x: Math.random() * w,
-            y: Math.random() * h,
-            r: Math.random() * 1.8 + 0.5,
-            vx: (Math.random() - 0.5) * 0.3,
-            vy: (Math.random() - 0.5) * 0.2,
-            a: Math.random() * 0.4 + 0.15
-        }));
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        w = c.offsetWidth;
+        h = c.offsetHeight;
+        c.width = Math.round(w * dpr);
+        c.height = Math.round(h * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const count = Math.max(36, Math.min(110, Math.round((w * h) / 15000)));
+        motes = Array.from({ length: count }, () => {
+            const z = Math.random() * 0.8 + 0.2;
+            return {
+                x: Math.random() * w,
+                y: Math.random() * h,
+                z,
+                size: (Math.random() * 7 + 4) * z,
+                bx: (Math.random() * 0.22 + 0.04) * z,
+                by: -(Math.random() * 0.12 + 0.02) * z,
+                vx: 0,
+                vy: 0,
+                a: Math.random() * 0.5 + 0.25,
+                ph: Math.random() * Math.PI * 2
+            };
+        });
+        if (reduce) draw(0);
     }
 
-    function tick() {
+    function draw(t) {
         ctx.clearRect(0, 0, w, h);
-        for (const p of pts) {
-            p.x += p.vx;
-            p.y += p.vy;
-            if (p.x > w) p.x = 0;
-            if (p.x < 0) p.x = w;
-            if (p.y > h) p.y = 0;
-            if (p.y < 0) p.y = h;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(217,179,108,${p.a})`;
-            ctx.fill();
+        const R = 150;
+        for (const m of motes) {
+            const dx = m.x - mouse.x;
+            const dy = m.y - mouse.y;
+            const d2 = dx * dx + dy * dy;
+            if (d2 < R * R && d2 > 1) {
+                const d = Math.sqrt(d2);
+                const f = (1 - d / R) * 0.55 * m.z;
+                m.vx += (dx / d) * f;
+                m.vy += (dy / d) * f;
+            }
+            m.vx *= 0.94;
+            m.vy *= 0.94;
+            m.x += m.bx + m.vx + Math.sin(t / 1800 + m.ph) * 0.12 * m.z;
+            m.y += m.by + m.vy + Math.cos(t / 2300 + m.ph) * 0.08 * m.z;
+            if (m.x > w + 20) m.x = -20;
+            if (m.x < -20) m.x = w + 20;
+            if (m.y < -20) m.y = h + 20;
+            if (m.y > h + 20) m.y = -20;
+            ctx.globalAlpha = m.a * (0.65 + 0.35 * Math.sin(t / 900 + m.ph));
+            ctx.drawImage(sprite, m.x - m.size, m.y - m.size, m.size * 2, m.size * 2);
         }
-        requestAnimationFrame(tick);
+        ctx.globalAlpha = 1;
     }
 
+    function loop(t) {
+        if (!running) return;
+        draw(t);
+        raf = requestAnimationFrame(loop);
+    }
+    function start() {
+        if (running || reduce || !inView || document.hidden) return;
+        running = true;
+        raf = requestAnimationFrame(loop);
+    }
+    function stop() {
+        running = false;
+        cancelAnimationFrame(raf);
+    }
+
+    hero.addEventListener("pointermove", e => {
+        const r = c.getBoundingClientRect();
+        mouse.x = e.clientX - r.left;
+        mouse.y = e.clientY - r.top;
+    }, { passive: true });
+    hero.addEventListener("pointerleave", () => { mouse.x = mouse.y = -9999; });
+    document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()));
+    if ("IntersectionObserver" in window) {
+        new IntersectionObserver(([e]) => {
+            inView = e.isIntersecting;
+            inView ? start() : stop();
+        }).observe(hero);
+    }
     window.addEventListener("resize", resize);
     resize();
-    tick();
+    start();
 }
 
 export function initObservers() {
