@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mosa-safari",
+  "main": "src/index.js",
+  "compatibility_date": "2026-01-01",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+  "vars": {
+    "GREEN_API_URL": "https://7107.api.greenapi.com",
+    "GREEN_ID_INSTANCE": "710722810410",
+    "OWNER_WHATSAPP_PHONES": "201207823884,201118748922",
+    "EMAIL_FROM": "Mosa Safari <bookings@mosasafari.com>"
+  }
+}

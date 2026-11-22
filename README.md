@@ -15,6 +15,11 @@ Mosa-safari/
 ├── robots.txt                        # Search engine crawler directives
 ├── sitemap.xml                       # XML sitemap for production indexing
 ├── .gitignore                        # Repository ignore rules
+├── cloudflare/
+│   ├── wrangler.jsonc                # Cloudflare Workers configuration (static assets + API worker)
+│   ├── package.json                  # Sync, local dev, and Wrangler deploy scripts
+│   ├── src/index.js                  # Cloudflare Worker handling assets, Green API & Resend Email
+│   └── public/                       # Standalone production copy of the website for Workers Assets
 ├── netlify/
 │   └── functions/
 │       └── notify-booking.js         # Serverless webhook for Green API WhatsApp & Email dispatch

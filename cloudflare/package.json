@@ -1,0 +1,12 @@
+{
+  "name": "mosa-safari-cloudflare",
+  "version": "1.2.0",
+  "private": true,
+  "author": "Mohamed Salem",
+  "description": "Cloudflare Workers deployment package for Mosa Safari (mosasafari.com)",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "sync": "rm -rf public && mkdir -p public && cp ../index.html ../robots.txt ../sitemap.xml public/ && cp -r ../assets public/assets && rm -f public/assets/js/env.local.js"
+  }
+}
