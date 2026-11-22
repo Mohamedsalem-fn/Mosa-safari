@@ -4,4 +4,5 @@ Thumbs.db
 *.log
 .env
 .env.*
+assets/js/env.local.js
 dist/

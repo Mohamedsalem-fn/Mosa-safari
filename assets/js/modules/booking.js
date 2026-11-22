@@ -11,7 +11,7 @@ import { I18N, STEP_TITLES_I18N, BOOKING_I18N } from "../data/i18n.js";
 import { state, fmtPrice } from "../state.js";
 import { getTripTitle, getTripDuration } from "./trips.js";
 import { showToast } from "./ui.js";
-import { dispatchBookingNotifications } from "./notifications.js";
+import { dispatchBookingNotifications } from "./notifications.js?v=1.2.2";
 
 export const UI_EXTRAs = {
     ar: {

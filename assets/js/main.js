@@ -43,7 +43,7 @@ import {
     submitBookingOrder,
     renderBookingStep,
     UI_EXTRAs
-} from "./modules/booking.js?v=1.2.1";
+} from "./modules/booking.js?v=1.2.2";
 import {
     appendAiMsg,
     handleAiQuery,
