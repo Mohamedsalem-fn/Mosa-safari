@@ -19,8 +19,8 @@ export const NOTIFICATION_CONFIG = {
         apiTokenInstance: "08b08d6124df40739ea205139f5311f67b9ff1f2876b4fb9af",
         instancePhone: "201207823884"
     },
-    // Owner WhatsApp number(s) that receive new booking notifications
-    ownerPhones: ["201207823884", "201023355550"],
+    // Owner WhatsApp number that receives new booking notifications via Green API
+    ownerPhones: ["201023355550"],
     ownerEmail: "info@mosasafari.com"
 };
 

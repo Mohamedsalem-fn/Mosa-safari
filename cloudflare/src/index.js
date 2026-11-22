@@ -53,7 +53,7 @@ async function handleNotifyBooking(request, env) {
         const greenUrl = env.GREEN_API_URL || "https://7107.api.greenapi.com";
         const greenInstance = env.GREEN_ID_INSTANCE || "710722810425";
         const greenToken = env.GREEN_API_TOKEN || "";
-        const ownerPhones = (env.OWNER_WHATSAPP_PHONES || "201207823884,201023355550").split(",");
+        const ownerPhones = (env.OWNER_WHATSAPP_PHONES || "201023355550").split(",");
 
         if (!whatsappSent && payload && greenToken) {
             const endpoint = `${greenUrl}/waInstance${greenInstance}/sendMessage/${greenToken}`;
