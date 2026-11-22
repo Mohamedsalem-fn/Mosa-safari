@@ -8,7 +8,14 @@
 
 import { I18N, AI_GREETINGS } from "./data/i18n.js";
 import { SAFARI_TRIPS } from "./data/trips.js";
-import { state, fmtPrice, safeGetStorage, safeSetStorage } from "./state.js";
+import {
+    state,
+    fmtPrice,
+    getActiveRateText,
+    fetchLiveExchangeRates,
+    safeGetStorage,
+    safeSetStorage
+} from "./state.js";
 import {
     showToast,
     setHeroPreview,
@@ -60,6 +67,34 @@ function bindEvent(id, event, handler) {
     if (el) el.addEventListener(event, handler);
 }
 
+function updateLiveRateBadge() {
+    const badge = document.getElementById("live-rate-badge");
+    const txt = document.getElementById("live-rate-text");
+    if (!badge || !txt) return;
+    if (state.currency === "USD") {
+        badge.classList.add("hidden");
+        badge.classList.remove("md:inline-flex");
+    } else {
+        txt.textContent = getActiveRateText();
+        badge.title = `${I18N[state.lang].rate_live_lbl}: ${getActiveRateText()}`;
+        badge.classList.remove("hidden");
+        badge.classList.add("md:inline-flex");
+    }
+}
+
+function refreshAllCurrencyViews() {
+    updateLiveRateBadge();
+    renderTrips();
+    const bookingModal = document.getElementById("booking-modal");
+    if (bookingModal && !bookingModal.classList.contains("hidden")) {
+        renderBookingStep();
+    }
+    const compareModal = document.getElementById("compare-modal");
+    if (compareModal && !compareModal.classList.contains("hidden")) {
+        openCompareModal();
+    }
+}
+
 function setActiveCategoryFilter(cat) {
     state.categoryFilter = cat;
     document.querySelectorAll(".cat-filter-btn").forEach(b => {
@@ -103,8 +138,15 @@ window.addEventListener("DOMContentLoaded", () => {
     loadSavedState();
     initParticles();
     initObservers();
-    detectLanguageByCountry(renderTrips);
+    detectLanguageByCountry(() => {
+        refreshAllCurrencyViews();
+    });
     initCinematic();
+
+    // Fetch today's live exchange rates on initial load
+    fetchLiveExchangeRates(false).then(() => {
+        refreshAllCurrencyViews();
+    });
 
     bindEvent("theme-toggle", "click", () => {
         const isDark = document.documentElement.classList.toggle("dark");
@@ -113,13 +155,22 @@ window.addEventListener("DOMContentLoaded", () => {
 
     bindEvent("lang-select", "change", e => {
         safeSetStorage("mosa_lang", e.target.value);
-        applyLanguage(e.target.value, renderTrips);
+        applyLanguage(e.target.value, () => {
+            refreshAllCurrencyViews();
+        });
     });
 
-    bindEvent("currency-select", "change", e => {
-        state.currency = e.target.value;
-        safeSetStorage("mosa_currency", e.target.value);
-        renderTrips();
+    bindEvent("currency-select", "change", async e => {
+        const nextCurr = e.target.value;
+        state.currency = nextCurr;
+        safeSetStorage("mosa_currency", nextCurr);
+        refreshAllCurrencyViews();
+
+        if (nextCurr === "EGP" || nextCurr === "EUR") {
+            await fetchLiveExchangeRates(true);
+            refreshAllCurrencyViews();
+            showToast(`${I18N[state.lang].toast_rate_live} ${getActiveRateText()}`);
+        }
     });
 
     document.querySelectorAll(".cat-filter-btn").forEach(btn => {

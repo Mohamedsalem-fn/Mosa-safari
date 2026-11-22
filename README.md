@@ -46,7 +46,7 @@ Mosa-safari/
 
 - **Full 4-Language Support (`ar`, `en`, `it`, `ru`):** Clean Arabic-first default HTML with zero flash of unstyled/wrong-language text, full RTL/LTR switching, and complete translations across all 8 trip titles, descriptions, FAQs, booking steps, and AI quick chips.
 - **Smart Safari Category Filtering:** Filter the 8 Sharm El Sheikh tours by adventure type (`ATV & Buggy`, `Nabq Reserve`, `Night & Stars`, `Canyon & Dahab`) from either the hero search console or the filter bar.
-- **Multi-Currency Pricing (`USD`, `EGP`, `EUR`):** Live price conversion across trip cards, the complete 8-tour price table, comparison modal, and booking totals, with local storage persistence.
+- **Live Real-Time Multi-Currency Pricing (`USD`, `EGP`, `EUR`):** Automatically fetches today's live `USD -> EGP` and `USD -> EUR` exchange rates from multi-CDN currency APIs (`open.er-api.com` and `@fawazahmed0/currency-api`) with local caching and offline fallback, dynamically converting all trip cards, the 8-tour price table, comparison modal, booking totals, and MOSA AI concierge quotes.
 - **Streamlined 5-Step Interactive Booking Modal:** Direct tour selection, traveler details validation, guest count & localized vehicle type, hotel pickup & preferred tour date, promo code validation (`MOSA20` for 20% off + automatic 10% group discount for 5+ guests), and instant WhatsApp booking handoff.
 - **Anime.js v4 Cinematic Motion Layer (`assets/js/cinematic.js`):** Staggered hero and card entrances, 3D interactive card tilt, magnetic header buttons, and scroll-reactive floating glass navigation.
 - **SEO & Structured Data Ready:** Embedded JSON-LD schemas (`TravelAgency`, `ItemList`, `FAQPage`, `BreadcrumbList`), Open Graph metadata, `robots.txt`, and `sitemap.xml`.
