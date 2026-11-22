@@ -1,0 +1,83 @@
+/*
+ * -------------------------------------------------------------------------------
+ * Author: Mohamed Salem (Expert AI Engineer & Automation Architect)
+ * Focus: AI Engineering | Automation | Agentic Systems
+ * Copyright (c) 2026. All Rights Reserved.
+ * -------------------------------------------------------------------------------
+ */
+
+@keyframes spinSlow {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes floatSoft {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+@keyframes pulseHalo {
+    0% {
+        box-shadow: 0 0 0 0 rgba(217, 179, 108, 0.45);
+    }
+    70% {
+        box-shadow: 0 0 0 14px rgba(217, 179, 108, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(217, 179, 108, 0);
+    }
+}
+
+.animate-spin-slow {
+    animation: spinSlow 30s linear infinite;
+}
+
+.animate-float-soft {
+    animation: floatSoft 5s ease-in-out infinite;
+}
+
+.animate-pulse-halo {
+    animation: pulseHalo 2.6s infinite;
+}
+
+.reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.bg-grid-pattern {
+    background-image: radial-gradient(rgba(217, 179, 108, 0.12) 1px, transparent 1px);
+    background-size: 28px 28px;
+}
+
+::-webkit-scrollbar {
+    width: 7px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(217, 179, 108, 0.35);
+    border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(217, 179, 108, 0.7);
+}

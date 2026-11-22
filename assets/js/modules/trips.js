@@ -1,0 +1,140 @@
+/**
+ * -------------------------------------------------------------------------------
+ * Author: Mohamed Salem (Expert AI Engineer & Automation Architect)
+ * Focus: AI Engineering | Automation | Agentic Systems
+ * Copyright (c) 2026. All Rights Reserved.
+ * -------------------------------------------------------------------------------
+ */
+
+import { SAFARI_TRIPS } from "../data/trips.js";
+import { I18N, BADGE_I18N } from "../data/i18n.js";
+import { state, fmtPrice } from "../state.js";
+import { showToast } from "./ui.js";
+
+export function renderTrips() {
+    const grid = document.getElementById("trips-grid");
+    if (!grid) return;
+
+    let list = [...SAFARI_TRIPS];
+    if (state.cityFilter !== "all") list = list.filter(t => t.city === state.cityFilter);
+    if (state.sortBy === "price-asc") list.sort((a, b) => a.fromPrice - b.fromPrice);
+    if (state.sortBy === "price-desc") list.sort((a, b) => b.fromPrice - a.fromPrice);
+    if (state.sortBy === "rating") list.sort((a, b) => b.rating - a.rating);
+
+    grid.innerHTML = list.map(trip => {
+        const isFav = state.favorites.has(trip.id);
+        const isCmp = state.compareIds.includes(trip.id);
+        const title = state.lang === "ar" ? trip.titleAr : trip.titleEn;
+        const cityLabel = I18N[state.lang].city_sharm || trip.city;
+        const dur = state.lang === "ar" ? trip.duration : trip.durationEn;
+        const badgeText = state.lang === "ar"
+            ? trip.badge
+            : ((BADGE_I18N[state.lang] && BADGE_I18N[state.lang][trip.badge]) || trip.badge);
+        const descText = state.lang === "ar"
+            ? trip.descAr
+            : (trip["desc" + state.lang.charAt(0).toUpperCase() + state.lang.slice(1)] || trip.titleEn);
+
+        return `
+          <article class="group rounded-2xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 hover:border-champagne/60 shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col overflow-hidden">
+            <div class="relative h-52 overflow-hidden bg-carbon-900">
+              <img src="${trip.img}" alt="${title}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+              <div class="absolute inset-0 bg-gradient-to-t from-carbon-950/90 via-transparent to-carbon-950/30"></div>
+              <span class="absolute top-3 start-3 px-2.5 py-1 rounded-md bg-carbon-950/75 backdrop-blur-md border border-white/15 text-champagne text-[11px] font-extrabold">${badgeText}</span>
+              <div class="absolute top-3 end-3 flex gap-1.5">
+                <button type="button" onclick="toggleCompare('${trip.id}')" title="مقارنة" class="p-2 rounded-lg ${isCmp ? 'bg-champagne text-carbon-950' : 'bg-carbon-950/60 text-white hover:bg-carbon-950'} backdrop-blur-md transition"><i data-lucide="git-compare" class="w-3.5 h-3.5"></i></button>
+                <button type="button" onclick="toggleFav('${trip.id}')" title="مفضلة" class="p-2 rounded-lg ${isFav ? 'bg-rose-500 text-white' : 'bg-carbon-950/60 text-white hover:bg-carbon-950'} backdrop-blur-md transition"><i data-lucide="heart" class="w-3.5 h-3.5"></i></button>
+              </div>
+              <div class="absolute bottom-3 inset-x-3 flex items-end justify-between text-white">
+                <div>
+                  <span class="text-[10px] text-[#B5B0A8] block">${I18N[state.lang].from_label}</span>
+                  <span class="text-lg font-black text-champagne">${fmtPrice(trip.fromPrice)}</span>
+                  <span class="text-[10px] text-[#B5B0A8]">(${fmtPrice(trip.adultPrice)})</span>
+                </div>
+                <span class="px-2 py-1 rounded-md bg-carbon-950/75 text-champagne text-xs font-black flex items-center gap-1">
+                  <i data-lucide="star" class="w-3 h-3 fill-champagne"></i> ${trip.rating}
+                </span>
+              </div>
+            </div>
+
+            <div class="p-5 flex-1 flex flex-col justify-between gap-4">
+              <div>
+                <div class="flex items-center gap-3 text-[11px] font-bold text-sea-dark dark:text-sea mb-2">
+                  <span>${cityLabel}</span>
+                  <span>•</span>
+                  <span>${dur}</span>
+                  <span>•</span>
+                  <span class="text-carbon-900/60 dark:text-[#9E9990]">${trip.vehicle}</span>
+                </div>
+                <h3 class="text-base font-black leading-snug mb-2">${title}</h3>
+                <p class="text-xs text-carbon-900/70 dark:text-[#9E9990] leading-relaxed">${descText}</p>
+              </div>
+              <button type="button" onclick="openBookingWithTrip('${trip.id}')" class="w-full py-2.5 px-4 rounded-xl bg-carbon-900 dark:bg-champagne hover:bg-champagne hover:text-carbon-950 text-white dark:text-carbon-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition">
+                <span>${I18N[state.lang].book_now}</span>
+                <i data-lucide="arrow-left" class="w-4 h-4 ${state.lang !== 'ar' ? 'rotate-180' : ''}"></i>
+              </button>
+            </div>
+          </article>`;
+    }).join("");
+
+    if (window.lucide) window.lucide.createIcons();
+}
+
+export function toggleFav(id) {
+    if (state.favorites.has(id)) {
+        state.favorites.delete(id);
+        showToast(I18N[state.lang].toast_fav_rem);
+    } else {
+        state.favorites.add(id);
+        showToast(I18N[state.lang].toast_fav_add);
+    }
+    renderTrips();
+}
+
+export function toggleCompare(id) {
+    const i = state.compareIds.indexOf(id);
+    if (i > -1) {
+        state.compareIds.splice(i, 1);
+    } else {
+        if (state.compareIds.length >= 3) {
+            showToast(I18N[state.lang].toast_cmp_max, "error");
+            return;
+        }
+        state.compareIds.push(id);
+    }
+    document.getElementById("compare-count").textContent = state.compareIds.length;
+    renderTrips();
+}
+
+export function openCompareModal() {
+    const b = document.getElementById("compare-body");
+    const items = SAFARI_TRIPS.filter(t => state.compareIds.includes(t.id));
+    b.innerHTML = !items.length
+        ? `<p class="text-center text-sm opacity-60 py-8">${I18N[state.lang].cmp_empty}</p>`
+        : `<table class="w-full text-xs sm:text-sm text-start">
+            <thead>
+                <tr class="border-b border-white/10">
+                    <th class="p-3">${I18N[state.lang].cmp_crit}</th>
+                    ${items.map(i => `<th class="p-3 font-black text-champagne">${state.lang === "ar" ? i.titleAr : i.titleEn}</th>`).join("")}
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/10">
+                <tr>
+                    <td class="p-3 font-bold">${I18N[state.lang].cmp_city}</td>
+                    ${items.map(i => `<td class="p-3">${state.lang === "ar" ? i.cityAr : i.city}</td>`).join("")}
+                </tr>
+                <tr>
+                    <td class="p-3 font-bold">${I18N[state.lang].cmp_price}</td>
+                    ${items.map(i => `<td class="p-3 font-black text-sea">${fmtPrice(i.fromPrice)}</td>`).join("")}
+                </tr>
+                <tr>
+                    <td class="p-3 font-bold">${I18N[state.lang].tbl_dur}</td>
+                    ${items.map(i => `<td class="p-3">${state.lang === "ar" ? i.duration : i.durationEn}</td>`).join("")}
+                </tr>
+                <tr>
+                    <td class="p-3 font-bold">${I18N[state.lang].tbl_rate}</td>
+                    ${items.map(i => `<td class="p-3">${i.rating} ★</td>`).join("")}
+                </tr>
+            </tbody>
+           </table>`;
+    document.getElementById("compare-modal").classList.remove("hidden");
+}

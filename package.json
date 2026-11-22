@@ -1,0 +1,21 @@
+{
+  "name": "mosa-safari",
+  "version": "1.0.0",
+  "description": "Mosa Safari (mosasafari.com) - Luxury Sharm El Sheikh & Sinai Desert Safari Booking Platform",
+  "main": "index.html",
+  "author": "Mohamed Salem <info@mosasafari.com>",
+  "license": "SEE LICENSE IN README.md",
+  "scripts": {
+    "dev": "python3 -m http.server 8080",
+    "preview": "npx --yes serve . -l 8080",
+    "check": "node --check assets/js/main.js assets/js/state.js assets/js/tailwind-config.js assets/js/data/trips.js assets/js/data/i18n.js assets/js/modules/ui.js assets/js/modules/trips.js assets/js/modules/booking.js assets/js/modules/ai-assistant.js"
+  },
+  "keywords": [
+    "safari",
+    "sharm-el-sheikh",
+    "tourism",
+    "booking",
+    "egypt",
+    "mosasafari"
+  ]
+}

@@ -1,0 +1,30 @@
+# -------------------------------------------------------------------------------
+# Author: Mohamed Salem (Expert AI Engineer & Automation Architect)
+# Focus: AI Engineering | Automation | Agentic Systems
+# Copyright (c) 2026. All Rights Reserved.
+# -------------------------------------------------------------------------------
+
+[build]
+  publish = "."
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/assets/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/assets/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
