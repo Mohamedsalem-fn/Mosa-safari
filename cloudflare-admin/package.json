@@ -1,0 +1,12 @@
+{
+  "name": "mosa-safari-admin-cloudflare",
+  "version": "1.0.0",
+  "private": true,
+  "author": "Mohamed Salem",
+  "description": "Isolated hardened Cloudflare Workers control plane for Mosa Safari Admin Dashboard",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "sync": "rm -rf public && mkdir -p public/assets/css public/assets/js/data public/assets/images && cp ../admin.html public/index.html && printf 'User-agent: *\\nDisallow: /\\n' > public/robots.txt && cp ../assets/css/tailwind.css ../assets/css/admin.css public/assets/css/ && cp ../assets/js/admin.js public/assets/js/ && cp ../assets/js/data/trips.js public/assets/js/data/ && cp -r ../assets/images/* public/assets/images/"
+  }
+}

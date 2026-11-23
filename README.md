@@ -9,7 +9,7 @@ A modern, multilingual, launch-ready web platform for booking luxury desert safa
 ```text
 Mosa-safari/
 ├── index.html                        # Clean Arabic-first semantic entry point (SEO, JSON-LD, UI layout)
-├── admin.html                        # Executive Admin Dashboard UI (/admin) with Chart.js & CRM modals
+├── admin.html                        # Isolated Executive Admin Dashboard UI (Chart.js & CRM modals)
 ├── package.json                      # Project metadata, dev server, CSS build, and JS check scripts
 ├── tailwind.config.js                # Tailwind CSS configuration (custom theme & content paths)
 ├── netlify.toml                      # Static hosting headers, caching, and security policy
@@ -17,10 +17,15 @@ Mosa-safari/
 ├── sitemap.xml                       # XML sitemap for production indexing
 ├── .gitignore                        # Repository ignore rules
 ├── cloudflare/
-│   ├── wrangler.jsonc                # Cloudflare Workers configuration (ASSETS + MOSA_KV + env vars)
-│   ├── package.json                  # Sync, local dev, and Wrangler deploy scripts
-│   ├── src/index.js                  # Cloudflare Worker API (KV persistence, Auth, Analytics, Green API, Resend)
-│   └── public/                       # Standalone production copy of the website for Workers Assets
+│   ├── wrangler.jsonc                # Public storefront Worker configuration (ASSETS + MOSA_KV + vars)
+│   ├── package.json                  # Sync, local dev, and Wrangler deploy scripts (storefront only)
+│   ├── src/index.js                  # Public Worker API (/api/public/config, /api/track, /api/notify-booking)
+│   └── public/                       # Storefront production static assets (zero admin files)
+├── cloudflare-admin/
+│   ├── wrangler.jsonc                # Isolated hardened Admin Worker configuration (run_worker_first + MOSA_KV)
+│   ├── package.json                  # Sync & deploy scripts for isolated admin Worker (mosa-safari-admin)
+│   ├── src/index.js                  # Hardened Admin API (HttpOnly cookies, CSRF, IP rate limit, CSP, HSTS)
+│   └── public/                       # Isolated admin static assets + strict Disallow robots.txt
 ├── netlify/
 │   └── functions/
 │       └── notify-booking.js         # Serverless webhook for Green API WhatsApp & Email dispatch
@@ -62,7 +67,7 @@ Mosa-safari/
 - **Live Real-Time Multi-Currency Pricing (`USD`, `EGP`, `EUR`):** Automatically fetches today's live `USD -> EGP` and `USD -> EUR` exchange rates from multi-CDN currency APIs (`open.er-api.com` and `@fawazahmed0/currency-api`) with local caching and offline fallback, dynamically converting all trip cards, the 8-tour price table, comparison modal, booking totals, and MOSA AI concierge quotes.
 - **Streamlined 5-Step Interactive Booking Modal:** Direct tour selection, traveler details validation, guest count & localized vehicle type, hotel pickup & preferred tour date, promo code validation (`MOSA20` for 20% off + automatic 10% group discount for 5+ guests), and instant WhatsApp booking handoff.
 - **Anime.js v4 Cinematic Motion Layer (`assets/js/cinematic.js`):** Staggered hero and card entrances, 3D interactive card tilt, magnetic header buttons, and scroll-reactive floating glass navigation.
-- **Executive Admin Dashboard (`/admin`) & Cloudflare KV Persistence:** Protected by HMAC-SHA256 authentication (`ADMIN_PASSWORD` Worker secret), featuring real-time Chart.js revenue/funnel analytics, full Bookings CRM with UTF-8 CSV export, live Tours & Pricing CRUD, Promo Code campaign manager, Customers LTV directory, live Exchange Rate / Time Slot / Notification settings, integration health checks, and administrative audit log.
+- **Isolated Hardened Admin Worker (`mosa-safari-admin`) & Cloudflare KV Persistence:** Physically separated from the public storefront Worker (`mosa-safari` serves zero admin routes or secrets). Protected by a dedicated `ADMIN_JWT_SECRET`, `__Host-mosa_admin_session` `HttpOnly` + `Secure` + `SameSite=Strict` cookies, strict `X-CSRF-Token` & `Origin` checks, KV-backed IP brute-force rate limiting (5 fails / 15m), server-side session revocation (`jti`), strict CSP (no inline scripts), HSTS, `X-Frame-Options: DENY`, and `noindex` headers. Features real-time Chart.js analytics, Bookings CRM with UTF-8 CSV export, live Tours/Promos/Settings sync via `MOSA_KV`, Customers LTV directory, and Audit Log.
 - **Multilingual SEO & Google Rich Results (`ar`, `en`, `it`, `ru`):** Comprehensive 4-language SEO metadata with dynamic `?lang=` URL routing (`hreflang` + canonical/Open Graph synchronization in `ui.js`), unified JSON-LD `@graph` schemas (`WebSite`, `TravelAgency`/`LocalBusiness`, dual-typed `Product` + `TouristTrip` `ItemList` for all 8 tours with USD offers & star ratings, 6-question `FAQPage`, `BreadcrumbList`), crawlable pre-rendered price rows, `robots.txt`, and `hreflang`/Image XML `sitemap.xml`.
 
 ---

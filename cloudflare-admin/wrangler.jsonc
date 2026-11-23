@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mosa-safari-admin",
+  "main": "src/index.js",
+  "compatibility_date": "2026-01-01",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "kv_namespaces": [
+    {
+      "binding": "MOSA_KV",
+      "id": "c2ef18f5fa814630b915e598049eb526"
+    }
+  ],
+  "vars": {
+    "GREEN_API_URL": "https://7107.api.greenapi.com",
+    "GREEN_ID_INSTANCE": "710722810425",
+    "OWNER_WHATSAPP_PHONES": "201023355550",
+    "EMAIL_FROM": "Mosa Safari <bookings@mosasafari.com>",
+    "STOREFRONT_URL": "https://mosa-safari.mohamedsalem-fn.workers.dev"
+  }
+}

@@ -8,7 +8,6 @@
 
 import { SAFARI_TRIPS } from "./data/trips.js";
 
-const STORAGE_TOKEN_KEY = "mosa_admin_token_v1";
 const STORAGE_LANG_KEY = "mosa_admin_lang_v1";
 const STORAGE_THEME_KEY = "mosa_admin_theme_v1";
 
@@ -103,7 +102,7 @@ const AT = {
 };
 
 const adminState = {
-    token: "",
+    csrfToken: "",
     lang: "ar",
     activeTab: "overview",
     chartDays: 14,
@@ -169,17 +168,23 @@ function showAdminToast(msg, type = "ok") {
 }
 
 async function apiFetch(path, options = {}) {
+    const method = (options.method || "GET").toUpperCase();
     const headers = { ...(options.headers || {}) };
-    if (adminState.token) {
-        headers["Authorization"] = `Bearer ${adminState.token}`;
+    if (["POST", "PUT", "PATCH", "DELETE"].includes(method) && adminState.csrfToken) {
+        headers["X-CSRF-Token"] = adminState.csrfToken;
     }
     if (options.body && !headers["Content-Type"]) {
         headers["Content-Type"] = "application/json";
     }
 
-    const res = await fetch(path, { ...options, headers });
-    if (res.status === 401 && path !== "/api/admin/login") {
-        handleLogout(false);
+    const res = await fetch(path, {
+        ...options,
+        method,
+        headers,
+        credentials: "same-origin"
+    });
+    if (res.status === 401 && path !== "/api/admin/login" && path !== "/api/admin/session") {
+        await handleLogout(false, false);
         showAdminToast(adminState.lang === "ar" ? "انتهت الجلسة، يرجى تسجيل الدخول مجدداً" : "Session expired", "err");
         throw new Error("Unauthorized");
     }
@@ -1253,11 +1258,13 @@ function renderAuditTab(root) {
 
     root.innerHTML = `
         <div class="space-y-5">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                ${healthCard(isAr ? "عزل لوحة التحكم (Worker مستقل)" : "Isolated Admin Worker", h.isolatedWorker)}
+                ${healthCard(isAr ? "حماية الكوكيز + CSRF + Rate Limit" : "HttpOnly + CSRF + Rate Limit", h.httpOnlyCookie && h.csrfProtected)}
+                ${healthCard(isAr ? "مفتاح التوقيع المنفصل (JWT Secret)" : "JWT Signing Secret", h.jwtSecretSet)}
                 ${healthCard("Cloudflare KV (MOSA_KV)", h.kvBound)}
                 ${healthCard("Green API WhatsApp Secret", h.greenApiConfigured)}
                 ${healthCard("Resend Email API Secret", h.resendConfigured)}
-                ${healthCard("Admin Auth Secret", h.adminSecretSet)}
             </div>
 
             <div class="rounded-3xl p-5 bg-white dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10">
@@ -1634,21 +1641,28 @@ function showDashboardShell() {
     document.getElementById("admin-app")?.classList.remove("hidden");
 }
 
-function handleLogout(toast = true) {
-    adminState.token = "";
-    try { sessionStorage.removeItem(STORAGE_TOKEN_KEY); localStorage.removeItem(STORAGE_TOKEN_KEY); } catch { /* ignore */ }
+async function handleLogout(toast = true, notifyServer = true) {
+    if (notifyServer && adminState.csrfToken) {
+        try {
+            await apiFetch("/api/admin/logout", { method: "POST" });
+        } catch {
+            // Clear UI state regardless
+        }
+    }
+    adminState.csrfToken = "";
+    try { localStorage.removeItem("mosa_admin_token_v1"); } catch { /* ignore */ }
     document.getElementById("admin-app")?.classList.add("hidden");
     document.getElementById("admin-login-screen")?.classList.remove("hidden");
-    if (toast) showAdminToast(adminState.lang === "ar" ? "تم تسجيل الخروج" : "Signed out");
+    if (toast) showAdminToast(adminState.lang === "ar" ? "تم تسجيل الخروج وإبطال الجلسة" : "Signed out & session revoked");
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
     try {
+        localStorage.removeItem("mosa_admin_token_v1");
         const th = localStorage.getItem(STORAGE_THEME_KEY) || "dark";
         applyAdminTheme(th);
         const lg = localStorage.getItem(STORAGE_LANG_KEY) || "ar";
         adminState.lang = lg === "en" ? "en" : "ar";
-        adminState.token = localStorage.getItem(STORAGE_TOKEN_KEY) || "";
     } catch { /* ignore */ }
 
     applyAdminLang(adminState.lang);
@@ -1668,13 +1682,14 @@ window.addEventListener("DOMContentLoaded", async () => {
 
         try {
             const res = await apiFetch("/api/admin/login", { method: "POST", body: JSON.stringify({ password: pw }) });
-            adminState.token = res.token;
-            try { localStorage.setItem(STORAGE_TOKEN_KEY, res.token); } catch { /* ignore */ }
+            adminState.csrfToken = res.csrfToken || "";
+            const pwInput = document.getElementById("login-password");
+            if (pwInput) pwInput.value = "";
             showDashboardShell();
             await loadOverviewData();
         } catch (err) {
             if (errEl) {
-                errEl.textContent = err.message || "كلمة المرور غير صحيحة";
+                errEl.textContent = err.message || (adminState.lang === "ar" ? "كلمة المرور غير صحيحة" : "Invalid credentials");
                 errEl.classList.remove("hidden");
             }
         } finally {
@@ -1689,7 +1704,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("sidebar-open-btn")?.addEventListener("click", openMobileSidebar);
     document.getElementById("sidebar-close-btn")?.addEventListener("click", closeMobileSidebar);
     document.getElementById("sidebar-backdrop")?.addEventListener("click", closeMobileSidebar);
-    document.getElementById("admin-logout-btn")?.addEventListener("click", () => handleLogout(true));
+    document.getElementById("admin-logout-btn")?.addEventListener("click", () => handleLogout(true, true));
     document.getElementById("admin-refresh-btn")?.addEventListener("click", () => loadOverviewData().catch(e => showAdminToast(e.message, "err")));
     document.getElementById("admin-lang-btn")?.addEventListener("click", () => applyAdminLang(adminState.lang === "ar" ? "en" : "ar"));
     document.getElementById("admin-theme-btn")?.addEventListener("click", () => applyAdminTheme(document.documentElement.classList.contains("dark") ? "light" : "dark"));
@@ -1711,12 +1726,15 @@ window.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("admin-modal-backdrop")?.addEventListener("click", closeModal);
     window.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 
-    if (adminState.token) {
-        try {
+    // Restore HttpOnly session cleanly if active
+    try {
+        const sess = await apiFetch("/api/admin/session");
+        if (sess && sess.ok && sess.csrfToken) {
+            adminState.csrfToken = sess.csrfToken;
             showDashboardShell();
             await loadOverviewData();
-        } catch {
-            handleLogout(false);
         }
+    } catch {
+        // Stay cleanly on login screen
     }
 });
