@@ -402,20 +402,20 @@ html[dir="rtl"] #ai-chat-panel { transform-origin: bottom left; }
 }
 
 /* ===================================================================
- * MOBILE-FIRST RESPONSIVE LAYER (Premium Mobile App UI/UX 320px+)
- * Preserves Desktop Layout (>= 640px) untouched while delivering a
- * clean, zero-overflow, app-grade mobile experience on phones.
+ * FLUID REM-BASED MOBILE RESPONSIVE LAYER (320px - 639px)
+ * Uses fluid root font-size so every rem-based Tailwind utility scales
+ * proportionally across small phones, packing content cleanly without
+ * any single element hogging the entire viewport.
  * =================================================================== */
 html { -webkit-text-size-adjust: 100%; }
 html, body { max-width: 100%; overflow-x: clip; }
 img, svg, canvas, video { max-width: 100%; }
+body.ai-sheet-open { overflow: hidden; }
 
 #toast-container { width: max-content; max-width: 92vw; }
 #toast-container > div { text-align: center; border-radius: 1rem; }
-
-@supports (height: 100dvh) {
-    #ai-chat-panel { max-height: 75dvh; }
-}
+.ai-chips-strip { scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.ai-chips-strip::-webkit-scrollbar { display: none; }
 
 /* Safe areas (iPhone notch / home bar) */
 #ai-dock { bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px)); }
@@ -424,111 +424,116 @@ img, svg, canvas, video { max-width: 100%; }
 /* Comfortable touch targets on touch devices */
 @media (pointer: coarse) {
     .cat-filter-btn, .hub-tabs button, #sort-select, #open-compare-btn,
-    #theme-toggle, #mobile-menu-btn { min-height: 40px; }
+    #theme-toggle, #mobile-menu-btn { min-height: 2.5rem; }
     .hero-thumb:hover, .glow-card:hover, #trips-grid > article:hover { transform: none; }
 }
 
-/* ---------- Phones (< 640px): Dedicated App-Grade UI/UX ---------- */
+/* ---------- Phones (< 640px): Fluid rem + High-Density App UI/UX ---------- */
 @media (max-width: 639px) {
-    /* Space at bottom so footer never hides behind sticky mobile bottom bar */
-    body { padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px)); }
+    /* Fluid root rem scaling: 13px on 320px -> 14.5px on 400px -> 15px on 430px+ */
+    html { font-size: clamp(13px, 3.65vw, 15px); }
 
-    /* Clean Full-Width Mobile Top App Bar (Zero Cramping) */
+    /* Reserve space for fixed bottom navigation bar */
+    body { padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px)); }
+
+    /* Clean Full-Width Mobile Top App Bar */
     .glass-nav,
     .glass-nav.is-scrolled {
         width: 100%;
         margin: 0;
         top: 0;
-        border-radius: 0 0 1.25rem 1.25rem;
+        border-radius: 0 0 1rem 1rem;
         border-top: 0;
         border-inline: 0;
-        box-shadow: 0 8px 28px -14px rgba(0, 0, 0, 0.18);
+        box-shadow: 0 0.5rem 1.75rem -0.9rem rgba(0, 0, 0, 0.18);
     }
     #main-navbar > div:first-child {
-        padding-inline: 0.9rem;
-        padding-block: 0.6rem;
+        padding-inline: 0.85rem;
+        padding-block: 0.5rem;
     }
-    #main-navbar img { height: 2.35rem; }
+    #main-navbar img { height: 2.2rem; }
     #currency-select {
-        padding-inline: 0.6rem;
-        padding-block: 0.4rem;
-        font-size: 11.5px;
-        min-height: 38px;
+        padding-inline: 0.55rem;
+        padding-block: 0.35rem;
+        font-size: 0.78rem;
+        min-height: 2.35rem;
     }
     #mobile-menu-btn {
-        min-height: 38px;
-        min-width: 38px;
-        padding: 0.45rem;
+        min-height: 2.35rem;
+        min-width: 2.35rem;
+        padding: 0.4rem;
     }
     #mobile-menu {
-        max-height: calc(100dvh - 4.5rem);
+        max-height: calc(100dvh - 4rem);
         overflow-y: auto;
     }
 
-    /* Visual-First Luxury Mobile Hero */
+    /* Compact Visual-First Hero: Showcase + Title + Search fit cleanly without hogging full viewport */
     #hero {
-        padding-top: 0.85rem;
-        padding-bottom: 2rem;
+        padding-top: 0.75rem;
+        padding-bottom: 1.5rem;
     }
-    #hero > .relative.z-10 { gap: 1.25rem; padding-inline: 0.9rem; }
+    #hero > .relative.z-10 { gap: 0.9rem; padding-inline: 0.85rem; }
     .hero-frame {
-        border-radius: 1.5rem;
-        aspect-ratio: 16 / 10;
-        box-shadow: 0 24px 48px -20px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(var(--gold), 0.3);
+        border-radius: 1.15rem;
+        aspect-ratio: 16 / 9;
+        max-height: 13.5rem;
+        box-shadow: 0 1.25rem 2.5rem -1rem rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(var(--gold), 0.3);
     }
     .float-glass {
-        top: 0.7rem;
-        inset-inline-start: 0.7rem;
-        max-width: calc(100% - 1.4rem);
-        padding: 0.35rem 0.75rem;
+        top: 0.55rem;
+        inset-inline-start: 0.55rem;
+        max-width: calc(100% - 1.1rem);
+        padding: 0.25rem 0.65rem;
         border-radius: 999px;
     }
-    .float-glass span { font-size: 10.5px; line-height: 1.25; }
+    .float-glass span { font-size: 0.72rem; line-height: 1.25; }
     .hero-frame > div.absolute.bottom-5 {
-        bottom: 0.8rem;
-        inset-inline: 0.85rem;
-        gap: 0.5rem;
+        bottom: 0.6rem;
+        inset-inline: 0.7rem;
+        gap: 0.4rem;
     }
-    #hero-showcase-title { font-size: 1rem; line-height: 1.25; }
-    #hero-showcase-tag { font-size: 10px; }
-    .hero-thumbs { gap: 0.45rem; margin-top: 0.55rem; }
-    .hero-thumb { height: 2.9rem; border-radius: 0.75rem; }
+    #hero-showcase-title { font-size: 0.95rem; line-height: 1.2; }
+    #hero-showcase-tag { font-size: 0.68rem; }
+    .hero-thumbs { gap: 0.4rem; margin-top: 0.45rem; }
+    .hero-thumb { height: 2.45rem; border-radius: 0.55rem; }
 
-    /* Editorial Copy under Hero Photo */
-    #hero .space-y-5 > * + * { margin-top: 0.85rem; }
+    /* Tight Editorial Column */
+    #hero .space-y-5 > * + * { margin-top: 0.65rem; }
     .hero-badge {
         border-radius: 999px;
-        font-size: 10.5px;
-        line-height: 1.35;
-        padding: 0.35rem 0.75rem;
+        font-size: 0.72rem;
+        line-height: 1.3;
+        padding: 0.28rem 0.65rem;
         max-width: 100%;
     }
     #hero h1 {
-        font-size: 1.85rem;
+        font-size: 1.65rem;
         line-height: 1.18;
         letter-spacing: -0.02em;
     }
-    #hero p { font-size: 0.85rem; line-height: 1.65; }
+    #hero p { font-size: 0.82rem; line-height: 1.5; }
 
-    /* Hero Search Console: 2-Column Compact Grid on Mobile */
+    /* Compact 2-Column Hero Search Console */
     #hero-search-form {
-        padding: 0.7rem;
-        gap: 0.5rem;
-        border-radius: 1.25rem;
+        padding: 0.55rem;
+        gap: 0.45rem;
+        border-radius: 1rem;
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     #hero-search-form > div:last-child {
         grid-column: span 2 / span 2;
     }
-    #hero-search-form select, #hero-search-form button { min-height: 44px; }
+    #hero-search-form select, #hero-search-form button { min-height: 2.6rem; }
 
-    /* Programs Section + Horizontal Scrollable Filter Chips (No messy wrap!) */
+    /* Programs Section: Compact Header + Horizontal Filter Chips */
     #programs, #seo-guide {
-        padding-top: 2.25rem;
-        padding-bottom: 2.25rem;
+        padding-top: 1.75rem;
+        padding-bottom: 1.75rem;
         padding-inline: 0.85rem;
     }
-    #programs h2, #seo-guide h2 { font-size: 1.35rem; line-height: 1.3; }
+    #programs > div:first-child { margin-bottom: 1rem; gap: 0.65rem; }
+    #programs h2, #seo-guide h2 { font-size: 1.28rem; line-height: 1.28; }
     #programs .filter-pills {
         display: flex;
         flex-wrap: nowrap;
@@ -536,50 +541,75 @@ img, svg, canvas, video { max-width: 100%; }
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
         width: 100%;
-        padding: 0.35rem;
-        gap: 0.4rem;
-        border-radius: 0.9rem;
+        padding: 0.28rem;
+        gap: 0.35rem;
+        border-radius: 0.8rem;
     }
     #programs .filter-pills::-webkit-scrollbar { display: none; }
     #programs .filter-pills .cat-filter-btn {
         flex: 0 0 auto;
         white-space: nowrap;
-        padding: 0.45rem 0.85rem;
-        font-size: 11.5px;
+        padding: 0.4rem 0.75rem;
+        font-size: 0.78rem;
     }
     #sort-select, #open-compare-btn {
         flex: 1 1 calc(50% - 0.25rem);
         justify-content: center;
-        min-height: 42px;
-        font-size: 12px;
+        min-height: 2.5rem;
+        font-size: 0.8rem;
     }
 
-    /* Trip Cards: crisp mobile spacing & proportions */
-    #trips-grid { gap: 1rem; }
-    #trips-grid > article { border-radius: 1.25rem; }
-    #trips-grid > article .h-52 { height: 11.75rem; }
-    #trips-grid > article > div:last-child { padding: 1rem; gap: 0.85rem; }
-    #trips-grid > article h3 { font-size: 0.95rem; }
+    /* High-Efficiency Trip Cards (Balanced height so ~2 cards feel snappy & scannable) */
+    #trips-grid { gap: 0.85rem; }
+    #trips-grid > article { border-radius: 1.1rem; }
+    #trips-grid > article .h-52 { height: 9.8rem; }
+    #trips-grid > article > div:last-child { padding: 0.85rem; gap: 0.65rem; }
+    #trips-grid > article h3 { font-size: 0.94rem; margin-bottom: 0.3rem; }
+    #trips-grid > article p {
+        font-size: 0.78rem;
+        line-height: 1.45;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    #trips-grid > article button[onclick*="openBookingWithTrip"] {
+        padding-block: 0.6rem;
+        border-radius: 0.75rem;
+    }
 
-    /* Why Us Stats Grid */
-    .why-us { padding-block: 2.25rem; }
+    /* Why Us: Dense 2x2 Stats + Compact Feature Rows */
+    .why-us { padding-block: 1.75rem; }
     .why-us > div { padding-inline: 0.85rem; }
-    .why-us .grid { gap: 0.65rem; }
-    .why-us .glow-card { padding: 0.95rem; border-radius: 1rem; }
-    .why-us .counter { font-size: 1.65rem; }
+    .why-us .mb-10 { margin-bottom: 1rem; }
+    .why-us .grid { gap: 0.6rem; }
+    .why-us .glow-card { padding: 0.85rem; border-radius: 0.95rem; }
+    .why-us .counter { font-size: 1.55rem; }
+    .why-us .md\:grid-cols-3 .glow-card {
+        display: grid;
+        grid-template-columns: 2rem minmax(0, 1fr);
+        column-gap: 0.75rem;
+        align-items: start;
+        text-align: start;
+    }
+    .why-us .md\:grid-cols-3 .glow-card svg {
+        grid-row: span 2;
+        margin-bottom: 0;
+        margin-top: 0.15rem;
+    }
 
-    /* Hub Tabs + Price Table -> Clean Stacked Cards */
+    /* Hub Tabs + Price Table -> Clean Compact Cards */
     .hub-tabs { width: 100%; }
-    .hub-tabs button { flex: 1 1 0; min-height: 42px; }
-    #hub-panel-prices { padding: 0.9rem; border-radius: 1.25rem; }
+    .hub-tabs button { flex: 1 1 0; min-height: 2.5rem; }
+    #hub-panel-prices { padding: 0.85rem; border-radius: 1.1rem; }
     #hub-panel-prices > div { border: 0; overflow: visible; }
     #hub-panel-prices table, #hub-panel-prices tbody { display: block; width: 100%; }
     #hub-panel-prices thead { display: none; }
     #hub-panel-prices tbody tr {
         display: block;
-        padding: 0.9rem;
-        margin-bottom: 0.75rem;
-        border-radius: 1rem;
+        padding: 0.8rem;
+        margin-bottom: 0.65rem;
+        border-radius: 0.9rem;
         background: rgba(var(--gold), 0.04);
         border: 1px solid rgba(var(--gold), 0.25);
     }
@@ -588,15 +618,15 @@ img, svg, canvas, video { max-width: 100%; }
         justify-content: space-between;
         align-items: baseline;
         gap: 0.75rem;
-        padding: 0.28rem 0 !important;
+        padding: 0.22rem 0 !important;
         text-align: end;
-        font-size: 12px;
+        font-size: 0.8rem;
     }
     #hub-panel-prices tbody td::before {
         content: attr(data-label);
         font-weight: 700;
         opacity: 0.65;
-        font-size: 11px;
+        font-size: 0.72rem;
         text-align: start;
         flex-shrink: 0;
     }
@@ -604,49 +634,46 @@ img, svg, canvas, video { max-width: 100%; }
         display: block;
         text-align: start;
         font-size: 0.88rem;
-        line-height: 1.45;
-        padding-bottom: 0.5rem !important;
-        margin-bottom: 0.35rem;
+        line-height: 1.4;
+        padding-bottom: 0.45rem !important;
+        margin-bottom: 0.3rem;
         border-bottom: 1px solid rgba(var(--gold), 0.16);
     }
     #hub-panel-prices tbody td:first-child::before { display: none; }
     #hub-panel-prices tbody td:last-child {
         display: block;
-        padding-top: 0.65rem !important;
+        padding-top: 0.55rem !important;
     }
     #hub-panel-prices tbody td:last-child::before { display: none; }
     #hub-panel-prices tbody td:last-child button {
         width: 100%;
-        padding: 0.65rem;
-        min-height: 42px;
-        border-radius: 0.75rem;
+        padding: 0.55rem;
+        min-height: 2.5rem;
+        border-radius: 0.7rem;
     }
 
     /* Footer compact on mobile */
-    footer { padding-block: 2rem; text-align: center; }
-    footer > div > div:first-child { flex-direction: column; gap: 0.5rem; }
+    footer { padding-block: 1.5rem; text-align: center; }
+    footer > div > div:first-child { flex-direction: column; gap: 0.45rem; }
 
     /* Booking & Compare Modals -> Native Bottom Sheet */
     #booking-modal, #compare-modal { padding: 0; align-items: flex-end; }
     #booking-modal > div, #compare-modal > div {
         max-width: 100%;
-        max-height: 92vh;
-        border-radius: 1.4rem 1.4rem 0 0;
+        max-height: 90dvh;
+        border-radius: 1.35rem 1.35rem 0 0;
     }
-    @supports (height: 100dvh) {
-        #booking-modal > div, #compare-modal > div { max-height: 92dvh; }
-    }
-    #booking-modal > div > div:first-child { padding: 0.9rem 1rem; }
+    #booking-modal > div > div:first-child { padding: 0.8rem 0.95rem; }
     #booking-modal h3 { font-size: 0.98rem; }
-    #booking-progress-bars { padding-inline: 1rem; gap: 0.3rem; }
-    #booking-body { padding: 0.95rem 1rem; }
+    #booking-progress-bars { padding-inline: 0.95rem; gap: 0.3rem; }
+    #booking-body { padding: 0.85rem 0.95rem; }
     #booking-modal > div > div:last-child {
-        padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+        padding: 0.7rem 0.95rem calc(0.7rem + env(safe-area-inset-bottom, 0px));
         flex-wrap: wrap;
-        gap: 0.5rem;
+        gap: 0.45rem;
     }
     #booking-modal > div > div:last-child > div:last-child { flex: 1 1 100%; }
-    #booking-prev-btn, #booking-next-btn { flex: 1; padding: 0.7rem 1rem; min-height: 44px; border-radius: 0.75rem; }
+    #booking-prev-btn, #booking-next-btn { flex: 1; padding: 0.65rem 0.9rem; min-height: 2.75rem; border-radius: 0.75rem; }
     #booking-prev-btn:not(.hidden) { flex: 0 0 36%; }
     #booking-body div.flex.justify-between.gap-3,
     #booking-body div.flex.justify-between.gap-2 { flex-wrap: wrap; }
@@ -655,30 +682,41 @@ img, svg, canvas, video { max-width: 100%; }
         text-align: end;
         overflow-wrap: anywhere;
     }
-    #compare-body { padding: 0.75rem; }
-    #compare-body table { min-width: 480px; }
+    #compare-body { padding: 0.7rem; }
+    #compare-body table { min-width: 30rem; }
 
     /* Prevent iOS Safari auto-zoom on input focus */
     #booking-modal input, #booking-modal select, #ai-input,
     #hero-search-form select { font-size: 16px; }
 
-    /* AI Assistant Dock: hide floating FAB on phones since Bottom App Bar has MOSA AI button */
+    /* MOSA AI Assistant -> Dedicated Mobile Bottom Sheet (Full Width, Safe Area, Backdrop) */
     #ai-fab { display: none; }
     #ai-dock {
-        inset-inline: 0.65rem;
-        bottom: calc(4.6rem + env(safe-area-inset-bottom, 0px));
+        inset-inline: 0;
+        bottom: 0;
         align-items: stretch;
+        gap: 0;
     }
-    #ai-chat-panel { width: 100%; max-height: 70dvh; border-radius: 1.25rem; }
+    #ai-chat-panel {
+        width: 100%;
+        max-width: 100%;
+        height: 78dvh;
+        max-height: 78dvh;
+        border-radius: 1.35rem 1.35rem 0 0;
+        border-bottom: 0;
+        border-inline: 0;
+        transform-origin: bottom center !important;
+    }
+    #ai-form {
+        padding-bottom: calc(0.65rem + env(safe-area-inset-bottom, 0px));
+    }
 }
 
-/* ---------- Ultra-Small Phones (320px - 379px) ---------- */
-@media (max-width: 379px) {
-    #main-navbar img { height: 2rem; }
-    #hero h1 { font-size: 1.62rem; }
-    .hero-badge { font-size: 10px; padding: 0.3rem 0.6rem; }
-    #hero-showcase-title { font-size: 0.88rem; }
-    .hero-thumb { height: 2.65rem; }
-    #trips-grid > article .h-52 { height: 10.5rem; }
-    #mobile-bottom-bar a, #mobile-bottom-bar button { font-size: 9.5px; }
+/* ---------- Ultra-Small Phones (320px - 359px) ---------- */
+@media (max-width: 359px) {
+    #main-navbar img { height: 1.95rem; }
+    #hero h1 { font-size: 1.5rem; }
+    .hero-frame { max-height: 11.5rem; }
+    .hero-thumb { height: 2.15rem; }
+    #trips-grid > article .h-52 { height: 8.8rem; }
 }

@@ -263,10 +263,11 @@ window.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Close modals on Escape key or backdrop click
+    // Close modals & AI sheet on Escape key or backdrop click
     window.addEventListener("keydown", e => {
         if (e.key === "Escape") {
             closeBookingModal();
+            toggleAiWidget(false);
             document.getElementById("compare-modal")?.classList.add("hidden");
         }
     });

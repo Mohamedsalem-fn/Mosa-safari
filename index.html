@@ -680,28 +680,38 @@
         </div>
     </footer>
 
-    <!-- FLOATING MOSA AI ASSISTANT -->
-    <div id="ai-dock" class="fixed bottom-5 end-5 z-50 flex flex-col items-end gap-3">
+    <!-- FLOATING MOSA AI ASSISTANT (Desktop Floating Panel / Mobile Bottom Sheet) -->
+    <div id="ai-backdrop" onclick="toggleAiWidget(false)"
+        class="hidden fixed inset-0 z-[55] bg-carbon-950/60 backdrop-blur-xs sm:hidden transition-opacity"></div>
+
+    <div id="ai-dock" class="fixed bottom-5 end-5 z-[60] flex flex-col items-end gap-3 pointer-events-none">
         <div id="ai-chat-panel"
-            class="hidden w-[92vw] sm:w-96 max-h-[75vh] flex flex-col rounded-2xl bg-white dark:bg-carbon-800 border border-carbon-900/15 dark:border-white/15 shadow-2xl overflow-hidden">
-            <div class="p-4 bg-carbon-950 text-white flex items-center justify-between border-b border-white/10">
-                <div class="flex items-center gap-2.5">
-                    <img src="assets/images/logo-icon.svg" alt="MOSA AI" class="w-8 h-8 rounded-lg shadow-sm">
-                    <div>
-                        <div class="text-sm font-black" data-i18n="ai_title">MOSA AI · مساعد موسى</div>
-                        <div class="text-[10px] text-champagne">24/7 · AR / EN / IT / RU</div>
+            class="hidden pointer-events-auto w-[92vw] sm:w-[24rem] max-h-[78dvh] flex flex-col rounded-2xl bg-white dark:bg-carbon-800 border border-carbon-900/15 dark:border-white/15 shadow-2xl overflow-hidden">
+            <!-- Mobile Sheet Grab Handle -->
+            <div class="sm:hidden pt-2 pb-1 bg-carbon-950 flex justify-center">
+                <span class="w-10 h-1 rounded-full bg-white/25"></span>
+            </div>
+            <div class="px-4 py-3 bg-carbon-950 text-white flex items-center justify-between border-b border-white/10">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="relative shrink-0">
+                        <img src="assets/images/logo-icon.svg" alt="MOSA AI" class="w-8 h-8 rounded-lg shadow-sm">
+                        <span class="absolute -bottom-0.5 -end-0.5 w-2.5 h-2.5 rounded-full bg-sea ring-2 ring-carbon-950"></span>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="text-sm font-black truncate" data-i18n="ai_title">MOSA AI · مساعد موسى</div>
+                        <div class="text-[10px] text-champagne font-bold">24/7 · AR / EN / IT / RU</div>
                     </div>
                 </div>
-                <div class="flex items-center gap-1.5">
+                <div class="flex items-center gap-1.5 shrink-0">
                     <select id="ai-lang-select" aria-label="AI Language"
-                        class="bg-white/10 text-white text-[11px] font-bold px-2 py-1 rounded-md focus:outline-none">
+                        class="bg-white/10 text-white text-[11px] font-bold px-2 py-1.5 rounded-lg focus:outline-none cursor-pointer">
                         <option value="ar" class="text-carbon-950">العربية</option>
                         <option value="en" class="text-carbon-950">English</option>
                         <option value="it" class="text-carbon-950">Italiano</option>
                         <option value="ru" class="text-carbon-950">Русский</option>
                     </select>
                     <button id="ai-close-btn" type="button" aria-label="Close AI"
-                        class="p-1 rounded-md hover:bg-white/15"><svg xmlns="http://www.w3.org/2000/svg" width="24"
+                        class="p-1.5 rounded-lg hover:bg-white/15 transition"><svg xmlns="http://www.w3.org/2000/svg" width="24"
                             height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
                             <path d="M18 6 6 18"></path>
@@ -711,27 +721,25 @@
             </div>
 
             <div id="ai-messages"
-                class="flex-1 p-4 space-y-3 overflow-y-auto text-xs sm:text-sm bg-[#F6F3EC] dark:bg-carbon-950 min-h-[240px]">
+                class="flex-1 p-3.5 space-y-2.5 overflow-y-auto text-xs sm:text-sm bg-[#F6F3EC] dark:bg-carbon-950 min-h-[14rem]">
             </div>
 
-            <div class="px-3 py-2 border-t border-carbon-900/10 dark:border-white/10 flex flex-wrap gap-1.5">
+            <!-- Horizontal Scrollable Quick Prompt Chips -->
+            <div class="ai-chips-strip px-3 py-2 border-t border-carbon-900/10 dark:border-white/10 flex items-center gap-1.5 overflow-x-auto bg-white/80 dark:bg-carbon-900/60">
                 <button type="button" data-i18n="ai_chip_1"
-                    class="ai-chip px-2.5 py-1 rounded-md bg-champagne/15 text-champagne-dark dark:text-champagne text-[11px] font-bold">أفضل
-                    سفاري في شرم الشيخ؟</button>
+                    class="ai-chip shrink-0 whitespace-nowrap px-2.5 py-1.5 rounded-lg bg-champagne/15 text-champagne-dark dark:text-champagne text-[11px] font-extrabold hover:bg-champagne/25 transition">أفضل سفاري في شرم الشيخ؟</button>
                 <button type="button" data-i18n="ai_chip_2"
-                    class="ai-chip px-2.5 py-1 rounded-md bg-sea/15 text-sea-dark dark:text-sea text-[11px] font-bold">خطط
-                    لي يوم سفاري عائلي</button>
+                    class="ai-chip shrink-0 whitespace-nowrap px-2.5 py-1.5 rounded-lg bg-sea/15 text-sea-dark dark:text-sea text-[11px] font-extrabold hover:bg-sea/25 transition">خطط لي يوم سفاري عائلي</button>
                 <button type="button" data-i18n="ai_chip_3"
-                    class="ai-chip px-2.5 py-1 rounded-md bg-copper/15 text-copper text-[11px] font-bold">تفاصيل الدفع
-                    عند الوصول</button>
+                    class="ai-chip shrink-0 whitespace-nowrap px-2.5 py-1.5 rounded-lg bg-copper/15 text-copper text-[11px] font-extrabold hover:bg-copper/25 transition">تفاصيل الدفع عند الوصول</button>
             </div>
 
-            <form id="ai-form" class="p-3 border-t border-carbon-900/10 dark:border-white/10 flex items-center gap-2">
+            <form id="ai-form" class="p-2.5 border-t border-carbon-900/10 dark:border-white/10 flex items-center gap-2 bg-white dark:bg-carbon-800">
                 <input id="ai-input" type="text" data-i18n-placeholder="ai_placeholder"
                     placeholder="اسأل موسى الذكي عن الرحلات والأسعار..."
-                    class="flex-1 px-3 py-2 rounded-lg bg-[#F6F3EC] dark:bg-carbon-900 text-xs sm:text-sm focus:outline-none">
+                    class="flex-1 min-w-0 px-3 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 text-xs sm:text-sm focus:border-champagne focus:outline-none">
                 <button type="submit" aria-label="Send"
-                    class="p-2.5 rounded-lg bg-champagne text-carbon-950 font-black"><svg
+                    class="p-2.5 rounded-xl bg-champagne hover:bg-champagne-light text-carbon-950 font-black shrink-0 transition"><svg
                         xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         class="w-4 h-4">
@@ -741,7 +749,7 @@
                         <path d="m21.854 2.147-10.94 10.939"></path>
                     </svg></button>
                 <a href="https://wa.me/201023355550" target="_blank" rel="noopener noreferrer"
-                    title="واتساب الدعم البشري" class="p-2.5 rounded-lg bg-sea text-carbon-950"><svg
+                    title="واتساب الدعم البشري" class="p-2.5 rounded-xl bg-sea text-carbon-950 shrink-0 transition"><svg
                         xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         class="w-4 h-4">
@@ -751,7 +759,7 @@
         </div>
 
         <button id="ai-fab" type="button"
-            class="animate-pulse-halo flex items-center gap-2 px-4 py-3 rounded-full bg-champagne text-carbon-950 font-black text-xs sm:text-sm shadow-2xl hover:scale-105 transition">
+            class="pointer-events-auto animate-pulse-halo flex items-center gap-2 px-4 py-3 rounded-full bg-champagne text-carbon-950 font-black text-xs sm:text-sm shadow-2xl hover:scale-105 transition">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
                 <path
