@@ -49,6 +49,13 @@ import {
     handleAiQuery,
     toggleAiWidget
 } from "./modules/ai-assistant.js";
+import {
+    renderMobileApp,
+    copyMosaPromo,
+    setMobileCategory,
+    setMobileSort,
+    toggleMobileFaq
+} from "./modules/mobile-app.js";
 import { initCinematic } from "./cinematic.js";
 
 // Expose handlers used by inline HTML attributes
@@ -68,6 +75,37 @@ window.applyPromoCode = applyPromoCode;
 window.renderBookingStep = renderBookingStep;
 window.openBookingModal = openBookingModal;
 window.toggleAiWidget = toggleAiWidget;
+window.copyMosaPromo = copyMosaPromo;
+window.setMobileCategory = setMobileCategory;
+window.setMobileSort = setMobileSort;
+window.toggleMobileFaq = toggleMobileFaq;
+
+window.handleMobileLangChange = function (val) {
+    safeSetStorage("mosa_lang", val);
+    const deskSel = document.getElementById("lang-select");
+    if (deskSel) deskSel.value = val;
+    applyLanguage(val, refreshAllCurrencyViews);
+};
+
+window.handleMobileCurrencyChange = async function (nextCurr) {
+    state.currency = nextCurr;
+    safeSetStorage("mosa_currency", nextCurr);
+    const deskCurr = document.getElementById("currency-select");
+    if (deskCurr) deskCurr.value = nextCurr;
+    refreshAllCurrencyViews();
+
+    if (nextCurr === "EGP" || nextCurr === "EUR") {
+        await fetchLiveExchangeRates(true);
+        refreshAllCurrencyViews();
+        showToast(`${I18N[state.lang].toast_rate_live} ${getActiveRateText()}`);
+    }
+};
+
+window.toggleMobileTheme = function () {
+    const isDark = document.documentElement.classList.toggle("dark");
+    safeSetStorage("mosa_theme", isDark ? "dark" : "light");
+    renderMobileApp();
+};
 
 function bindEvent(id, event, handler) {
     const el = document.getElementById(id);
@@ -92,6 +130,7 @@ function updateLiveRateBadge() {
 function refreshAllCurrencyViews() {
     updateLiveRateBadge();
     renderTrips();
+    renderMobileApp();
     const bookingModal = document.getElementById("booking-modal");
     if (bookingModal && !bookingModal.classList.contains("hidden")) {
         renderBookingStep();
@@ -155,10 +194,13 @@ window.addEventListener("DOMContentLoaded", () => {
         refreshAllCurrencyViews();
     });
 
+    document.addEventListener("mosa:trips-rendered", renderMobileApp);
+
     document.querySelectorAll("#theme-toggle, .js-theme-toggle").forEach(btn => {
         btn.addEventListener("click", () => {
             const isDark = document.documentElement.classList.toggle("dark");
             safeSetStorage("mosa_theme", isDark ? "dark" : "light");
+            renderMobileApp();
         });
     });
 

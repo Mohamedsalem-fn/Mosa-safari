@@ -137,6 +137,11 @@
     <div id="toast-container"
         class="fixed top-20 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
+    <!-- DEDICATED LUXURY MOBILE APP SHELL (Phones < 640px Only) -->
+    <div id="mobile-app-shell" class="sm:hidden min-h-screen pb-24"></div>
+
+    <!-- DESKTOP SHELL (>= 640px) -->
+    <div id="desktop-shell" class="hidden sm:block">
     <!-- ARCHITECTURAL TOP HEADER -->
     <header id="main-navbar"
         class="glass-nav sticky top-0 z-50 bg-[#F6F3EC]/70 dark:bg-carbon-950/60 backdrop-blur-xl border border-carbon-900/10 dark:border-white/10">
@@ -679,10 +684,11 @@
             </div>
         </div>
     </footer>
+    </div><!-- /#desktop-shell -->
 
     <!-- FLOATING MOSA AI ASSISTANT (Desktop Floating Panel / Mobile Bottom Sheet) -->
     <div id="ai-backdrop" onclick="toggleAiWidget(false)"
-        class="hidden fixed inset-0 z-[55] bg-carbon-950/60 backdrop-blur-xs sm:hidden transition-opacity"></div>
+        class="hidden fixed inset-0 z-[55] bg-carbon-950/60 backdrop-blur-sm sm:hidden transition-opacity"></div>
 
     <div id="ai-dock" class="fixed bottom-5 end-5 z-[60] flex flex-col items-end gap-3 pointer-events-none">
         <div id="ai-chat-panel"
@@ -829,32 +835,6 @@
             <div id="compare-body" class="p-5 overflow-auto"></div>
         </div>
     </div>
-
-    <!-- MOBILE STICKY BOTTOM APP BAR (Phones Only < 640px) -->
-    <nav id="mobile-bottom-bar" aria-label="التنقل السريع للهاتف"
-        class="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-[#F6F3EC] dark:bg-carbon-950 border-t border-carbon-900/15 dark:border-white/15 px-2.5 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] shadow-[0_-12px_32px_-12px_rgba(0,0,0,0.22)]">
-        <div class="grid grid-cols-4 items-center gap-1.5 max-w-md mx-auto">
-            <a href="#programs"
-                class="flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl text-[10px] font-extrabold text-carbon-900/80 dark:text-[#D5CEC3] active:scale-95 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-champagne-dark dark:text-champagne" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-                <span data-i18n="nav_programs">الرحلات</span>
-            </a>
-            <button type="button" onclick="toggleAiWidget()"
-                class="flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl text-[10px] font-extrabold text-carbon-900/80 dark:text-[#D5CEC3] active:scale-95 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-copper" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
-                <span>MOSA AI</span>
-            </button>
-            <a href="https://wa.me/201023355550" target="_blank" rel="noopener noreferrer"
-                class="flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl text-[10px] font-extrabold text-sea-dark dark:text-sea active:scale-95 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
-                <span>WhatsApp</span>
-            </a>
-            <button type="button" onclick="openBookingModal()"
-                class="flex items-center justify-center gap-1 py-2.5 px-2 rounded-xl bg-champagne text-carbon-950 text-[11px] font-black shadow-md shadow-champagne/30 active:scale-95 transition">
-                <span data-i18n="book_now">احجز الآن</span>
-            </button>
-        </div>
-    </nav>
 
     <script type="module" src="assets/js/main.js"></script>
 </body>

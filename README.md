@@ -45,8 +45,9 @@ Mosa-safari/
             ├── ui.js                 # Particles canvas, scroll reveal, counters, toasts, language switching
             ├── trips.js              # Dynamic trip grid, category filtering, live price table & comparison
             ├── booking.js            # Upgraded 5-step booking UI, Pay on Arrival + Visa placeholder gateway
-            ├── notifications.js      # Green API WhatsApp owner/customer alerts & customer email dispatch
-            └── ai-assistant.js       # MOSA AI floating concierge widget & quick prompts
+            ├── notifications.js      # Green API WhatsApp owner alerts & Resend customer email dispatch
+            ├── mobile-app.js         # Dedicated luxury native-app mobile shell (< 640px)
+            └── ai-assistant.js       # MOSA AI floating concierge widget & mobile bottom sheet
 ```
 
 ---
