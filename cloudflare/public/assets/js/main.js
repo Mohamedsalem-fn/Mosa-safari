@@ -35,6 +35,7 @@ import {
     closeBookingModal,
     toggleBookingTrip,
     adjustGuests,
+    selectTripTime,
     selectPaymentMethod,
     formatCardNumberInput,
     formatCardExpiryInput,
@@ -68,6 +69,7 @@ window.toggleCompare = toggleCompare;
 window.openBookingWithTrip = openBookingWithTrip;
 window.toggleBookingTrip = toggleBookingTrip;
 window.adjustGuests = adjustGuests;
+window.selectTripTime = selectTripTime;
 window.selectPaymentMethod = selectPaymentMethod;
 window.formatCardNumberInput = formatCardNumberInput;
 window.formatCardExpiryInput = formatCardExpiryInput;

@@ -37,7 +37,11 @@ export const UI_EXTRAs = {
         conf_title: "تم تأكيد حجزك بنجاح!",
         conf_email_ok: "✓ تم إرسال تفاصيل وتأكيد الحجز إلى بريدك الإلكتروني",
         conf_new_btn: "حجز جديد / إغلاق",
-        err_invalid_email: "يرجى إدخال بريد إلكتروني صحيح لإرسال رسالة التأكيد"
+        err_invalid_email: "يرجى إدخال بريد إلكتروني صحيح لإرسال رسالة التأكيد",
+        time_slot_label: "ميعاد الرحلة",
+        time_morning: "صباحاً (الفترة الصباحية)",
+        time_evening: "مساءً (الغروب / الفترة المسائية)",
+        sum_time: "الميعاد:"
     },
     en: {
         step_pills: ["1. Tours", "2. Traveler", "3. Guests", "4. Hotel & Payment", "5. Review"],
@@ -62,7 +66,11 @@ export const UI_EXTRAs = {
         conf_title: "Booking Confirmed Successfully!",
         conf_email_ok: "✓ Booking confirmation sent to your email",
         conf_new_btn: "Done / Close",
-        err_invalid_email: "Please enter a valid email address to receive your confirmation"
+        err_invalid_email: "Please enter a valid email address to receive your confirmation",
+        time_slot_label: "Tour Time Slot",
+        time_morning: "Morning (AM)",
+        time_evening: "Evening (Sunset / PM)",
+        sum_time: "Time Slot:"
     },
     it: {
         step_pills: ["1. Tour", "2. Viaggiatore", "3. Ospiti", "4. Hotel & Pagamento", "5. Conferma"],
@@ -87,7 +95,11 @@ export const UI_EXTRAs = {
         conf_title: "Prenotazione Confermata!",
         conf_email_ok: "✓ Conferma inviata alla tua email",
         conf_new_btn: "Chiudi",
-        err_invalid_email: "Inserisci un indirizzo email valido per ricevere la conferma"
+        err_invalid_email: "Inserisci un indirizzo email valido per ricevere la conferma",
+        time_slot_label: "Orario del Tour",
+        time_morning: "Mattina (AM)",
+        time_evening: "Sera (Tramonto / PM)",
+        sum_time: "Orario:"
     },
     ru: {
         step_pills: ["1. Туры", "2. Турист", "3. Гости", "4. Отель и Оплата", "5. Подтверждение"],
@@ -112,7 +124,11 @@ export const UI_EXTRAs = {
         conf_title: "Бронирование успешно подтверждено!",
         conf_email_ok: "✓ Подтверждение отправлено на ваш email",
         conf_new_btn: "Закрыть",
-        err_invalid_email: "Пожалуйста, введите корректный email для получения подтверждения"
+        err_invalid_email: "Пожалуйста, введите корректный email для получения подтверждения",
+        time_slot_label: "Время тура",
+        time_morning: "Утром (AM)",
+        time_evening: "Вечером (Закат / PM)",
+        sum_time: "Время:"
     }
 };
 
@@ -163,6 +179,12 @@ export function adjustGuests(field, delta) {
     } else if (field === "children") {
         state.booking.children = Math.max(0, Math.min(20, state.booking.children + delta));
     }
+    renderBookingStep();
+}
+
+export function selectTripTime(slot) {
+    saveCurrentStepInputs();
+    state.booking.tripTime = slot;
     renderBookingStep();
 }
 
@@ -260,6 +282,8 @@ export async function submitBookingOrder() {
         vehicleDisplay,
         pickupHotel: b.pickupHotel || "Sharm El Sheikh",
         tripDate: b.tripDate || today,
+        tripTime: b.tripTime || "morning",
+        tripTimeDisplay: b.tripTime === "evening" ? u.time_evening : u.time_morning,
         paymentMethod: b.paymentMethod,
         cardMask: last4 ? `**** ${last4}` : "Visa Placeholder",
         promoCode: b.promoCode,
@@ -354,6 +378,10 @@ export function renderBookingStep() {
                 <div class="flex justify-between gap-2">
                     <span class="opacity-70">${t.sum_hotel}</span>
                     <span class="font-bold">${c.pickupHotel} (${c.tripDate})</span>
+                </div>
+                <div class="flex justify-between gap-2">
+                    <span class="opacity-70">${u.sum_time}</span>
+                    <span class="font-bold">${c.tripTimeDisplay}</span>
                 </div>
                 <div class="flex justify-between gap-2">
                     <span class="opacity-70">${t.sum_payment}</span>
@@ -475,6 +503,20 @@ export function renderBookingStep() {
             </div>
 
             <div>
+                <label class="block text-xs font-extrabold mb-2">${u.time_slot_label}</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <button type="button" onclick="selectTripTime('morning')" class="p-3 rounded-xl border-2 text-start transition-all flex items-center gap-2.5 ${b.tripTime !== 'evening' ? 'border-champagne bg-champagne/15 shadow-sm' : 'border-carbon-900/10 dark:border-white/10 hover:border-champagne/40'}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-champagne-dark dark:text-champagne shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+                        <span class="text-xs sm:text-sm font-black leading-snug">${u.time_morning}</span>
+                    </button>
+                    <button type="button" onclick="selectTripTime('evening')" class="p-3 rounded-xl border-2 text-start transition-all flex items-center gap-2.5 ${b.tripTime === 'evening' ? 'border-champagne bg-champagne/15 shadow-sm' : 'border-carbon-900/10 dark:border-white/10 hover:border-champagne/40'}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-copper shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                        <span class="text-xs sm:text-sm font-black leading-snug">${u.time_evening}</span>
+                    </button>
+                </div>
+            </div>
+
+            <div>
                 <label class="block text-xs font-extrabold mb-2">${u.pay_section_title}</label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <!-- Option 1: Pay on Arrival -->
@@ -568,6 +610,10 @@ export function renderBookingStep() {
                 <div class="flex justify-between gap-3">
                     <span class="opacity-70 font-bold">${t.sum_hotel}</span>
                     <span class="font-bold">${b.pickupHotel || "Sharm El Sheikh"} ${b.tripDate ? `(${b.tripDate})` : ""}</span>
+                </div>
+                <div class="flex justify-between gap-3">
+                    <span class="opacity-70 font-bold">${u.sum_time}</span>
+                    <span class="font-bold">${b.tripTime === "evening" ? u.time_evening : u.time_morning}</span>
                 </div>
                 <div class="flex justify-between gap-3 pt-2 border-t border-carbon-900/10 dark:border-white/10">
                     <span class="opacity-70 font-bold">${t.sum_payment}</span>

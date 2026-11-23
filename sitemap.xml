@@ -1,9 +1,90 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://mosasafari.com/</loc>
-    <lastmod>2026-11-22</lastmod>
+    <lastmod>2026-11-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mosasafari.com/?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="ar-EG" href="https://mosasafari.com/?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://mosasafari.com/?lang=en" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://mosasafari.com/?lang=it" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mosasafari.com/?lang=ru" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mosasafari.com/" />
+    <image:image>
+      <image:loc>https://mosasafari.com/assets/images/hero-atv-sunset.jpg</image:loc>
+      <image:title>Mosa Safari Sharm El Sheikh — Sunrise &amp; Sunset ATV Quad Echo Mountains</image:title>
+      <image:caption>رحلات سفاري البيتش باجي شروق وغروب الشمس في جبال الصدى بشرم الشيخ — أسعار تبدأ من $10.13</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://mosasafari.com/assets/images/safari-night-stars.jpg</image:loc>
+      <image:title>Sharm El Sheikh 5-in-1 Night ATV Safari &amp; Stargazing Bedouin Dinner</image:title>
+      <image:caption>سفاري شرم الشيخ الليلية 5 في 1 ومراقبة النجوم بالتلسكوب والعشاء البدوي</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://mosasafari.com/assets/images/safari-nabq-buggy.jpg</image:loc>
+      <image:title>Double Thrill ATV Quad &amp; Dune Buggy + Nabq Protected Area Safari</image:title>
+      <image:caption>الإثارة المزدوجة بيتش باجي وباجي صحراوي وسفاري محمية نبق الطبيعية</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://mosasafari.com/assets/images/safari-canyon-dahab.jpg</image:loc>
+      <image:title>Colored Canyon, Blue Hole &amp; Dahab 4x4 Expedition + Nabq Seafood Dusk</image:title>
+      <image:caption>رحلة الوادي الملون والبلو هول ودهب وعشاء المأكولات البحرية في محمية نبق</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://mosasafari.com/assets/images/logo.jpg</image:loc>
+      <image:title>Mosa Safari Official Logo — موسى سفاري شرم الشيخ</image:title>
+      <image:caption>الشعار الرسمي لمنصة موسى سفاري شرم الشيخ</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://mosasafari.com/?lang=ar</loc>
+    <lastmod>2026-11-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mosasafari.com/?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="ar-EG" href="https://mosasafari.com/?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://mosasafari.com/?lang=en" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://mosasafari.com/?lang=it" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mosasafari.com/?lang=ru" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mosasafari.com/" />
+  </url>
+  <url>
+    <loc>https://mosasafari.com/?lang=en</loc>
+    <lastmod>2026-11-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mosasafari.com/?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="ar-EG" href="https://mosasafari.com/?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://mosasafari.com/?lang=en" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://mosasafari.com/?lang=it" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mosasafari.com/?lang=ru" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mosasafari.com/" />
+  </url>
+  <url>
+    <loc>https://mosasafari.com/?lang=it</loc>
+    <lastmod>2026-11-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mosasafari.com/?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="ar-EG" href="https://mosasafari.com/?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://mosasafari.com/?lang=en" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://mosasafari.com/?lang=it" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mosasafari.com/?lang=ru" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mosasafari.com/" />
+  </url>
+  <url>
+    <loc>https://mosasafari.com/?lang=ru</loc>
+    <lastmod>2026-11-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://mosasafari.com/?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="ar-EG" href="https://mosasafari.com/?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://mosasafari.com/?lang=en" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://mosasafari.com/?lang=it" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://mosasafari.com/?lang=ru" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mosasafari.com/" />
   </url>
 </urlset>

@@ -58,6 +58,7 @@ export function buildOwnerWhatsAppMessage(payload) {
         "━━━━━━━━━━━━━━━━━━━━",
         `🔖 *رقم الحجز:* ${payload.ref}`,
         `📅 *تاريخ الرحلة:* ${payload.tripDate || "غير محدد"}`,
+        `🕒 *ميعاد الرحلة:* ${payload.tripTimeDisplay || (payload.tripTime === "evening" ? "مساءً" : "صباحاً")}`,
         `🏜️ *البرامج المختارة:* ${payload.selectedTours}`,
         `🚐 *نوع المركبة:* ${payload.vehicleDisplay}`,
         `👥 *عدد الضيوف:* ${payload.adults} بالغين · ${payload.children} أطفال`,
@@ -103,6 +104,7 @@ export function buildCustomerConfirmationContent(payload) {
             `• رقم المرجع: ${payload.ref}`,
             `• البرامج: ${payload.selectedTours}`,
             `• التاريخ: ${payload.tripDate}`,
+            `• الميعاد: ${payload.tripTimeDisplay || (payload.tripTime === "evening" ? "مساءً" : "صباحاً")}`,
             `• الضيوف: ${payload.adults} بالغين، ${payload.children} أطفال`,
             `• المركبة: ${payload.vehicleDisplay}`,
             `• فندق الاستلام: ${payload.pickupHotel || "شرم الشيخ"}`,
@@ -120,6 +122,7 @@ export function buildCustomerConfirmationContent(payload) {
             `• Reference ID: ${payload.ref}`,
             `• Safari Programs: ${payload.selectedTours}`,
             `• Tour Date: ${payload.tripDate}`,
+            `• Time Slot: ${payload.tripTimeDisplay || (payload.tripTime === "evening" ? "Evening (PM)" : "Morning (AM)")}`,
             `• Guests: ${payload.adults} Adults, ${payload.children} Children`,
             `• Vehicle: ${payload.vehicleDisplay}`,
             `• Pickup Hotel: ${payload.pickupHotel || "Sharm El Sheikh"}`,
@@ -143,6 +146,7 @@ export function buildCustomerConfirmationContent(payload) {
         <div style="background: #161922; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; margin: 16px 0;">
           <p style="margin: 6px 0;"><strong>${isAr ? "البرامج:" : "Programs:"}</strong> ${payload.selectedTours}</p>
           <p style="margin: 6px 0;"><strong>${isAr ? "تاريخ الرحلة:" : "Tour Date:"}</strong> ${payload.tripDate}</p>
+          <p style="margin: 6px 0;"><strong>${isAr ? "ميعاد الرحلة:" : "Time Slot:"}</strong> ${payload.tripTimeDisplay || (payload.tripTime === "evening" ? (isAr ? "مساءً" : "Evening (PM)") : (isAr ? "صباحاً" : "Morning (AM)"))}</p>
           <p style="margin: 6px 0;"><strong>${isAr ? "عدد الضيوف:" : "Guests:"}</strong> ${payload.adults} ${isAr ? "بالغين" : "Adults"} · ${payload.children} ${isAr ? "أطفال" : "Children"}</p>
           <p style="margin: 6px 0;"><strong>${isAr ? "نوع المركبة:" : "Vehicle:"}</strong> ${payload.vehicleDisplay}</p>
           <p style="margin: 6px 0;"><strong>${isAr ? "فندق الاستلام:" : "Pickup Hotel:"}</strong> ${payload.pickupHotel || "-"}</p>

@@ -218,7 +218,27 @@ export function applyLanguage(lang, onLanguageApplied) {
     state.lang = lang;
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
-    if (I18N[lang].doc_title) document.title = I18N[lang].doc_title;
+
+    const L = I18N[lang];
+    if (L.doc_title) document.title = L.doc_title;
+
+    const setMeta = (selector, value) => {
+        if (!value) return;
+        const el = document.querySelector(selector);
+        if (el) el.setAttribute("content", value);
+    };
+    setMeta('meta[name="description"]', L.meta_desc);
+    setMeta('meta[property="og:title"]', L.og_title || L.doc_title);
+    setMeta('meta[property="og:description"]', L.og_desc || L.meta_desc);
+    setMeta('meta[property="og:locale"]', L.og_locale);
+    setMeta('meta[name="twitter:title"]', L.og_title || L.doc_title);
+    setMeta('meta[name="twitter:description"]', L.og_desc || L.meta_desc);
+
+    const canonicalEl = document.querySelector('link[rel="canonical"]');
+    if (canonicalEl) {
+        const hasUrlLang = new URLSearchParams(window.location.search).has("lang");
+        canonicalEl.setAttribute("href", hasUrlLang ? `https://mosasafari.com/?lang=${lang}` : "https://mosasafari.com/");
+    }
 
     const sel = document.getElementById("lang-select");
     if (sel) sel.value = lang;
@@ -249,6 +269,16 @@ export function applyLanguage(lang, onLanguageApplied) {
 }
 
 export function detectLanguageByCountry(onLanguageApplied) {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const urlLang = (params.get("lang") || "").toLowerCase().trim();
+        if (urlLang && I18N[urlLang]) {
+            safeSetStorage("mosa_lang", urlLang);
+            applyLanguage(urlLang, onLanguageApplied);
+            return;
+        }
+    } catch { /* fallback to storage */ }
+
     const saved = safeGetStorage("mosa_lang");
     if (saved && I18N[saved]) {
         applyLanguage(saved, onLanguageApplied);

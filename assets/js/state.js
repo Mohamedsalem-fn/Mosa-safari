@@ -39,6 +39,7 @@ export const state = {
         vehicleOpt: "Double ATV Quad",
         pickupHotel: "",
         tripDate: "",
+        tripTime: "morning",
         paymentMethod: "arrival",
         promoCode: "",
         cardHolder: "",

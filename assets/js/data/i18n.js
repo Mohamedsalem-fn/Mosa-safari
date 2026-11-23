@@ -41,7 +41,11 @@ export const BADGE_I18N = {
 
 export const I18N = {
     ar: {
-        doc_title: "موسى سفاري | رحلات سفاري شرم الشيخ الفاخرة 2026 - mosasafari.com",
+        doc_title: "موسى سفاري شرم الشيخ | رحلات سفاري وبيتش باجي ATV تبدأ من $10.13 (تقييم 4.9★) — Mosa Safari 2026",
+        meta_desc: "احجز أفضل 8 رحلات سفاري في شرم الشيخ مع موسى سفاري بأسعار تبدأ من $10.13 وتقييم 4.9★: بيتش باجي ATV، باجي صحراوي، محمية نبق، مراقبة النجوم والعشاء البدوي، الوادي الملون ودهب. مواعيد صباحية ومسائية مع الدفع عند الوصول.",
+        og_title: "موسى سفاري شرم الشيخ | رحلات سفاري وبيتش باجي ATV تبدأ من $10.13 (تقييم 4.9★)",
+        og_desc: "8 برامج سفاري معتمدة في شرم الشيخ تبدأ من $10.13: بيتش باجي، باجي، محمية نبق، مراقبة النجوم، الوادي الملون ودهب مع الدفع عند الوصول.",
+        og_locale: "ar_EG",
         brand_name: "موسى سفاري",
         nav_home: "الرئيسية",
         nav_programs: "برامج السفاري",
@@ -146,7 +150,11 @@ export const I18N = {
         footer_addr: "خليج نعمة، شرم الشيخ، جنوب سيناء · info@mosasafari.com"
     },
     en: {
-        doc_title: "mosasafari | Luxury Sharm El Sheikh Desert Safari 2026 - mosasafari.com",
+        doc_title: "Mosa Safari Sharm El Sheikh | Desert Safari, ATV Quad & Buggy Tours from $10.13 (4.9★) 2026",
+        meta_desc: "Book 8 top-rated desert safari excursions in Sharm El Sheikh from $10.13 (4.9★, 1,240+ reviews): Sunrise & Sunset ATV Quad in Echo Mountains, Dune Buggy, Nabq Reserve, Stargazing & Bedouin Dinner, Colored Canyon & Dahab. Morning & evening slots with free hotel pickup & Pay on Arrival.",
+        og_title: "Mosa Safari Sharm El Sheikh | ATV Quad & Desert Safari Tours from $10.13 (4.9★)",
+        og_desc: "Explore 8 certified Sharm El Sheikh desert safaris from $10.13 with morning/evening departures, free hotel transfers, and zero-deposit Pay on Arrival.",
+        og_locale: "en_US",
         brand_name: "mosasafari",
         nav_home: "Home",
         nav_programs: "Safari Tours",
@@ -251,7 +259,11 @@ export const I18N = {
         footer_addr: "Naama Bay, Sharm El Sheikh, South Sinai · info@mosasafari.com"
     },
     it: {
-        doc_title: "mosasafari | Safari di Lusso a Sharm El Sheikh 2026 - mosasafari.com",
+        doc_title: "Mosa Safari Sharm El Sheikh | Escursioni Deserto, Quad ATV & Buggy da $10.13 (4.9★) 2026",
+        meta_desc: "Prenota gli 8 migliori tour safari nel deserto di Sharm El Sheikh a partire da $10.13 (voto 4.9★, 1.240+ recensioni): Quad ATV all'alba e tramonto nelle Montagne dell'Eco, Dune Buggy, Riserva di Nabq, Cena Beduina e Stelle, Canyon Colorato e Dahab. Turni mattutini/serali, trasferimento incluso e pagamento all'arrivo.",
+        og_title: "Mosa Safari Sharm El Sheikh | Safari Deserto & Quad ATV da $10.13 (4.9★)",
+        og_desc: "8 programmi safari certificati a Sharm El Sheikh da $10.13: partenze mattina o sera, trasferimento hotel gratuito e pagamento all'arrivo.",
+        og_locale: "it_IT",
         brand_name: "mosasafari",
         nav_home: "Home",
         nav_programs: "Tour Safari",
@@ -356,7 +368,11 @@ export const I18N = {
         footer_addr: "Naama Bay, Sharm El Sheikh, Sinai del Sud · info@mosasafari.com"
     },
     ru: {
-        doc_title: "mosasafari | Роскошное сафари в Шарм-эль-Шейхе 2026 - mosasafari.com",
+        doc_title: "Mosa Safari Шарм-эль-Шейх | Сафари, Квадроциклы ATV и Багги от $10.13 (4.9★) 2026",
+        meta_desc: "Забронируйте 8 лучших сафари-экскурсий в Шарм-эль-Шейхе от $10.13 (рейтинг 4.9★, 1 240+ отзывов): квадроциклы на рассвете и закате в Горах Эхо, багги, заповедник Набк, ужин у бедуинов и звёзды, Цветной каньон и Дахаб. Утренние и вечерние туры, бесплатный трансфер из отеля, оплата при получении.",
+        og_title: "Mosa Safari Шарм-эль-Шейх | Сафари-туры и квадроциклы от $10.13 (4.9★)",
+        og_desc: "8 проверенных сафари-программ в Шарм-эль-Шейхе от $10.13: утренние и вечерние выезды, трансфер из отеля и оплата без предоплаты.",
+        og_locale: "ru_RU",
         brand_name: "mosasafari",
         nav_home: "Главная",
         nav_programs: "Сафари-туры",
