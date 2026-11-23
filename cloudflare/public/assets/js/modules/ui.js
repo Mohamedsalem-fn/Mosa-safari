@@ -222,6 +222,8 @@ export function applyLanguage(lang, onLanguageApplied) {
 
     const sel = document.getElementById("lang-select");
     if (sel) sel.value = lang;
+    const mobSel = document.getElementById("mobile-lang-select");
+    if (mobSel) mobSel.value = lang;
     const aiSel = document.getElementById("ai-lang-select");
     if (aiSel) aiSel.value = lang;
 

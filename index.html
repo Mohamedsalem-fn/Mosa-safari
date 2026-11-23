@@ -159,9 +159,9 @@
             </nav>
 
             <!-- Right Controls -->
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5 sm:gap-2">
                 <button id="theme-toggle" type="button" aria-label="تبديل المظهر"
-                    class="magnetic max-[359px]:hidden p-2 rounded-lg border border-carbon-900/15 dark:border-white/15 hover:border-champagne transition">
+                    class="magnetic hidden sm:inline-flex p-2 rounded-lg border border-carbon-900/15 dark:border-white/15 hover:border-champagne transition">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         class="w-4 h-4 hidden dark:block text-champagne">
@@ -182,14 +182,14 @@
                     </svg>
                 </button>
                 <select id="lang-select" aria-label="Language"
-                    class="magnetic px-2 sm:px-2.5 py-1.5 rounded-lg bg-transparent border border-carbon-900/15 dark:border-white/15 text-xs font-extrabold focus:outline-none cursor-pointer">
+                    class="magnetic hidden sm:inline-block px-2.5 py-1.5 rounded-lg bg-transparent border border-carbon-900/15 dark:border-white/15 text-xs font-extrabold focus:outline-none cursor-pointer">
                     <option value="ar" class="text-carbon-950">AR</option>
                     <option value="en" class="text-carbon-950">EN</option>
                     <option value="it" class="text-carbon-950">IT</option>
                     <option value="ru" class="text-carbon-950">RU</option>
                 </select>
                 <select id="currency-select" aria-label="العملة"
-                    class="magnetic px-2 sm:px-2.5 py-1.5 rounded-lg bg-transparent border border-carbon-900/15 dark:border-white/15 text-xs font-bold focus:outline-none cursor-pointer">
+                    class="magnetic px-2.5 py-1.5 rounded-xl sm:rounded-lg bg-carbon-900/5 dark:bg-white/5 sm:bg-transparent border border-carbon-900/10 dark:border-white/15 text-xs font-extrabold focus:outline-none cursor-pointer">
                     <option value="USD" class="text-carbon-950">$ USD</option>
                     <option value="EGP" class="text-carbon-950">ج.م EGP</option>
                     <option value="EUR" class="text-carbon-950">€ EUR</option>
@@ -212,7 +212,7 @@
                     <span data-i18n="nav_book">احجز رحلتك</span>
                 </button>
                 <button id="mobile-menu-btn" type="button" aria-label="القائمة"
-                    class="lg:hidden p-2 rounded-lg border border-carbon-900/15 dark:border-white/15">
+                    class="lg:hidden p-2 rounded-xl bg-carbon-900/5 dark:bg-white/5 border border-carbon-900/10 dark:border-white/15">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         class="w-5 h-5">
@@ -224,22 +224,28 @@
             </div>
         </div>
 
-        <!-- Mobile Menu -->
+        <!-- Mobile Menu (Organized App Drawer) -->
         <div id="mobile-menu"
-            class="hidden lg:hidden px-4 pb-4 pt-2 border-t border-carbon-900/10 dark:border-white/10 space-y-2 text-sm font-bold">
-            <a href="#hero" class="block py-2 px-3 rounded-lg hover:bg-champagne/10" data-i18n="nav_home">الرئيسية</a>
-            <a href="#programs" class="block py-2 px-3 rounded-lg hover:bg-champagne/10" data-i18n="nav_programs">برامج
-                السفاري</a>
-            <a href="#why-us" class="block py-2 px-3 rounded-lg hover:bg-champagne/10" data-i18n="nav_why">لماذا
-                نحن؟</a>
-            <a href="#seo-guide" class="block py-2 px-3 rounded-lg hover:bg-champagne/10" data-i18n="nav_guide">الأسعار
-                والأسئلة</a>
-            <button type="button"
-                class="js-theme-toggle min-[360px]:hidden w-full py-3 px-3 rounded-lg border border-carbon-900/15 dark:border-white/15 text-start">🌓
-                Dark / Light</button>
+            class="hidden lg:hidden px-4 pb-5 pt-3 border-t border-carbon-900/10 dark:border-white/10 space-y-3 text-sm font-bold">
+            <div class="grid grid-cols-2 gap-2">
+                <a href="#hero" class="flex items-center justify-center py-2.5 px-3 rounded-xl bg-carbon-900/5 dark:bg-white/5 hover:bg-champagne/15 transition text-xs font-extrabold" data-i18n="nav_home">الرئيسية</a>
+                <a href="#programs" class="flex items-center justify-center py-2.5 px-3 rounded-xl bg-carbon-900/5 dark:bg-white/5 hover:bg-champagne/15 transition text-xs font-extrabold" data-i18n="nav_programs">برامج السفاري</a>
+                <a href="#why-us" class="flex items-center justify-center py-2.5 px-3 rounded-xl bg-carbon-900/5 dark:bg-white/5 hover:bg-champagne/15 transition text-xs font-extrabold" data-i18n="nav_why">لماذا نحن؟</a>
+                <a href="#seo-guide" class="flex items-center justify-center py-2.5 px-3 rounded-xl bg-carbon-900/5 dark:bg-white/5 hover:bg-champagne/15 transition text-xs font-extrabold" data-i18n="nav_guide">الأسعار والأسئلة</a>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <select id="mobile-lang-select" aria-label="Language"
+                    class="w-full px-3 py-2.5 rounded-xl bg-carbon-900/5 dark:bg-white/5 border border-carbon-900/10 dark:border-white/15 text-xs font-extrabold focus:outline-none">
+                    <option value="ar" class="text-carbon-950">🌐 العربية (AR)</option>
+                    <option value="en" class="text-carbon-950">🌐 English (EN)</option>
+                    <option value="it" class="text-carbon-950">🌐 Italiano (IT)</option>
+                    <option value="ru" class="text-carbon-950">🌐 Русский (RU)</option>
+                </select>
+                <button type="button"
+                    class="js-theme-toggle w-full py-2.5 px-3 rounded-xl bg-carbon-900/5 dark:bg-white/5 border border-carbon-900/10 dark:border-white/15 text-xs font-extrabold">🌓 المظهر الداكن</button>
+            </div>
             <button id="mobile-book-btn" type="button"
-                class="w-full py-2.5 px-3 rounded-lg bg-champagne text-carbon-950 font-black" data-i18n="nav_book">احجز
-                رحلتك</button>
+                class="w-full py-3 px-4 rounded-xl bg-champagne text-carbon-950 font-black text-sm shadow-lg shadow-champagne/25" data-i18n="nav_book">احجز رحلتك الآن</button>
         </div>
     </header>
 
@@ -258,7 +264,7 @@
             <div
                 class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
                 <!-- Right/Start Editorial Column -->
-                <div class="lg:col-span-6 space-y-6 relative">
+                <div class="order-2 lg:order-1 lg:col-span-6 space-y-5 sm:space-y-6 relative">
                     <div class="hero-enter hero-badge inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-champagne/15 border border-champagne/30 text-champagne-dark dark:text-champagne text-xs font-extrabold"
                         style="--d:0">
                         <span class="w-2 h-2 rounded-full bg-sea animate-ping shrink-0"></span>
@@ -326,8 +332,8 @@
                     </form>
                 </div>
 
-                <!-- Left/End Interactive Visual Showcase -->
-                <div class="hero-stage hero-enter lg:col-span-6 relative" style="--d:3">
+                <!-- Left/End Interactive Visual Showcase (Visual-First on Mobile) -->
+                <div class="hero-stage hero-enter order-1 lg:order-2 lg:col-span-6 relative" style="--d:3">
                     <div class="hero-ring" aria-hidden="true" data-depth="10"></div>
                     <div
                         class="hero-frame relative rounded-3xl overflow-hidden border border-carbon-900/10 dark:border-white/15 shadow-2xl aspect-[4/3] bg-carbon-900">

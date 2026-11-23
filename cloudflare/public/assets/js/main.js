@@ -162,12 +162,17 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    bindEvent("lang-select", "change", e => {
+    const syncLangSelect = e => {
         safeSetStorage("mosa_lang", e.target.value);
+        const otherId = e.target.id === "lang-select" ? "mobile-lang-select" : "lang-select";
+        const other = document.getElementById(otherId);
+        if (other) other.value = e.target.value;
         applyLanguage(e.target.value, () => {
             refreshAllCurrencyViews();
         });
-    });
+    };
+    bindEvent("lang-select", "change", syncLangSelect);
+    bindEvent("mobile-lang-select", "change", syncLangSelect);
 
     bindEvent("currency-select", "change", async e => {
         const nextCurr = e.target.value;
