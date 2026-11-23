@@ -303,7 +303,7 @@ export function renderBookingStep() {
                 const isCurrent = !b.lastConfirmation && n === b.step;
                 return `<div class="flex flex-col gap-1">
                     <div class="h-1.5 rounded-full transition-all duration-300 ${isDone ? 'bg-sea' : isCurrent ? 'bg-champagne' : 'bg-carbon-900/15 dark:bg-white/10'}"></div>
-                    <span class="text-[10px] font-extrabold truncate ${isCurrent ? 'text-champagne-dark dark:text-champagne' : isDone ? 'text-sea' : 'opacity-45'}">${pillLabel}</span>
+                    <span class="hidden sm:block text-[10px] font-extrabold truncate ${isCurrent ? 'text-champagne-dark dark:text-champagne' : isDone ? 'text-sea' : 'opacity-45'}">${pillLabel}</span>
                 </div>`;
             })
             .join("");
@@ -384,7 +384,7 @@ export function renderBookingStep() {
                     <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleBookingTrip('${trip.id}')" class="accent-champagne w-4 h-4 shrink-0" />
                     <img src="${trip.img}" alt="${getTripTitle(trip)}" class="w-12 h-12 rounded-xl object-cover shrink-0 border border-white/10" />
                     <div class="min-w-0">
-                        <div class="text-xs sm:text-sm font-black truncate">${getTripTitle(trip)}</div>
+                        <div class="text-xs sm:text-sm font-black line-clamp-2 sm:truncate">${getTripTitle(trip)}</div>
                         <div class="text-[11px] opacity-65 mt-0.5">${getTripDuration(trip)} · ${trip.vehicle} · ★ ${trip.rating}</div>
                     </div>
                 </div>

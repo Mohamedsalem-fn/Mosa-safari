@@ -36,19 +36,20 @@ export function renderPriceTable() {
     const tbody = document.getElementById("price-table-body");
     if (!tbody) return;
 
+    const L = I18N[state.lang];
     tbody.innerHTML = SAFARI_TRIPS.map(trip => {
         const title = getTripTitle(trip);
         const dur = getTripDuration(trip);
         return `
             <tr class="hover:bg-champagne/5 transition">
-                <td class="p-3.5 font-bold">${title}</td>
-                <td class="p-3.5 text-xs text-carbon-900/70 dark:text-[#B5B0A8]">${trip.vehicle}</td>
-                <td class="p-3.5 text-sea font-extrabold whitespace-nowrap">${fmtPrice(trip.fromPrice)} <span class="text-[11px] font-normal text-carbon-900/55 dark:text-[#9E9990]">(${fmtPrice(trip.adultPrice)})</span></td>
-                <td class="p-3.5 whitespace-nowrap">${dur}</td>
-                <td class="p-3.5 font-bold text-champagne-dark dark:text-champagne whitespace-nowrap">${trip.rating} ★</td>
+                <td data-label="${L.tbl_prog}" class="p-3.5 font-bold">${title}</td>
+                <td data-label="${L.tbl_veh}" class="p-3.5 text-xs text-carbon-900/70 dark:text-[#B5B0A8]">${trip.vehicle}</td>
+                <td data-label="${L.tbl_price}" class="p-3.5 text-sea font-extrabold whitespace-nowrap">${fmtPrice(trip.fromPrice)} <span class="text-[11px] font-normal text-carbon-900/55 dark:text-[#9E9990]">(${fmtPrice(trip.adultPrice)})</span></td>
+                <td data-label="${L.tbl_dur}" class="p-3.5 whitespace-nowrap">${dur}</td>
+                <td data-label="${L.tbl_rate}" class="p-3.5 font-bold text-champagne-dark dark:text-champagne whitespace-nowrap">${trip.rating} ★</td>
                 <td class="p-3.5">
                     <button type="button" onclick="openBookingWithTrip('${trip.id}')" class="px-3 py-1.5 rounded-lg bg-champagne hover:bg-champagne-light text-carbon-950 font-black text-xs transition whitespace-nowrap">
-                        ${I18N[state.lang].book_now}
+                        ${L.book_now}
                     </button>
                 </td>
             </tr>

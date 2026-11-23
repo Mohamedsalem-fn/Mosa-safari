@@ -155,9 +155,11 @@ window.addEventListener("DOMContentLoaded", () => {
         refreshAllCurrencyViews();
     });
 
-    bindEvent("theme-toggle", "click", () => {
-        const isDark = document.documentElement.classList.toggle("dark");
-        safeSetStorage("mosa_theme", isDark ? "dark" : "light");
+    document.querySelectorAll("#theme-toggle, .js-theme-toggle").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const isDark = document.documentElement.classList.toggle("dark");
+            safeSetStorage("mosa_theme", isDark ? "dark" : "light");
+        });
     });
 
     bindEvent("lang-select", "change", e => {

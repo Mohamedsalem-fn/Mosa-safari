@@ -17,7 +17,7 @@ function initScrollNavbar() {
 }
 
 function initMagneticControls() {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || window.matchMedia("(pointer: coarse)").matches) return;
     document.querySelectorAll(".magnetic").forEach(el => {
         el.addEventListener("pointermove", e => {
             const r = el.getBoundingClientRect();
@@ -32,7 +32,7 @@ function initMagneticControls() {
 }
 
 function initCardGlowAndTilt() {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || window.matchMedia("(pointer: coarse)").matches) return;
 
     const bindGlow = selector => {
         document.querySelectorAll(selector).forEach(card => {

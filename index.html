@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0E1015">
 
     <!-- Primary SEO Meta Tags -->
     <title>موسى سفاري | رحلات سفاري شرم الشيخ الفاخرة 2026 - mosasafari.com</title>
@@ -139,11 +140,12 @@
     <!-- ARCHITECTURAL TOP HEADER -->
     <header id="main-navbar"
         class="glass-nav sticky top-0 z-50 bg-[#F6F3EC]/70 dark:bg-carbon-950/60 backdrop-blur-xl border border-carbon-900/10 dark:border-white/10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3 flex items-center justify-between gap-4">
+        <div
+            class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-4">
             <!-- Brand -->
             <a href="#hero" class="flex items-center gap-3 shrink-0 group">
                 <img src="assets/images/logo.svg" alt="شعار موسى سفاري Mosa Safari"
-                    class="h-11 sm:h-12 w-auto object-contain drop-shadow-sm group-hover:scale-[1.03] transition-transform duration-300">
+                    class="h-9 min-[400px]:h-11 sm:h-12 w-auto object-contain drop-shadow-sm group-hover:scale-[1.03] transition-transform duration-300">
             </a>
 
             <!-- Center Nav -->
@@ -159,7 +161,7 @@
             <!-- Right Controls -->
             <div class="flex items-center gap-2">
                 <button id="theme-toggle" type="button" aria-label="تبديل المظهر"
-                    class="magnetic p-2 rounded-lg border border-carbon-900/15 dark:border-white/15 hover:border-champagne transition">
+                    class="magnetic max-[359px]:hidden p-2 rounded-lg border border-carbon-900/15 dark:border-white/15 hover:border-champagne transition">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         class="w-4 h-4 hidden dark:block text-champagne">
@@ -180,14 +182,14 @@
                     </svg>
                 </button>
                 <select id="lang-select" aria-label="Language"
-                    class="magnetic px-2.5 py-1.5 rounded-lg bg-transparent border border-carbon-900/15 dark:border-white/15 text-xs font-extrabold focus:outline-none cursor-pointer">
+                    class="magnetic px-2 sm:px-2.5 py-1.5 rounded-lg bg-transparent border border-carbon-900/15 dark:border-white/15 text-xs font-extrabold focus:outline-none cursor-pointer">
                     <option value="ar" class="text-carbon-950">AR</option>
                     <option value="en" class="text-carbon-950">EN</option>
                     <option value="it" class="text-carbon-950">IT</option>
                     <option value="ru" class="text-carbon-950">RU</option>
                 </select>
                 <select id="currency-select" aria-label="العملة"
-                    class="magnetic px-2.5 py-1.5 rounded-lg bg-transparent border border-carbon-900/15 dark:border-white/15 text-xs font-bold focus:outline-none cursor-pointer">
+                    class="magnetic px-2 sm:px-2.5 py-1.5 rounded-lg bg-transparent border border-carbon-900/15 dark:border-white/15 text-xs font-bold focus:outline-none cursor-pointer">
                     <option value="USD" class="text-carbon-950">$ USD</option>
                     <option value="EGP" class="text-carbon-950">ج.م EGP</option>
                     <option value="EUR" class="text-carbon-950">€ EUR</option>
@@ -232,6 +234,9 @@
                 نحن؟</a>
             <a href="#seo-guide" class="block py-2 px-3 rounded-lg hover:bg-champagne/10" data-i18n="nav_guide">الأسعار
                 والأسئلة</a>
+            <button type="button"
+                class="js-theme-toggle min-[360px]:hidden w-full py-3 px-3 rounded-lg border border-carbon-900/15 dark:border-white/15 text-start">🌓
+                Dark / Light</button>
             <button id="mobile-book-btn" type="button"
                 class="w-full py-2.5 px-3 rounded-lg bg-champagne text-carbon-950 font-black" data-i18n="nav_book">احجز
                 رحلتك</button>
@@ -256,8 +261,149 @@
                 <div class="lg:col-span-6 space-y-6 relative">
                     <div class="hero-enter hero-badge inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-champagne/15 border border-champagne/30 text-champagne-dark dark:text-champagne text-xs font-extrabold"
                         style="--d:0">
-                        <span class="w-2 h-2 rounded-full bg-sea animate-ping"></span>
-                        <span data-i18n="hero_badge">سفاري شرم الشيخ وسيناء 2026 · خصم 20% كود MOSA20</span>
+                        </script>
+
+                        </head>
+
+                        <body
+                            class="bg-[#F6F3EC] text-carbon-900 dark:bg-carbon-950 dark:text-[#F4EFE6] font-sans antialiased transition-colors duration-300 selection:bg-champagne selection:text-carbon-950">
+
+                            <!-- Toast Container -->
+                            <div id="toast-container"
+                                class="fixed top-20 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-none">
+                            </div>
+
+                            <!-- ARCHITECTURAL TOP HEADER -->
+                            <header id="main-navbar"
+                                class="glass-nav sticky top-0 z-50 bg-[#F6F3EC]/70 dark:bg-carbon-950/60 backdrop-blur-xl border border-carbon-900/10 dark:border-white/10">
+                                <div
+                                    class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-4">
+                                    <!-- Brand -->
+                                    <a href="#hero" class="flex items-center gap-3 shrink-0 group">
+                                        <img src="assets/images/logo.svg" alt="شعار موسى سفاري Mosa Safari"
+                                            class="h-9 min-[400px]:h-11 sm:h-12 w-auto object-contain drop-shadow-sm group-hover:scale-[1.03] transition-transform duration-300">
+                                    </a>
+
+                                    <!-- Center Nav -->
+                                    <nav class="hidden lg:flex items-center gap-7 text-xs font-extrabold tracking-wide">
+                                        <a href="#hero" class="text-champagne-dark dark:text-champagne transition"
+                                            data-i18n="nav_home">الرئيسية</a>
+                                        <a href="#programs"
+                                            class="hover:text-champagne transition flex items-center gap-1.5"
+                                            data-i18n="nav_programs">برامج السفاري</a>
+                                        <a href="#why-us" class="hover:text-champagne transition"
+                                            data-i18n="nav_why">لماذا نحن؟</a>
+                                        <a href="#seo-guide" class="hover:text-champagne transition"
+                                            data-i18n="nav_guide">الأسعار والأسئلة</a>
+                                    </nav>
+
+                                    <!-- Right Controls -->
+                                    <div class="flex items-center gap-2">
+                                        <button id="theme-toggle" type="button" aria-label="تبديل المظهر"
+                                            class="magnetic max-[359px]:hidden p-2 rounded-lg border border-carbon-900/15 dark:border-white/15 hover:border-champagne transition">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round"
+                                                class="w-4 h-4 hidden dark:block text-champagne">
+                                                <circle cx="12" cy="12" r="4"></circle>
+                                                <path d="M12 2v2"></path>
+                                                <path d="M12 20v2"></path>
+                                                <path d="m4.93 4.93 1.41 1.41"></path>
+                                                <path d="m17.66 17.66 1.41 1.41"></path>
+                                                <path d="M2 12h2"></path>
+                                                <path d="M20 12h2"></path>
+                                                <path d="m6.34 17.66-1.41 1.41"></path>
+                                                <path d="m19.07 4.93-1.41 1.41"></path>
+                                            </svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round"
+                                                class="w-4 h-4 dark:hidden">
+                                                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                                            </svg>
+                                        </button>
+                                        <select id="lang-select" aria-label="Language"
+                                            class="magnetic px-2 sm:px-2.5 py-1.5 rounded-lg bg-transparent border border-carbon-900/15 dark:border-white/15 text-xs font-extrabold focus:outline-none cursor-pointer">
+                                            <option value="ar" class="text-carbon-950">AR</option>
+                                            <option value="en" class="text-carbon-950">EN</option>
+                                            <option value="it" class="text-carbon-950">IT</option>
+                                            <option value="ru" class="text-carbon-950">RU</option>
+                                        </select>
+                                        <select id="currency-select" aria-label="العملة"
+                                            class="magnetic px-2 sm:px-2.5 py-1.5 rounded-lg bg-transparent border border-carbon-900/15 dark:border-white/15 text-xs font-bold focus:outline-none cursor-pointer">
+                                            <option value="USD" class="text-carbon-950">$ USD</option>
+                                            <option value="EGP" class="text-carbon-950">ج.م EGP</option>
+                                            <option value="EUR" class="text-carbon-950">€ EUR</option>
+                                        </select>
+                                        <span id="live-rate-badge"
+                                            class="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sea/15 border border-sea/30 text-sea-dark dark:text-sea text-[11px] font-extrabold whitespace-nowrap">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-sea animate-ping"></span>
+                                            <span id="live-rate-text">1 USD = $1.00</span>
+                                        </span>
+                                        <button id="nav-book-btn" type="button"
+                                            class="magnetic btn-shine hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-champagne hover:bg-champagne-light text-carbon-950 text-xs font-black shadow-lg shadow-champagne/20 transition">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                                                <path
+                                                    d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z">
+                                                </path>
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                            </svg>
+                                            <span data-i18n="nav_book">احجز رحلتك</span>
+                                        </button>
+                                        <button id="mobile-menu-btn" type="button" aria-label="القائمة"
+                                            class="lg:hidden p-2 rounded-lg border border-carbon-900/15 dark:border-white/15">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                                                <line x1="4" x2="20" y1="12" y2="12"></line>
+                                                <line x1="4" x2="20" y1="6" y2="6"></line>
+                                                <line x1="4" x2="20" y1="18" y2="18"></line>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Mobile Menu -->
+                                <div id="mobile-menu"
+                                    class="hidden lg:hidden px-4 pb-4 pt-2 border-t border-carbon-900/10 dark:border-white/10 space-y-2 text-sm font-bold">
+                                    <a href="#hero" class="block py-2 px-3 rounded-lg hover:bg-champagne/10"
+                                        data-i18n="nav_home">الرئيسية</a>
+                                    <a href="#programs" class="block py-2 px-3 rounded-lg hover:bg-champagne/10"
+                                        data-i18n="nav_programs">برامج
+                                        السفاري</a>
+                                    <a href="#why-us" class="block py-2 px-3 rounded-lg hover:bg-champagne/10"
+                                        data-i18n="nav_why">لماذا
+                                        نحن؟</a>
+                                    <a href="#seo-guide" class="block py-2 px-3 rounded-lg hover:bg-champagne/10"
+                                        data-i18n="nav_guide">الأسعار
+                                        والأسئلة</a>
+                                    <button type="button"
+                                        class="js-theme-toggle min-[360px]:hidden w-full py-3 px-3 rounded-lg border border-carbon-900/15 dark:border-white/15 text-start">🌓
+                                        Dark / Light</button>
+                                    <button id="mobile-book-btn" type="button"
+                                        class="w-full py-2.5 px-3 rounded-lg bg-champagne text-carbon-950 font-black"
+                                        data-i18n="nav_book">احجز
+                                        رحلتك</button>
+                                </div>
+                            </header>
+
+                            <main>
+                                <!-- SPLIT ARCHITECTURAL HERO (50/50 ASYMMETRIC EXPEDITION LAYOUT) -->
+                                <section id="hero"
+                                    class="relative pt-10 pb-16 lg:py-20 overflow-hidden bg-grid-pattern">
+                                    <div class="hero-aurora" aria-hidden="true">
+                                        <span class="aurora-sun" data-depth="-14"></span>
+                                        <span class="aurora-sea" data-depth="-9"></span>
+                                        <span class="aurora-copper" data-depth="-6"></span>
+                                    </div>
+
+                                    <canvas id="desert-particles"
+                                        class="absolute inset-0 w-full h-full pointer-events-none opacity-60" <span
+                                        class="w-2 h-2 rounded-full bg-sea animate-ping"></span>
+                                        <span data-i18n="hero_badge">سفاري شرم الشيخ وسيناء 2026 · خصم 20% كود
+                                            MOSA20</span>
                     </div>
 
                     <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.12] tracking-tight">
@@ -670,7 +816,7 @@
     </footer>
 
     <!-- FLOATING MOSA AI ASSISTANT -->
-    <div class="fixed bottom-5 end-5 z-50 flex flex-col items-end gap-3">
+    <div id="ai-dock" class="fixed bottom-5 end-5 z-50 flex flex-col items-end gap-3">
         <div id="ai-chat-panel"
             class="hidden w-[92vw] sm:w-96 max-h-[75vh] flex flex-col rounded-2xl bg-white dark:bg-carbon-800 border border-carbon-900/15 dark:border-white/15 shadow-2xl overflow-hidden">
             <div class="p-4 bg-carbon-950 text-white flex items-center justify-between border-b border-white/10">
