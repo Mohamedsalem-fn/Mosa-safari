@@ -27,6 +27,22 @@ export const state = {
     heroSlideIdx: 0,
     favorites: new Set(),
     compareIds: [],
+    platformConfig: {
+        promos: [{ code: "MOSA20", discount: 20, active: true }],
+        settings: {
+            siteAnnouncement: "",
+            groupDiscountMin: 5,
+            groupDiscountPct: 10,
+            exchangeMode: "auto",
+            manualEgpRate: 50.5,
+            manualEurRate: 0.92,
+            enableMorningSlot: true,
+            enableEveningSlot: true,
+            enablePayArrival: true,
+            enablePayVisa: true,
+            maintenanceNotice: ""
+        }
+    },
     booking: {
         step: 1,
         selectedIds: ["sharm-sunset-echo"],
@@ -75,6 +91,25 @@ export function getActiveRateText() {
     return `1 USD = ${formatted} ${state.currency}`;
 }
 
+export function trackEvent(event, extra = {}) {
+    try {
+        fetch("/api/track", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                event,
+                lang: state.lang || "ar",
+                currency: state.currency || "USD",
+                device: typeof window !== "undefined" && window.innerWidth < 640 ? "mobile" : "desktop",
+                ...extra
+            }),
+            keepalive: true
+        }).catch(() => {});
+    } catch {
+        // Silent analytics failure
+    }
+}
+
 export function safeGetStorage(key) {
     try {
         return localStorage.getItem(key);
@@ -116,6 +151,12 @@ function parseRatesPayload(data) {
  * @returns {Promise<{USD: number, EGP: number, EUR: number, isLive: boolean}>}
  */
 export async function fetchLiveExchangeRates(forceRefresh = false) {
+    if (state.platformConfig?.settings?.exchangeMode === "manual") {
+        state.rates.EGP = Number(state.platformConfig.settings.manualEgpRate) || state.rates.EGP;
+        state.rates.EUR = Number(state.platformConfig.settings.manualEurRate) || state.rates.EUR;
+        state.ratesIsLive = false;
+        return { ...state.rates, isLive: false };
+    }
     if (!forceRefresh) {
         const cachedRaw = safeGetStorage(CACHE_KEY);
         if (cachedRaw) {

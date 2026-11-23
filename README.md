@@ -9,6 +9,7 @@ A modern, multilingual, launch-ready web platform for booking luxury desert safa
 ```text
 Mosa-safari/
 ├── index.html                        # Clean Arabic-first semantic entry point (SEO, JSON-LD, UI layout)
+├── admin.html                        # Executive Admin Dashboard UI (/admin) with Chart.js & CRM modals
 ├── package.json                      # Project metadata, dev server, CSS build, and JS check scripts
 ├── tailwind.config.js                # Tailwind CSS configuration (custom theme & content paths)
 ├── netlify.toml                      # Static hosting headers, caching, and security policy
@@ -16,9 +17,9 @@ Mosa-safari/
 ├── sitemap.xml                       # XML sitemap for production indexing
 ├── .gitignore                        # Repository ignore rules
 ├── cloudflare/
-│   ├── wrangler.jsonc                # Cloudflare Workers configuration (static assets + API worker)
+│   ├── wrangler.jsonc                # Cloudflare Workers configuration (ASSETS + MOSA_KV + env vars)
 │   ├── package.json                  # Sync, local dev, and Wrangler deploy scripts
-│   ├── src/index.js                  # Cloudflare Worker handling assets, Green API & Resend Email
+│   ├── src/index.js                  # Cloudflare Worker API (KV persistence, Auth, Analytics, Green API, Resend)
 │   └── public/                       # Standalone production copy of the website for Workers Assets
 ├── netlify/
 │   └── functions/
@@ -27,7 +28,8 @@ Mosa-safari/
     ├── css/
     │   ├── input.css                 # Tailwind CSS entry source
     │   ├── tailwind.css              # Pre-compiled & minified Tailwind CSS bundle (zero CDN dependency)
-    │   └── styles.css                # Custom keyframe animations, scrollbars, reveal transitions
+    │   ├── styles.css                # Custom keyframe animations, scrollbars, reveal transitions
+    │   └── admin.css                 # Luxury executive dashboard glassmorphism & Chart.js styling
     ├── images/
     │   ├── logo.jpg                  # Brand logo
     │   ├── hero-atv-sunset.jpg       # Hero & ATV Quad sunset photography
@@ -35,7 +37,8 @@ Mosa-safari/
     │   ├── safari-night-stars.jpg    # Night safari & stargazing photography
     │   └── safari-canyon-dahab.jpg   # Colored Canyon & Dahab photography
     └── js/
-        ├── main.js                   # Application entry point, persistent preferences & DOM bindings
+        ├── main.js                   # Application entry point, live KV config sync & tracking beacon
+        ├── admin.js                  # Executive Admin Dashboard logic (KPIs, CRM, Tours, Promos, Settings)
         ├── cinematic.js              # Anime.js v4 motion layer, 3D card tilt & magnetic controls
         ├── state.js                  # Reactive app state, live exchange rate fetcher, storage helpers
         ├── data/
@@ -59,6 +62,7 @@ Mosa-safari/
 - **Live Real-Time Multi-Currency Pricing (`USD`, `EGP`, `EUR`):** Automatically fetches today's live `USD -> EGP` and `USD -> EUR` exchange rates from multi-CDN currency APIs (`open.er-api.com` and `@fawazahmed0/currency-api`) with local caching and offline fallback, dynamically converting all trip cards, the 8-tour price table, comparison modal, booking totals, and MOSA AI concierge quotes.
 - **Streamlined 5-Step Interactive Booking Modal:** Direct tour selection, traveler details validation, guest count & localized vehicle type, hotel pickup & preferred tour date, promo code validation (`MOSA20` for 20% off + automatic 10% group discount for 5+ guests), and instant WhatsApp booking handoff.
 - **Anime.js v4 Cinematic Motion Layer (`assets/js/cinematic.js`):** Staggered hero and card entrances, 3D interactive card tilt, magnetic header buttons, and scroll-reactive floating glass navigation.
+- **Executive Admin Dashboard (`/admin`) & Cloudflare KV Persistence:** Protected by HMAC-SHA256 authentication (`ADMIN_PASSWORD` Worker secret), featuring real-time Chart.js revenue/funnel analytics, full Bookings CRM with UTF-8 CSV export, live Tours & Pricing CRUD, Promo Code campaign manager, Customers LTV directory, live Exchange Rate / Time Slot / Notification settings, integration health checks, and administrative audit log.
 - **Multilingual SEO & Google Rich Results (`ar`, `en`, `it`, `ru`):** Comprehensive 4-language SEO metadata with dynamic `?lang=` URL routing (`hreflang` + canonical/Open Graph synchronization in `ui.js`), unified JSON-LD `@graph` schemas (`WebSite`, `TravelAgency`/`LocalBusiness`, dual-typed `Product` + `TouristTrip` `ItemList` for all 8 tours with USD offers & star ratings, 6-question `FAQPage`, `BreadcrumbList`), crawlable pre-rendered price rows, `robots.txt`, and `hreflang`/Image XML `sitemap.xml`.
 
 ---

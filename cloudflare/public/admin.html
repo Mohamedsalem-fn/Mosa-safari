@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="dark scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#08090C">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="author" content="Mohamed Salem — Mosa Safari">
+    <title>لوحة التحكم الإدارية | Mosa Safari Command Center</title>
+
+    <link rel="icon" type="image/svg+xml" href="assets/images/logo-icon.svg">
+    <link rel="alternate icon" type="image/jpeg" href="assets/images/logo.jpg">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="assets/css/tailwind.css">
+    <link rel="stylesheet" href="assets/css/admin.css">
+
+    <!-- Chart.js v4 for Executive Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
+</head>
+
+<body class="bg-[#F6F3EC] text-carbon-900 dark:bg-carbon-950 dark:text-[#F4EFE6] font-sans antialiased selection:bg-champagne selection:text-carbon-950 overflow-x-hidden">
+
+    <!-- Toast Notification Container -->
+    <div id="admin-toast-container" class="fixed top-5 left-1/2 -translate-x-1/2 z-[120] flex flex-col gap-2 pointer-events-none w-[90vw] max-w-md items-center"></div>
+
+    <!-- LOGIN GATE -->
+    <section id="admin-login-screen" class="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden">
+        <div class="absolute inset-0 pointer-events-none opacity-40" style="background: radial-gradient(circle at 20% 20%, rgba(217,179,108,0.22), transparent 45%), radial-gradient(circle at 80% 80%, rgba(44,181,160,0.18), transparent 45%);"></div>
+
+        <div class="relative z-10 w-full max-w-md rounded-3xl admin-glass border border-carbon-900/15 dark:border-champagne/25 shadow-2xl p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col items-center text-center gap-3">
+                <div class="bg-[#F6F3EC] px-4 py-2 rounded-2xl shadow-lg border border-champagne/30">
+                    <img src="assets/images/logo.svg" alt="Mosa Safari" class="h-11 w-auto object-contain">
+                </div>
+                <div>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-champagne/15 border border-champagne/35 text-champagne-dark dark:text-champagne text-[11px] font-black tracking-wide">
+                        <span class="w-2 h-2 rounded-full bg-sea animate-pulse"></span>
+                        MOSASAFARI.COM · COMMAND CENTER
+                    </span>
+                    <h1 class="text-2xl font-black mt-3">لوحة التحكم الشاملة</h1>
+                    <p class="text-xs opacity-70 mt-1">إدارة الحجوزات، الرحلات، الأسعار، التحليلات وإعدادات المنصة</p>
+                </div>
+            </div>
+
+            <form id="admin-login-form" class="space-y-4">
+                <div>
+                    <label for="login-password" class="block text-xs font-extrabold mb-1.5">كلمة مرور الإدارة</label>
+                    <div class="relative">
+                        <input id="login-password" type="password" autocomplete="current-password" required
+                            placeholder="••••••••"
+                            class="w-full px-4 py-3 rounded-xl bg-white dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm font-bold focus:border-champagne focus:outline-none">
+                        <button id="toggle-pass-vis" type="button" aria-label="Show password"
+                            class="absolute inset-y-0 end-2 px-2 text-xs font-extrabold opacity-65 hover:opacity-100">عرض</button>
+                    </div>
+                </div>
+
+                <div id="login-error" class="hidden p-3 rounded-xl bg-rose-500/15 border border-rose-500/35 text-rose-500 text-xs font-extrabold text-center"></div>
+
+                <button id="login-submit-btn" type="submit"
+                    class="w-full py-3.5 px-5 rounded-xl bg-champagne hover:bg-champagne-light text-carbon-950 font-black text-sm shadow-lg shadow-champagne/25 transition active:scale-[0.99]">
+                    دخول إلى لوحة التحكم
+                </button>
+            </form>
+
+            <div class="pt-3 border-t border-carbon-900/10 dark:border-white/10 flex items-center justify-between text-[11px] opacity-70">
+                <a href="/" class="hover:text-champagne font-bold transition">← العودة إلى الموقع الرئيسي</a>
+                <span id="login-worker-status" class="font-bold text-sea">Cloudflare KV Protected</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- AUTHENTICATED ADMIN SHELL -->
+    <div id="admin-app" class="hidden min-h-screen flex bg-[#F6F3EC] dark:bg-carbon-950">
+
+        <!-- Mobile Sidebar Backdrop -->
+        <div id="sidebar-backdrop" class="hidden lg:hidden fixed inset-0 z-40 bg-carbon-950/75 backdrop-blur-sm"></div>
+
+        <!-- SIDEBAR -->
+        <aside id="admin-sidebar"
+            class="fixed lg:sticky top-0 start-0 z-50 h-screen w-72 shrink-0 bg-white dark:bg-carbon-900 border-e border-carbon-900/10 dark:border-white/10 flex flex-col transition-transform duration-300 -translate-x-full rtl:translate-x-full lg:translate-x-0 rtl:lg:translate-x-0">
+
+            <div class="p-4 border-b border-carbon-900/10 dark:border-white/10 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="bg-[#F6F3EC] px-2.5 py-1 rounded-xl shrink-0 border border-champagne/30">
+                        <img src="assets/images/logo.svg" alt="Mosa Safari" class="h-7 w-auto">
+                    </div>
+                    <div class="min-w-0">
+                        <div class="text-sm font-black truncate" data-at="brand_title">موسى سفاري</div>
+                        <div class="text-[10px] font-extrabold text-champagne uppercase tracking-wider" data-at="brand_sub">Command Center</div>
+                    </div>
+                </div>
+                <button id="sidebar-close-btn" type="button" class="lg:hidden p-1.5 rounded-lg hover:bg-carbon-900/10 dark:hover:bg-white/10">✕</button>
+            </div>
+
+            <nav id="admin-nav" class="flex-1 p-3 space-y-1.5 overflow-y-auto admin-scroll text-xs font-extrabold">
+                <button type="button" data-tab="overview" class="admin-nav-btn active w-full px-3.5 py-2.5 rounded-xl flex items-center justify-between gap-2 transition hover:bg-champagne/10">
+                    <span class="flex items-center gap-2.5"><span class="text-base">📊</span><span data-at="nav_overview">نظرة عامة والتحليلات</span></span>
+                </button>
+                <button type="button" data-tab="bookings" class="admin-nav-btn w-full px-3.5 py-2.5 rounded-xl flex items-center justify-between gap-2 transition hover:bg-champagne/10">
+                    <span class="flex items-center gap-2.5"><span class="text-base">📅</span><span data-at="nav_bookings">إدارة الحجوزات</span></span>
+                    <span id="nav-badge-pending" class="px-2 py-0.5 rounded-full bg-copper text-white text-[10px] font-black">0</span>
+                </button>
+                <button type="button" data-tab="tours" class="admin-nav-btn w-full px-3.5 py-2.5 rounded-xl flex items-center justify-between gap-2 transition hover:bg-champagne/10">
+                    <span class="flex items-center gap-2.5"><span class="text-base">🏜️</span><span data-at="nav_tours">الرحلات والأسعار</span></span>
+                    <span id="nav-badge-tours" class="px-2 py-0.5 rounded-full bg-champagne/20 text-champagne-dark dark:text-champagne text-[10px] font-black">8</span>
+                </button>
+                <button type="button" data-tab="promos" class="admin-nav-btn w-full px-3.5 py-2.5 rounded-xl flex items-center justify-between gap-2 transition hover:bg-champagne/10">
+                    <span class="flex items-center gap-2.5"><span class="text-base">🏷️</span><span data-at="nav_promos">أكواد الخصم</span></span>
+                    <span id="nav-badge-promos" class="px-2 py-0.5 rounded-full bg-sea/20 text-sea text-[10px] font-black">1</span>
+                </button>
+                <button type="button" data-tab="customers" class="admin-nav-btn w-full px-3.5 py-2.5 rounded-xl flex items-center justify-between gap-2 transition hover:bg-champagne/10">
+                    <span class="flex items-center gap-2.5"><span class="text-base">👥</span><span data-at="nav_customers">قاعدة العملاء</span></span>
+                </button>
+                <button type="button" data-tab="analytics" class="admin-nav-btn w-full px-3.5 py-2.5 rounded-xl flex items-center justify-between gap-2 transition hover:bg-champagne/10">
+                    <span class="flex items-center gap-2.5"><span class="text-base">📈</span><span data-at="nav_analytics">التحليلات المتقدمة</span></span>
+                </button>
+                <button type="button" data-tab="settings" class="admin-nav-btn w-full px-3.5 py-2.5 rounded-xl flex items-center justify-between gap-2 transition hover:bg-champagne/10">
+                    <span class="flex items-center gap-2.5"><span class="text-base">⚙️</span><span data-at="nav_settings">إعدادات المنصة</span></span>
+                </button>
+                <button type="button" data-tab="audit" class="admin-nav-btn w-full px-3.5 py-2.5 rounded-xl flex items-center justify-between gap-2 transition hover:bg-champagne/10">
+                    <span class="flex items-center gap-2.5"><span class="text-base">🛡️</span><span data-at="nav_audit">النظام وسجل النشاط</span></span>
+                </button>
+            </nav>
+
+            <div class="p-3 border-t border-carbon-900/10 dark:border-white/10 space-y-2 text-xs font-extrabold">
+                <a href="/" target="_blank" rel="noopener noreferrer"
+                    class="w-full py-2.5 px-3 rounded-xl bg-carbon-900/5 dark:bg-white/5 hover:bg-champagne/15 flex items-center justify-between transition">
+                    <span data-at="open_site">فتح الموقع المباشر</span>
+                    <span>↗</span>
+                </a>
+                <button id="admin-logout-btn" type="button"
+                    class="w-full py-2.5 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 flex items-center justify-between transition">
+                    <span data-at="logout">تسجيل الخروج</span>
+                    <span>⏻</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN WORKSPACE -->
+        <div class="flex-1 min-w-0 flex flex-col">
+
+            <!-- Sticky Topbar -->
+            <header class="sticky top-0 z-30 bg-white/85 dark:bg-carbon-900/85 backdrop-blur-lg border-b border-carbon-900/10 dark:border-white/10 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <button id="sidebar-open-btn" type="button" aria-label="Menu"
+                        class="lg:hidden p-2 rounded-xl bg-carbon-900/5 dark:bg-white/10 font-black">☰</button>
+                    <div class="min-w-0">
+                        <h1 id="topbar-title" class="text-base sm:text-lg font-black truncate">نظرة عامة والتحليلات</h1>
+                        <div class="flex items-center gap-2 text-[11px] opacity-65">
+                            <span class="w-1.5 h-1.5 rounded-full bg-sea"></span>
+                            <span id="topbar-sync-time">متزامن الآن</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 flex-wrap">
+                    <input id="admin-global-search" type="search" placeholder="بحث سريع (رقم حجز، اسم، هاتف)..."
+                        class="hidden md:block w-60 px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 text-xs font-bold focus:border-champagne focus:outline-none">
+
+                    <button id="admin-refresh-btn" type="button" title="Refresh"
+                        class="px-3 py-2 rounded-xl bg-carbon-900/5 dark:bg-white/10 hover:bg-champagne/20 text-xs font-extrabold transition">↻ <span class="hidden sm:inline" data-at="refresh">تحديث</span></button>
+
+                    <button id="admin-lang-btn" type="button"
+                        class="px-3 py-2 rounded-xl bg-carbon-900/5 dark:bg-white/10 hover:bg-champagne/20 text-xs font-extrabold transition">EN / AR</button>
+
+                    <button id="admin-theme-btn" type="button" aria-label="Theme"
+                        class="px-3 py-2 rounded-xl bg-carbon-900/5 dark:bg-white/10 hover:bg-champagne/20 text-xs font-extrabold transition">🌓</button>
+
+                    <button id="open-manual-booking-btn" type="button"
+                        class="px-3.5 py-2 rounded-xl bg-champagne hover:bg-champagne-light text-carbon-950 font-black text-xs shadow-lg shadow-champagne/20 transition">+ <span data-at="add_booking">حجز يدوي</span></button>
+                </div>
+            </header>
+
+            <!-- Dynamic Tab Stage -->
+            <main id="admin-main" class="flex-1 p-4 sm:p-6 space-y-6 max-w-[1600px] w-full mx-auto">
+                <div class="py-16 text-center text-sm opacity-65">جاري تحميل بيانات المنصة...</div>
+            </main>
+        </div>
+    </div>
+
+    <!-- REUSABLE ADMIN MODAL -->
+    <div id="admin-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6">
+        <div id="admin-modal-backdrop" class="absolute inset-0 bg-carbon-950/80 backdrop-blur-sm"></div>
+        <div id="admin-modal-card" class="relative z-10 w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl bg-white dark:bg-carbon-800 border border-carbon-900/15 dark:border-champagne/25 shadow-2xl overflow-hidden">
+            <div class="px-5 py-4 bg-carbon-950 text-white flex items-center justify-between gap-3 border-b border-white/10">
+                <div class="min-w-0">
+                    <h2 id="admin-modal-title" class="text-base sm:text-lg font-black truncate">تفاصيل</h2>
+                    <p id="admin-modal-subtitle" class="text-[11px] text-champagne truncate"></p>
+                </div>
+                <button id="admin-modal-close" type="button" aria-label="Close"
+                    class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 grid place-items-center text-sm font-black shrink-0">✕</button>
+            </div>
+            <div id="admin-modal-body" class="flex-1 p-5 overflow-y-auto admin-scroll space-y-4"></div>
+            <div id="admin-modal-footer" class="px-5 py-3.5 border-t border-carbon-900/10 dark:border-white/10 flex flex-wrap items-center justify-end gap-2 bg-[#F6F3EC]/60 dark:bg-carbon-900/60"></div>
+        </div>
+    </div>
+
+    <script type="module" src="assets/js/admin.js"></script>
+</body>
+
+</html>

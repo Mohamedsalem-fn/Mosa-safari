@@ -174,9 +174,10 @@ export function renderMobileApp() {
         { id: "canyon", label: m.cat_canyon, img: "assets/images/safari-canyon-dahab.jpg" }
     ];
 
-    const trendingTrips = [SAFARI_TRIPS[2], SAFARI_TRIPS[4], SAFARI_TRIPS[7], SAFARI_TRIPS[1]];
+    const activeTrips = SAFARI_TRIPS.filter(t => t.active !== false);
+    const trendingTrips = [activeTrips[2], activeTrips[4], activeTrips[7], activeTrips[1]].filter(Boolean);
 
-    let filtered = [...SAFARI_TRIPS];
+    let filtered = [...activeTrips];
     if (state.categoryFilter !== "all") {
         filtered = filtered.filter(t => t.category === state.categoryFilter);
     }

@@ -8,7 +8,7 @@
 
 import { SAFARI_TRIPS } from "../data/trips.js";
 import { I18N, STEP_TITLES_I18N, BOOKING_I18N } from "../data/i18n.js";
-import { state, fmtPrice } from "../state.js";
+import { state, fmtPrice, trackEvent } from "../state.js";
 import { getTripTitle, getTripDuration } from "./trips.js";
 import { showToast } from "./ui.js";
 import { dispatchBookingNotifications } from "./notifications.js";
@@ -132,11 +132,26 @@ export const UI_EXTRAs = {
     }
 };
 
+export function findActivePromo(rawCode) {
+    const clean = String(rawCode || "").trim().toUpperCase();
+    if (!clean) return null;
+    const list = state.platformConfig?.promos;
+    if (Array.isArray(list) && list.length) {
+        const match = list.find(p => String(p.code || "").toUpperCase() === clean && p.active !== false);
+        return match ? { code: String(match.code).toUpperCase(), discount: Number(match.discount) || 0 } : null;
+    }
+    return clean === "MOSA20" ? { code: "MOSA20", discount: 20 } : null;
+}
+
 export function calcBookingTotal() {
+    const cfg = state.platformConfig?.settings || {};
+    const minGroup = Number(cfg.groupDiscountMin) > 0 ? Number(cfg.groupDiscountMin) : 5;
+    const groupPct = Number(cfg.groupDiscountPct) >= 0 ? Number(cfg.groupDiscountPct) : 10;
     const sel = SAFARI_TRIPS.filter(t => state.booking.selectedIds.includes(t.id));
     let total = sel.reduce((s, t) => s + t.adultPrice, 0) * Math.max(1, state.booking.adults + state.booking.children * 0.5);
-    if (state.booking.adults + state.booking.children >= 5) total *= 0.9;
-    if (state.booking.promoCode.trim().toUpperCase() === "MOSA20") total *= 0.8;
+    if (state.booking.adults + state.booking.children >= minGroup) total *= (1 - groupPct / 100);
+    const promo = findActivePromo(state.booking.promoCode);
+    if (promo && promo.discount > 0) total *= (1 - promo.discount / 100);
     return total;
 }
 
@@ -147,13 +162,14 @@ export function openBookingWithTrip(id) {
     }
     state.booking.lastConfirmation = null;
     state.booking.step = 2;
-    openBookingModal();
+    openBookingModal(id);
 }
 
-export function openBookingModal() {
+export function openBookingModal(trackedTripId = null) {
     state.booking.lastConfirmation = null;
     document.getElementById("booking-modal")?.classList.remove("hidden");
     renderBookingStep();
+    trackEvent("modal_open", trackedTripId ? { tripId: trackedTripId } : {});
 }
 
 export function closeBookingModal() {
@@ -216,9 +232,12 @@ export function applyPromoCode() {
     if (!input) return;
     const code = input.value.trim().toUpperCase();
     state.booking.promoCode = code;
+    const match = findActivePromo(code);
     renderBookingStep();
-    if (code === "MOSA20") {
-        showToast(I18N[state.lang].toast_promo_ok);
+    if (match) {
+        showToast(code === "MOSA20" && match.discount === 20
+            ? I18N[state.lang].toast_promo_ok
+            : `✓ ${match.code} (-${match.discount}%)`);
     } else {
         showToast(I18N[state.lang].toast_promo_err, "error");
     }
@@ -265,13 +284,15 @@ export async function submitBookingOrder() {
     const selectedTrips = SAFARI_TRIPS.filter(trip => b.selectedIds.includes(trip.id));
     const selectedTours = selectedTrips.map(trip => getTripTitle(trip)).join(" + ");
     const vehicleDisplay = t.vehicles[b.vehicleOpt] || b.vehicleOpt;
-    const totalFormatted = fmtPrice(calcBookingTotal());
+    const totalUsd = Number(calcBookingTotal().toFixed(2));
+    const totalFormatted = fmtPrice(totalUsd);
     const today = new Date().toISOString().split("T")[0];
     const last4 = b.cardNumber ? b.cardNumber.replace(/\D/g, "").slice(-4) : "";
 
     const payload = {
         ref,
         lang: state.lang,
+        currency: state.currency,
         name: b.name,
         phone: b.phone,
         email: b.email,
@@ -287,7 +308,9 @@ export async function submitBookingOrder() {
         paymentMethod: b.paymentMethod,
         cardMask: last4 ? `**** ${last4}` : "Visa Placeholder",
         promoCode: b.promoCode,
+        selectedIds: [...b.selectedIds],
         selectedTours,
+        totalUsd,
         totalFormatted
     };
 
@@ -405,7 +428,7 @@ export function renderBookingStep() {
     }
 
     if (b.step === 1) {
-        body.innerHTML = `<div class="grid grid-cols-1 gap-2.5">${SAFARI_TRIPS.map(trip => {
+        body.innerHTML = `<div class="grid grid-cols-1 gap-2.5">${SAFARI_TRIPS.filter(trip => trip.active !== false).map(trip => {
             const checked = b.selectedIds.includes(trip.id);
             return `<label class="flex items-center justify-between gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${checked ? 'border-champagne bg-champagne/10 shadow-md' : 'border-carbon-900/10 dark:border-white/10 hover:border-champagne/50'}">
                 <div class="flex items-center gap-3 min-w-0">
@@ -443,8 +466,10 @@ export function renderBookingStep() {
             </div>
         </div>`;
     } else if (b.step === 3) {
+        const cfg = state.platformConfig?.settings || {};
+        const minGroup = Number(cfg.groupDiscountMin) > 0 ? Number(cfg.groupDiscountMin) : 5;
         const vehicleKeys = Object.keys(t.vehicles);
-        const isGroup = b.adults + b.children >= 5;
+        const isGroup = b.adults + b.children >= minGroup;
         body.innerHTML = `<div class="space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div class="p-4 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 flex items-center justify-between">
@@ -487,6 +512,17 @@ export function renderBookingStep() {
         </div>`;
     } else if (b.step === 4) {
         const today = new Date().toISOString().split("T")[0];
+        const cfg = state.platformConfig?.settings || {};
+        const allowMorning = cfg.enableMorningSlot !== false;
+        const allowEvening = cfg.enableEveningSlot !== false;
+        if (!allowMorning && allowEvening) b.tripTime = "evening";
+        if (allowMorning && !allowEvening) b.tripTime = "morning";
+
+        const allowArrival = cfg.enablePayArrival !== false;
+        const allowVisa = cfg.enablePayVisa !== false;
+        if (!allowArrival && allowVisa) b.paymentMethod = "visa";
+        if (allowArrival && !allowVisa) b.paymentMethod = "arrival";
+
         const isArrival = b.paymentMethod === "arrival";
         const isVisa = b.paymentMethod === "visa";
 
@@ -504,22 +540,22 @@ export function renderBookingStep() {
 
             <div>
                 <label class="block text-xs font-extrabold mb-2">${u.time_slot_label}</label>
-                <div class="grid grid-cols-2 gap-3">
-                    <button type="button" onclick="selectTripTime('morning')" class="p-3 rounded-xl border-2 text-start transition-all flex items-center gap-2.5 ${b.tripTime !== 'evening' ? 'border-champagne bg-champagne/15 shadow-sm' : 'border-carbon-900/10 dark:border-white/10 hover:border-champagne/40'}">
+                <div class="grid ${allowMorning && allowEvening ? 'grid-cols-2' : 'grid-cols-1'} gap-3">
+                    ${allowMorning ? `<button type="button" onclick="selectTripTime('morning')" class="p-3 rounded-xl border-2 text-start transition-all flex items-center gap-2.5 ${b.tripTime !== 'evening' ? 'border-champagne bg-champagne/15 shadow-sm' : 'border-carbon-900/10 dark:border-white/10 hover:border-champagne/40'}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-champagne-dark dark:text-champagne shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
                         <span class="text-xs sm:text-sm font-black leading-snug">${u.time_morning}</span>
-                    </button>
-                    <button type="button" onclick="selectTripTime('evening')" class="p-3 rounded-xl border-2 text-start transition-all flex items-center gap-2.5 ${b.tripTime === 'evening' ? 'border-champagne bg-champagne/15 shadow-sm' : 'border-carbon-900/10 dark:border-white/10 hover:border-champagne/40'}">
+                    </button>` : ""}
+                    ${allowEvening ? `<button type="button" onclick="selectTripTime('evening')" class="p-3 rounded-xl border-2 text-start transition-all flex items-center gap-2.5 ${b.tripTime === 'evening' ? 'border-champagne bg-champagne/15 shadow-sm' : 'border-carbon-900/10 dark:border-white/10 hover:border-champagne/40'}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-copper shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
                         <span class="text-xs sm:text-sm font-black leading-snug">${u.time_evening}</span>
-                    </button>
+                    </button>` : ""}
                 </div>
             </div>
 
             <div>
                 <label class="block text-xs font-extrabold mb-2">${u.pay_section_title}</label>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <!-- Option 1: Pay on Arrival -->
+                <div class="grid grid-cols-1 ${allowArrival && allowVisa ? 'sm:grid-cols-2' : ''} gap-3">
+                    ${allowArrival ? `<!-- Option 1: Pay on Arrival -->
                     <button type="button" onclick="selectPaymentMethod('arrival')" class="p-4 rounded-2xl border-2 text-start transition-all relative ${isArrival ? 'border-sea bg-sea/10 shadow-lg' : 'border-carbon-900/10 dark:border-white/10 hover:border-sea/50'}">
                         <div class="flex items-center justify-between gap-2 mb-1.5">
                             <span class="px-2 py-0.5 rounded-md bg-sea/20 text-sea text-[10px] font-black">${u.pay_Arrival_badge}</span>
@@ -527,9 +563,9 @@ export function renderBookingStep() {
                         </div>
                         <div class="font-black text-sm text-sea">${u.pay_arrival_title}</div>
                         <div class="text-[11px] opacity-75 mt-1 leading-relaxed">${u.pay_arrival_desc}</div>
-                    </button>
+                    </button>` : ""}
 
-                    <!-- Option 2: Pay by Visa (Gateway Placeholder) -->
+                    ${allowVisa ? `<!-- Option 2: Pay by Visa (Gateway Placeholder) -->
                     <button type="button" onclick="selectPaymentMethod('visa')" class="p-4 rounded-2xl border-2 text-start transition-all relative ${isVisa ? 'border-champagne bg-champagne/10 shadow-lg' : 'border-carbon-900/10 dark:border-white/10 hover:border-champagne/50'}">
                         <div class="flex items-center justify-between gap-2 mb-1.5">
                             <span class="px-2 py-0.5 rounded-md bg-champagne/20 text-champagne-dark dark:text-champagne text-[10px] font-black">${u.pay_visa_badge}</span>
@@ -537,7 +573,7 @@ export function renderBookingStep() {
                         </div>
                         <div class="font-black text-sm text-champagne-dark dark:text-champagne">${u.pay_visa_title}</div>
                         <div class="text-[11px] opacity-75 mt-1 leading-relaxed">${u.pay_visa_desc}</div>
-                    </button>
+                    </button>` : ""}
                 </div>
             </div>
 
@@ -583,7 +619,7 @@ export function renderBookingStep() {
     } else if (b.step === 5) {
         const ch = SAFARI_TRIPS.filter(trip => b.selectedIds.includes(trip.id));
         const vehicleDisplay = t.vehicles[b.vehicleOpt] || b.vehicleOpt;
-        const promoActive = b.promoCode.trim().toUpperCase() === "MOSA20";
+        const promoMatch = findActivePromo(b.promoCode);
 
         body.innerHTML = `<div class="space-y-3.5">
             <div class="p-4 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 text-xs sm:text-sm space-y-2.5">
@@ -621,7 +657,7 @@ export function renderBookingStep() {
                 </div>
             </div>
 
-            ${promoActive ? `<div class="p-2.5 rounded-xl bg-sea/15 border border-sea/30 text-sea text-xs font-extrabold">${u.promo_applied_badge}</div>` : ""}
+            ${promoMatch ? `<div class="p-2.5 rounded-xl bg-sea/15 border border-sea/30 text-sea text-xs font-extrabold">✓ ${promoMatch.code} (-${promoMatch.discount}% OFF)</div>` : ""}
 
             <div class="flex gap-2">
                 <input id="bk-promo" type="text" value="${b.promoCode}" placeholder="${t.promo_placeholder}" class="flex-1 px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm font-bold uppercase focus:border-champagne focus:outline-none" />

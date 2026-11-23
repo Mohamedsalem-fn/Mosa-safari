@@ -37,7 +37,7 @@ export function renderPriceTable() {
     if (!tbody) return;
 
     const L = I18N[state.lang];
-    tbody.innerHTML = SAFARI_TRIPS.map(trip => {
+    tbody.innerHTML = SAFARI_TRIPS.filter(t => t.active !== false).map(trip => {
         const title = getTripTitle(trip);
         const dur = getTripDuration(trip);
         return `
@@ -61,7 +61,7 @@ export function renderTrips() {
     const grid = document.getElementById("trips-grid");
     if (!grid) return;
 
-    let list = [...SAFARI_TRIPS];
+    let list = SAFARI_TRIPS.filter(t => t.active !== false);
     if (state.categoryFilter !== "all") {
         list = list.filter(t => t.category === state.categoryFilter);
     }

@@ -204,69 +204,98 @@ export async function dispatchBookingNotifications(payload) {
     const ownerMessage = buildOwnerWhatsAppMessage(payload);
     const customerContent = buildCustomerConfirmationContent(payload);
 
-    // 1. Send WhatsApp notification ONLY to Owner (201023355550) via Green API
-    const uniqueOwnerPhones = [...new Set(NOTIFICATION_CONFIG.ownerPhones)];
-    for (const phone of uniqueOwnerPhones) {
-        const chatId = formatWhatsAppChatId(phone);
-        if (!chatId) continue;
-        const waRes = await sendGreenApiWhatsApp(chatId, ownerMessage);
-        if (waRes.ok) {
-            result.whatsappSent = true;
-        }
-    }
-
-    // 2. Trigger server-side endpoint (/.netlify/functions/notify-booking) for Customer Confirmation Email via Resend
+    // 1. Try managed Cloudflare Workers endpoint first (/api/notify-booking) so live Admin settings apply
+    let handledByManagedWorker = false;
     try {
-        const srvRes = await fetch("/.netlify/functions/notify-booking", {
+        const srvRes = await fetch("/api/notify-booking", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 payload,
+                ownerMessage,
                 subject: customerContent.subject,
                 text: customerContent.text,
                 html: customerContent.html,
-                whatsappAlreadySent: result.whatsappSent
+                whatsappAlreadySent: false
             })
         });
         if (srvRes.ok) {
             const srvData = await srvRes.json();
-            if (srvData.emailSent) result.emailSent = true;
-            if (srvData.whatsappSent) result.whatsappSent = true;
+            if (srvData.managed) {
+                handledByManagedWorker = true;
+                result.emailSent = Boolean(srvData.emailSent);
+                result.whatsappSent = Boolean(srvData.whatsappSent);
+            }
         }
     } catch {
-        // Fallback below if running on a static server without POST handler
+        // Fallback below when running locally or on static hosting without Cloudflare Worker
     }
 
-    // 4. Fallback client-side email relay (CORS-friendly) if server endpoint was not active
-    if (!result.emailSent && payload.email) {
+    if (!handledByManagedWorker) {
+        // 2. Local / fallback: Send WhatsApp notification ONLY to Owner via Green API
+        const uniqueOwnerPhones = [...new Set(NOTIFICATION_CONFIG.ownerPhones)];
+        for (const phone of uniqueOwnerPhones) {
+            const chatId = formatWhatsAppChatId(phone);
+            if (!chatId) continue;
+            const waRes = await sendGreenApiWhatsApp(chatId, ownerMessage);
+            if (waRes.ok) {
+                result.whatsappSent = true;
+            }
+        }
+
+        // 3. Fallback Netlify Function for Email
         try {
-            const emailRes = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(payload.email)}`, {
+            const srvRes = await fetch("/.netlify/functions/notify-booking", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    _subject: customerContent.subject,
-                    _template: "box",
-                    _captcha: "false",
-                    booking_reference: payload.ref,
-                    customer_name: payload.name,
-                    safari_programs: payload.selectedTours,
-                    tour_date: payload.tripDate,
-                    guests: `${payload.adults} Adults, ${payload.children} Children`,
-                    vehicle: payload.vehicleDisplay,
-                    pickup_hotel: payload.pickupHotel || "Sharm El Sheikh",
-                    payment_method: payload.paymentMethod === "visa" ? "Visa / Card" : "Pay on Arrival",
-                    total_amount: payload.totalFormatted,
-                    message: customerContent.text
+                    payload,
+                    subject: customerContent.subject,
+                    text: customerContent.text,
+                    html: customerContent.html,
+                    whatsappAlreadySent: result.whatsappSent
                 })
             });
-            if (emailRes.ok) {
-                result.emailSent = true;
+            if (srvRes.ok) {
+                const srvData = await srvRes.json();
+                if (srvData.emailSent) result.emailSent = true;
+                if (srvData.whatsappSent) result.whatsappSent = true;
             }
         } catch {
-            // Handled silently
+            // Ignored on static host
+        }
+
+        // 4. Client-side email relay fallback
+        if (!result.emailSent && payload.email) {
+            try {
+                const emailRes = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(payload.email)}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({
+                        _subject: customerContent.subject,
+                        _template: "box",
+                        _captcha: "false",
+                        booking_reference: payload.ref,
+                        customer_name: payload.name,
+                        safari_programs: payload.selectedTours,
+                        tour_date: payload.tripDate,
+                        guests: `${payload.adults} Adults, ${payload.children} Children`,
+                        vehicle: payload.vehicleDisplay,
+                        pickup_hotel: payload.pickupHotel || "Sharm El Sheikh",
+                        payment_method: payload.paymentMethod === "visa" ? "Visa / Card" : "Pay on Arrival",
+                        total_amount: payload.totalFormatted,
+                        message: customerContent.text
+                    })
+                });
+                if (emailRes.ok) {
+                    result.emailSent = true;
+                }
+            } catch {
+                // Handled silently
+            }
         }
     }
 

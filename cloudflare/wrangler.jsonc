@@ -7,6 +7,12 @@
     "directory": "./public",
     "binding": "ASSETS"
   },
+  "kv_namespaces": [
+    {
+      "binding": "MOSA_KV",
+      "id": "c2ef18f5fa814630b915e598049eb526"
+    }
+  ],
   "vars": {
     "GREEN_API_URL": "https://7107.api.greenapi.com",
     "GREEN_ID_INSTANCE": "710722810425",

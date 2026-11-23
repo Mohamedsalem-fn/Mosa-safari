@@ -6,11 +6,13 @@
  * -------------------------------------------------------------------------------
  */
 
+import { SAFARI_TRIPS } from "./data/trips.js";
 import { I18N, AI_GREETINGS } from "./data/i18n.js";
 import {
     state,
     getActiveRateText,
     fetchLiveExchangeRates,
+    trackEvent,
     safeGetStorage,
     safeSetStorage
 } from "./state.js";
@@ -182,6 +184,43 @@ function loadSavedState() {
     }
 }
 
+async function loadPublicPlatformConfig() {
+    try {
+        const res = await fetch("/api/public/config", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data || !data.ok) return;
+
+        if (Array.isArray(data.trips) && data.trips.length > 0) {
+            SAFARI_TRIPS.splice(0, SAFARI_TRIPS.length, ...data.trips);
+        }
+        if (Array.isArray(data.promos)) {
+            state.platformConfig.promos = data.promos;
+        }
+        if (data.settings && typeof data.settings === "object") {
+            state.platformConfig.settings = { ...state.platformConfig.settings, ...data.settings };
+            if (data.settings.exchangeMode === "manual") {
+                state.rates.EGP = Number(data.settings.manualEgpRate) || state.rates.EGP;
+                state.rates.EUR = Number(data.settings.manualEurRate) || state.rates.EUR;
+            }
+            if (data.settings.siteAnnouncement) {
+                const badgeEl = document.querySelector('[data-i18n="hero_badge"]');
+                if (badgeEl) badgeEl.textContent = data.settings.siteAnnouncement;
+            }
+            if (data.settings.maintenanceNotice && !document.getElementById("platform-maintenance-banner")) {
+                const bar = document.createElement("div");
+                bar.id = "platform-maintenance-banner";
+                bar.className = "w-full bg-champagne text-carbon-950 text-xs font-black text-center py-2 px-4 shadow-md z-[55] relative";
+                bar.textContent = data.settings.maintenanceNotice;
+                document.body.prepend(bar);
+            }
+        }
+        refreshAllCurrencyViews();
+    } catch {
+        // Silent offline fallback to built-in catalog
+    }
+}
+
 window.addEventListener("DOMContentLoaded", () => {
     loadSavedState();
     initParticles();
@@ -190,6 +229,17 @@ window.addEventListener("DOMContentLoaded", () => {
         refreshAllCurrencyViews();
     });
     initCinematic();
+
+    // Sync live catalog, promos & platform settings from Cloudflare KV + record visit
+    loadPublicPlatformConfig();
+    let isNewSession = false;
+    try {
+        if (!sessionStorage.getItem("mosa_sess_tracked")) {
+            sessionStorage.setItem("mosa_sess_tracked", "1");
+            isNewSession = true;
+        }
+    } catch { /* ignore */ }
+    trackEvent("pageview", { isNewSession });
 
     // Fetch today's live exchange rates on initial load
     fetchLiveExchangeRates(false).then(() => {
