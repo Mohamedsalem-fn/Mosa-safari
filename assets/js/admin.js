@@ -1201,7 +1201,50 @@ function renderSettingsTab(root) {
                 <button type="submit" class="px-5 py-2.5 rounded-xl bg-champagne hover:bg-champagne-light text-carbon-950 text-xs font-black shadow-lg shadow-champagne/25">${t("save")}</button>
             </div>
         </form>
+
+        <form id="admin-password-form" class="mt-5 rounded-3xl p-5 bg-white dark:bg-carbon-900 border border-rose-500/25 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                    <h2 class="text-sm sm:text-base font-black">${isAr ? "تغيير كلمة مرور الإدارة وتدوير مفاتيح الأمان" : "Rotate Admin Password & Session Signing Key"}</h2>
+                    <p class="text-[11px] opacity-65">${isAr ? "يقوم بتشفير كلمة المرور الجديدة بـ Bcrypt وتجديد مفتاح التوقيع فوراً داخل الخزنة المعزولة" : "Re-hashes password with Bcrypt (cost=12) and rotates HMAC signing key in vault"}</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div><label class="block font-extrabold mb-1">${isAr ? "كلمة المرور الحالية" : "Current Password"}</label><input id="pw-current" type="password" required class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 font-bold"></div>
+                <div><label class="block font-extrabold mb-1">${isAr ? "كلمة المرور الجديدة (8+ أحرف)" : "New Password (8+ chars)"}</label><input id="pw-new" type="password" minlength="8" required class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 font-bold"></div>
+                <div><label class="block font-extrabold mb-1">${isAr ? "تأكيد كلمة المرور الجديدة" : "Confirm New Password"}</label><input id="pw-confirm" type="password" minlength="8" required class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 font-bold"></div>
+            </div>
+            <div class="flex justify-end">
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-black shadow-lg shadow-rose-600/20">${isAr ? "تحديث كلمة المرور وتدوير المفاتيح" : "Update Password & Rotate Keys"}</button>
+            </div>
+        </form>
     `;
+
+    document.getElementById("admin-password-form")?.addEventListener("submit", async e => {
+        e.preventDefault();
+        const currentPassword = document.getElementById("pw-current").value;
+        const newPassword = document.getElementById("pw-new").value;
+        const confirmPassword = document.getElementById("pw-confirm").value;
+        if (newPassword.length < 8) {
+            showAdminToast(isAr ? "كلمة المرور الجديدة يجب أن تكون 8 أحرف على الأقل" : "New password must be 8+ chars", "err");
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            showAdminToast(isAr ? "تأكيد كلمة المرور غير متطابق" : "Passwords do not match", "err");
+            return;
+        }
+        try {
+            const res = await apiFetch("/api/admin/password", {
+                method: "POST",
+                body: JSON.stringify({ currentPassword, newPassword })
+            });
+            if (res.csrfToken) adminState.csrfToken = res.csrfToken;
+            document.getElementById("admin-password-form").reset();
+            showAdminToast(isAr ? "تم تحديث كلمة المرور وتدوير مفاتيح الجلسة بنجاح ✓" : "Password & keys rotated successfully ✓");
+        } catch (err) {
+            showAdminToast(err.message, "err");
+        }
+    });
 
     document.getElementById("admin-settings-form")?.addEventListener("submit", async e => {
         e.preventDefault();
@@ -1259,10 +1302,10 @@ function renderAuditTab(root) {
     root.innerHTML = `
         <div class="space-y-5">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                ${healthCard(isAr ? "عزل لوحة التحكم (Worker مستقل)" : "Isolated Admin Worker", h.isolatedWorker)}
+                ${healthCard(isAr ? "عزل لوحة التحكم (eria.mosasafari.com)" : "Isolated Admin Origin", h.isolatedWorker)}
                 ${healthCard(isAr ? "حماية الكوكيز + CSRF + Rate Limit" : "HttpOnly + CSRF + Rate Limit", h.httpOnlyCookie && h.csrfProtected)}
                 ${healthCard(isAr ? "مفتاح التوقيع المنفصل (JWT Secret)" : "JWT Signing Secret", h.jwtSecretSet)}
-                ${healthCard("Cloudflare KV (MOSA_KV)", h.kvBound)}
+                ${healthCard(isAr ? "خزنة البيانات المعزولة (Vault/KV)" : "Isolated Data Vault / KV", h.kvBound)}
                 ${healthCard("Green API WhatsApp Secret", h.greenApiConfigured)}
                 ${healthCard("Resend Email API Secret", h.resendConfigured)}
             </div>

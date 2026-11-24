@@ -26,6 +26,14 @@ Mosa-safari/
 │   ├── package.json                  # Sync & deploy scripts for isolated admin Worker (mosa-safari-admin)
 │   ├── src/index.js                  # Hardened Admin API (HttpOnly cookies, CSRF, IP rate limit, CSP, HSTS)
 │   └── public/                       # Isolated admin static assets + strict Disallow robots.txt
+├── hostinger/
+│   ├── shared/                       # Shared PHP 8 private vault, flock KV store, crypto, Green API & Resend
+│   ├── mosasafari.com/               # Hostinger public_html package (PHP SEO pre-renderer, API, .htaccess)
+│   └── eria.mosasafari.com/          # Hostinger isolated admin subdomain package (bcrypt, CSRF, hardened .htaccess)
+├── scripts/
+│   └── build-hostinger.sh            # Turnkey CSS/JS/PHP check & Hostinger ZIP packager (dist/hostinger/)
+├── HOSTINGER_DEPLOY.md               # Step-by-step Hostinger deployment & Search Console guide
+├── manifest.webmanifest              # Progressive Web App manifest for mosasafari.com
 ├── netlify/
 │   └── functions/
 │       └── notify-booking.js         # Serverless webhook for Green API WhatsApp & Email dispatch

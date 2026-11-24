@@ -1,0 +1,46 @@
+# ==============================================================================
+# Author: Mohamed Salem (Expert AI Engineer & Automation Architect)
+# Production Hardened .htaccess for https://eria.mosasafari.com (Hostinger)
+# ==============================================================================
+
+Options -Indexes -MultiViews
+ServerSignature Off
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1. Force HTTPS & lock subdomain to eria.mosasafari.com (keep .well-known open for SSL renewal)
+    RewriteCond %{REQUEST_URI} !^/\.well-known/
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://eria.mosasafari.com/$1 [R=301,L]
+
+    RewriteCond %{REQUEST_URI} !^/\.well-known/
+    RewriteCond %{HTTP_HOST} !^eria\.mosasafari\.com$ [NC]
+    RewriteRule ^ - [R=404,L]
+
+    # 2. Block hidden files & internal vault/library paths
+    RewriteRule ^(.*/)?\.(?!well-known/) - [R=404,L]
+    RewriteRule ^api/_lib/ - [R=404,L]
+    RewriteRule ^admin\.html$ - [R=404,L]
+    RewriteRule \.(log|sh|sql|md|lock|env|bak)$ - [R=404,L]
+
+    # 3. Route Admin API endpoints to PHP handler
+    RewriteRule ^api/admin(/.*)?$ api/index.php [QSA,L]
+
+    # 4. Route root & /admin to hardened index.php wrapper
+    RewriteRule ^$ index.php [L]
+    RewriteRule ^admin/?$ index.php [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    Header always set X-Frame-Options "DENY"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Robots-Tag "noindex, nofollow, noarchive, nosnippet"
+    Header always set Referrer-Policy "no-referrer"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+    Header always set Cache-Control "no-store, no-cache, must-revalidate, private"
+    Header always unset X-Powered-By
+</IfModule>

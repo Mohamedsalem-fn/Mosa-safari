@@ -440,6 +440,13 @@ async function handleAdminRoute(request, env, url) {
         );
     }
 
+    if (url.pathname === "/api/admin/password" && request.method === "POST") {
+        return jsonResponse({
+            ok: false,
+            error: "On Cloudflare Workers, rotate ADMIN_PASSWORD via: npx wrangler secret put ADMIN_PASSWORD"
+        }, 501);
+    }
+
     if (url.pathname === "/api/admin/overview" && request.method === "GET") {
         const [bookings, trips, promos, settings, analytics, auditLog] = await Promise.all([
             kvGetJson(env, KV_KEYS.BOOKINGS, []),

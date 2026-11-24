@@ -1,0 +1,70 @@
+# ==============================================================================
+# Author: Mohamed Salem (Expert AI Engineer & Automation Architect)
+# Production .htaccess for https://mosasafari.com (Hostinger public_html)
+# ==============================================================================
+
+Options -Indexes -MultiViews
+ServerSignature Off
+DirectoryIndex index.php index.html
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1. Enforce HTTPS & canonical non-www https://mosasafari.com (keep .well-known open for SSL renewal)
+    RewriteCond %{REQUEST_URI} !^/\.well-known/
+    RewriteCond %{HTTPS} off [OR]
+    RewriteCond %{HTTP_HOST} ^www\.mosasafari\.com$ [NC]
+    RewriteRule ^(.*)$ https://mosasafari.com/$1 [R=301,L]
+
+    # 2. Subdomain isolation: prevent accessing /eria/ or /admin* from main domain
+    RewriteCond %{HTTP_HOST} !^eria\.mosasafari\.com$ [NC]
+    RewriteRule ^eria(/.*)?$ - [R=404,L]
+    RewriteRule ^admin(\.html)?(/.*)?$ - [R=404,L]
+    RewriteRule ^api/admin(/.*)?$ - [R=404,L]
+
+    # 3. Block sensitive & hidden files (except .netlify webhook route)
+    RewriteRule ^\.netlify/functions/notify-booking$ api/index.php [QSA,L]
+    RewriteRule ^(.*/)?\.(?!well-known/) - [R=404,L]
+    RewriteRule ^api/_lib/ - [R=404,L]
+    RewriteRule \.(log|sh|sql|md|json|lock|env|bak)$ - [R=404,L]
+
+    # 4. Route Storefront Public APIs
+    RewriteRule ^api/(public/config|track|notify-booking)$ api/index.php [QSA,L]
+
+    # 5. Route Homepage through PHP Multilingual SEO Pre-Renderer
+    RewriteRule ^$ index.php [QSA,L]
+    RewriteRule ^index\.html$ index.php [QSA,L]
+</IfModule>
+
+<IfModule mod_mime.c>
+    AddType application/manifest+json .webmanifest
+    AddType image/svg+xml .svg
+    AddType image/webp .webp
+</IfModule>
+
+# Security Headers
+<IfModule mod_headers.c>
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    Header always unset X-Powered-By
+</IfModule>
+
+# Compression (Brotli / Gzip)
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json application/manifest+json image/svg+xml
+</IfModule>
+
+# Browser Caching for Maximum PageSpeed / Core Web Vitals
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType application/manifest+json "access plus 1 week"
+</IfModule>

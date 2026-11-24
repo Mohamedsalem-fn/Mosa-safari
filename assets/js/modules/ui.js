@@ -61,20 +61,15 @@ export function setHeroPreview(idx) {
 }
 
 export function switchHubTab(tab) {
-    document.getElementById("hub-panel-prices")?.classList.toggle("hidden", tab !== "prices");
-    document.getElementById("hub-panel-faq")?.classList.toggle("hidden", tab !== "faq");
-    const pBtn = document.getElementById("hub-tab-prices");
-    const fBtn = document.getElementById("hub-tab-faq");
-    if (pBtn) {
-        pBtn.className = tab === "prices"
-            ? "px-4 py-2 rounded-lg text-xs font-extrabold bg-champagne text-carbon-950 transition"
-            : "px-4 py-2 rounded-lg text-xs font-extrabold border border-carbon-900/15 dark:border-white/15 transition";
-    }
-    if (fBtn) {
-        fBtn.className = tab === "faq"
-            ? "px-4 py-2 rounded-lg text-xs font-extrabold bg-champagne text-carbon-950 transition"
-            : "px-4 py-2 rounded-lg text-xs font-extrabold border border-carbon-900/15 dark:border-white/15 transition";
-    }
+    ["prices", "faq", "tourism"].forEach(id => {
+        document.getElementById(`hub-panel-${id}`)?.classList.toggle("hidden", tab !== id);
+        const btn = document.getElementById(`hub-tab-${id}`);
+        if (btn) {
+            btn.className = tab === id
+                ? "px-4 py-2 rounded-lg text-xs font-extrabold bg-champagne text-carbon-950 transition"
+                : "px-4 py-2 rounded-lg text-xs font-extrabold border border-carbon-900/15 dark:border-white/15 transition";
+        }
+    });
 }
 
 export function initParticles() {

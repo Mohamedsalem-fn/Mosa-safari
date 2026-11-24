@@ -7,20 +7,10 @@
  */
 
 /**
- * Green API & Booking Notification Configuration
- * Instance Phone (Sender): 201207823884
- * Owner WhatsApp (Recipient): Receives instant booking alerts via Green API
+ * Public support contacts (notifications & API secrets are handled strictly server-side).
  */
 export const NOTIFICATION_CONFIG = {
-    greenApi: {
-        apiUrl: "https://7107.api.greenapi.com",
-        mediaUrl: "https://7107.api.greenapi.com",
-        idInstance: "710722810425",
-        apiTokenInstance: "08b08d6124df40739ea205139f5311f67b9ff1f2876b4fb9af",
-        instancePhone: "201207823884"
-    },
-    // Owner WhatsApp number that receives new booking notifications via Green API
-    ownerPhones: ["201023355550"],
+    supportPhone: "201023355550",
     ownerEmail: "info@mosasafari.com"
 };
 
@@ -161,36 +151,9 @@ export function buildCustomerConfirmationContent(payload) {
 }
 
 /**
- * Send a WhatsApp message directly via Green API (supports browser CORS).
- * @param {string} chatId - Format: "201207823884@c.us"
- * @param {string} message
- * @returns {Promise<{ok: boolean, idMessage?: string, error?: string}>}
- */
-export async function sendGreenApiWhatsApp(chatId, message) {
-    const { apiUrl, idInstance, apiTokenInstance } = NOTIFICATION_CONFIG.greenApi;
-    const endpoint = `${apiUrl}/waInstance${idInstance}/sendMessage/${apiTokenInstance}`;
-
-    try {
-        const res = await fetch(endpoint, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ chatId, message })
-        });
-        if (!res.ok) {
-            return { ok: false, error: `HTTP ${res.status}` };
-        }
-        const data = await res.json();
-        return { ok: Boolean(data && data.idMessage), idMessage: data?.idMessage };
-    } catch (err) {
-        return { ok: false, error: err?.message || "Network error" };
-    }
-}
-
-/**
- * Dispatch booking notifications:
- * 1) Direct Green API dispatch to Owner WhatsApp (+ customer WhatsApp confirmation)
- * 2) Server-side endpoint (/.netlify/functions/notify-booking) on Netlify or dev_server.py for Resend Email (zero browser CORS errors)
- * 3) Client-side FormSubmit AJAX fallback if running on a basic static server without backend POST support
+ * Dispatch booking notifications strictly via server-side endpoint (/api/notify-booking):
+ * 1) Primary server-side API on Hostinger (PHP) or Cloudflare Workers handles Green API + Resend safely without exposing keys.
+ * 2) Secondary Netlify Function fallback & static FormSubmit email fallback if previewed on plain static HTTP.
  * @param {object} payload
  * @returns {Promise<{whatsappSent: boolean, customerWaSent: boolean, emailSent: boolean}>}
  */
@@ -204,8 +167,8 @@ export async function dispatchBookingNotifications(payload) {
     const ownerMessage = buildOwnerWhatsAppMessage(payload);
     const customerContent = buildCustomerConfirmationContent(payload);
 
-    // 1. Try managed Cloudflare Workers endpoint first (/api/notify-booking) so live Admin settings apply
-    let handledByManagedWorker = false;
+    // 1. Primary server-side endpoint (/api/notify-booking)
+    let handledByServer = false;
     try {
         const srvRes = await fetch("/api/notify-booking", {
             method: "POST",
@@ -221,39 +184,28 @@ export async function dispatchBookingNotifications(payload) {
         });
         if (srvRes.ok) {
             const srvData = await srvRes.json();
-            if (srvData.managed) {
-                handledByManagedWorker = true;
+            if (srvData.managed || srvData.ok) {
+                handledByServer = true;
                 result.emailSent = Boolean(srvData.emailSent);
                 result.whatsappSent = Boolean(srvData.whatsappSent);
             }
         }
     } catch {
-        // Fallback below when running locally or on static hosting without Cloudflare Worker
+        // Fallback below when previewed on plain static server
     }
 
-    if (!handledByManagedWorker) {
-        // 2. Local / fallback: Send WhatsApp notification ONLY to Owner via Green API
-        const uniqueOwnerPhones = [...new Set(NOTIFICATION_CONFIG.ownerPhones)];
-        for (const phone of uniqueOwnerPhones) {
-            const chatId = formatWhatsAppChatId(phone);
-            if (!chatId) continue;
-            const waRes = await sendGreenApiWhatsApp(chatId, ownerMessage);
-            if (waRes.ok) {
-                result.whatsappSent = true;
-            }
-        }
-
-        // 3. Fallback Netlify Function for Email
+    if (!handledByServer) {
         try {
             const srvRes = await fetch("/.netlify/functions/notify-booking", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     payload,
+                    ownerMessage,
                     subject: customerContent.subject,
                     text: customerContent.text,
                     html: customerContent.html,
-                    whatsappAlreadySent: result.whatsappSent
+                    whatsappAlreadySent: false
                 })
             });
             if (srvRes.ok) {
@@ -262,10 +214,9 @@ export async function dispatchBookingNotifications(payload) {
                 if (srvData.whatsappSent) result.whatsappSent = true;
             }
         } catch {
-            // Ignored on static host
+            // Ignored on plain static preview
         }
 
-        // 4. Client-side email relay fallback
         if (!result.emailSent && payload.email) {
             try {
                 const emailRes = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(payload.email)}`, {

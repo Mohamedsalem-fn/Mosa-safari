@@ -1,0 +1,24 @@
+{
+  "name": "موسى سفاري | Mosa Safari Sharm El Sheikh",
+  "short_name": "Mosa Safari",
+  "description": "أفضل رحلات سفاري شرم الشيخ والسياحة في جنوب سيناء بأسعار تبدأ من $10.13 وتقييم 4.9★ مع الدفع عند الوصول.",
+  "start_url": "/?utm_source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#08090C",
+  "theme_color": "#D9B36C",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/assets/images/logo-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/assets/images/logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

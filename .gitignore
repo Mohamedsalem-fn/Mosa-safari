@@ -8,3 +8,12 @@ assets/js/env.local.js
 __pycache__/
 *.pyc
 dist/
+hostinger/*/assets/
+hostinger/*/index.html
+hostinger/*/admin.html
+hostinger/*/robots.txt
+hostinger/*/sitemap.xml
+hostinger/*/manifest.webmanifest
+hostinger/*/api/_lib/
+hostinger/**/.mosa_secrets.php
+hostinger/**/.mosa_vault/
