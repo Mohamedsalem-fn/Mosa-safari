@@ -63,7 +63,7 @@ Mosa-safari/
             ├── booking.js            # Upgraded 5-step booking UI, Pay on Arrival + Visa placeholder gateway
             ├── notifications.js      # Green API WhatsApp owner alerts & Resend customer email dispatch
             ├── mobile-app.js         # Dedicated luxury native-app mobile shell (< 640px)
-            └── ai-assistant.js       # MOSA AI floating concierge widget & mobile bottom sheet
+            └── ai-assistant.js       # MOSA AI 2.0 interactive concierge (NLU, 3-step Matcher, Live Quote Builder & voice)
 ```
 
 ---
@@ -76,6 +76,7 @@ Mosa-safari/
 - **Streamlined 5-Step Interactive Booking Modal:** Direct tour selection, traveler details validation, guest count & localized vehicle type, hotel pickup & preferred tour date, promo code validation (`MOSA20` for 20% off + automatic 10% group discount for 5+ guests), and instant WhatsApp booking handoff.
 - **Anime.js v4 Cinematic Motion Layer (`assets/js/cinematic.js`):** Staggered hero and card entrances, 3D interactive card tilt, magnetic header buttons, and scroll-reactive floating glass navigation.
 - **Isolated Hardened Admin Worker (`mosa-safari-admin`) & Cloudflare KV Persistence:** Physically separated from the public storefront Worker (`mosa-safari` serves zero admin routes or secrets). Protected by a dedicated `ADMIN_JWT_SECRET`, `__Host-mosa_admin_session` `HttpOnly` + `Secure` + `SameSite=Strict` cookies, strict `X-CSRF-Token` & `Origin` checks, KV-backed IP brute-force rate limiting (5 fails / 15m), server-side session revocation (`jti`), strict CSP (no inline scripts), HSTS, `X-Frame-Options: DENY`, and `noindex` headers. Features real-time Chart.js analytics, Bookings CRM with UTF-8 CSV export, live Tours/Promos/Settings sync via `MOSA_KV`, Customers LTV directory, and Audit Log.
+- **MOSA AI 2.0 Smart Concierge (`assets/js/modules/ai-assistant.js`):** Luxury Sinai concierge widget (Desktop floating glass panel + Mobile bottom sheet) featuring a 4-language NLU entity extractor (party size, morning/evening slot, budget in USD/EGP/EUR, promo detection) with persistent session memory, interactive tour & side-by-side comparison cards inside chat, a **3-Step Safari Matcher Quiz**, a **Live Instant Quote & Discount Calculator**, Web Speech API voice input, and 1-click pre-filled booking modal launch.
 - **Multilingual SEO & Google Rich Results (`ar`, `en`, `it`, `ru`):** Comprehensive 4-language SEO metadata with dynamic `?lang=` URL routing (`hreflang` + canonical/Open Graph synchronization in `ui.js`), unified JSON-LD `@graph` schemas (`WebSite`, `TravelAgency`/`LocalBusiness`, dual-typed `Product` + `TouristTrip` `ItemList` for all 8 tours with USD offers & star ratings, 6-question `FAQPage`, `BreadcrumbList`), crawlable pre-rendered price rows, `robots.txt`, and `hreflang`/Image XML `sitemap.xml`.
 
 ---

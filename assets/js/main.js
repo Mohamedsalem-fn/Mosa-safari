@@ -7,7 +7,7 @@
  */
 
 import { SAFARI_TRIPS } from "./data/trips.js";
-import { I18N, AI_GREETINGS } from "./data/i18n.js";
+import { I18N } from "./data/i18n.js";
 import {
     state,
     getActiveRateText,
@@ -48,9 +48,9 @@ import {
     UI_EXTRAs
 } from "./modules/booking.js";
 import {
-    appendAiMsg,
-    handleAiQuery,
-    toggleAiWidget
+    toggleAiWidget,
+    initAiAssistant,
+    refreshAiAssistantUI
 } from "./modules/ai-assistant.js";
 import {
     renderMobileApp,
@@ -135,6 +135,7 @@ function refreshAllCurrencyViews() {
     updateLiveRateBadge();
     renderTrips();
     renderMobileApp();
+    refreshAiAssistantUI();
     const bookingModal = document.getElementById("booking-modal");
     if (bookingModal && !bookingModal.classList.contains("hidden")) {
         renderBookingStep();
@@ -374,17 +375,7 @@ window.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    bindEvent("ai-fab", "click", () => toggleAiWidget());
-    bindEvent("ai-close-btn", "click", () => toggleAiWidget(false));
-    bindEvent("ai-lang-select", "change", e => appendAiMsg(AI_GREETINGS[e.target.value], "bot"));
-    document.querySelectorAll(".ai-chip").forEach(c => c.addEventListener("click", () => handleAiQuery(c.textContent)));
-    bindEvent("ai-form", "submit", e => {
-        e.preventDefault();
-        const i = document.getElementById("ai-input");
-        if (!i || !i.value.trim()) return;
-        handleAiQuery(i.value.trim());
-        i.value = "";
-    });
+    initAiAssistant();
 
     bindEvent("open-compare-btn", "click", openCompareModal);
     bindEvent("close-compare-btn", "click", () => document.getElementById("compare-modal")?.classList.add("hidden"));
