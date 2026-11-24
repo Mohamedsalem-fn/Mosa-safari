@@ -131,7 +131,13 @@ const AI_COPY = {
             family: ["احسبها لـ 2 كبار وطفلين", "أرخص رحلة عائلية؟", "الاستلام من الفندق مجاني؟", "تفاصيل الدفع عند الوصول"],
             compare: ["احسب سعر الفائز لـ 3 أفراد", "أيهما أفضل للأطفال؟", "مواعيد الصباح أم المساء؟", "فعّل كود MOSA20"],
             quote: ["أضف كود MOSA20 للحسبة", "قارنها مع رحلة أخرى", "سياسة الإلغاء المجاني", "تواصل واتساب مع مرشد"]
-        }
+        },
+        welcome_actions: [
+            { kind: "mode", val: "matcher", icon: "🧭", title: "مستشار الاختيار", sub: "3 أسئلة لأفضل رحلة" },
+            { kind: "mode", val: "quote", icon: "🧮", title: "حاسبة السعر", sub: "احسب التكلفة والخصم" },
+            { kind: "query", val: "رشح لي رحلة عائلية في الغروب", icon: "🌅", title: "غروب وعائلات", sub: "الأكثر طلباً بشرم" },
+            { kind: "promo", val: "MOSA20", icon: "🏷️", title: "خصم 20% فوري", sub: "تفعيل كود MOSA20" }
+        ]
     },
     en: {
         ctx_guests: (a, c) => `${a} Adult${a > 1 ? "s" : ""}${c ? ` + ${c} Child${c > 1 ? "ren" : ""}` : ""}`,
@@ -232,7 +238,13 @@ const AI_COPY = {
             family: ["Calculate 2 adults + 2 kids", "Cheapest family tour?", "Free hotel pickup zones?", "How Pay on Arrival works"],
             compare: ["Quote the winner for 3 adults", "Best one for kids?", "Morning vs Sunset slot?", "Apply MOSA20 code"],
             quote: ["Apply MOSA20 to my quote", "Compare with another tour", "Cancellation policy", "Chat on WhatsApp"]
-        }
+        },
+        welcome_actions: [
+            { kind: "mode", val: "matcher", icon: "🧭", title: "Trip Matcher", sub: "3 quick questions" },
+            { kind: "mode", val: "quote", icon: "🧮", title: "Price Builder", sub: "Live quote & savings" },
+            { kind: "query", val: "Recommend a sunset or family safari", icon: "🌅", title: "Sunset & Family", sub: "Top Sharm picks" },
+            { kind: "promo", val: "MOSA20", icon: "🏷️", title: "Unlock 20% OFF", sub: "Apply code MOSA20" }
+        ]
     },
     it: {
         ctx_guests: (a, c) => `${a} Adult${a > 1 ? "i" : "o"}${c ? ` + ${c} Bambin${c > 1 ? "i" : "o"}` : ""}`,
@@ -333,7 +345,13 @@ const AI_COPY = {
             family: ["Calcola 2 adulti + 2 bimbi", "Tour più economico?", "Transfer hotel gratis?", "Paga all'arrivo"],
             compare: ["Calcola per 3 adulti", "Migliore per bambini?", "Mattina o Tramonto?", "Applica MOSA20"],
             quote: ["Applica MOSA20", "Confronta con altro tour", "Cancellazione gratuita", "Supporto WhatsApp"]
-        }
+        },
+        welcome_actions: [
+            { kind: "mode", val: "matcher", icon: "🧭", title: "Trova Tour", sub: "3 domande veloci" },
+            { kind: "mode", val: "quote", icon: "🧮", title: "Calcola Prezzo", sub: "Preventivo live" },
+            { kind: "query", val: "Consiglia un safari tramonto o famiglia", icon: "🌅", title: "Tramonto & Famiglia", sub: "I più scelti" },
+            { kind: "promo", val: "MOSA20", icon: "🏷️", title: "Sconto 20% Subito", sub: "Codice MOSA20" }
+        ]
     },
     ru: {
         ctx_guests: (a, c) => `${a} взр.${c ? ` + ${c} дет.` : ""}`,
@@ -434,7 +452,13 @@ const AI_COPY = {
             family: ["Посчитай 2 взр. + 2 реб.", "Самый выгодный тур?", "Бесплатный трансфер?", "Оплата при получении"],
             compare: ["Расчёт лидера на 3 взр.", "Что лучше для детей?", "Утром или на закат?", "Применить MOSA20"],
             quote: ["Добавить скидку MOSA20", "Сравнить с другим туром", "Условия отмены", "Написать в WhatsApp"]
-        }
+        },
+        welcome_actions: [
+            { kind: "mode", val: "matcher", icon: "🧭", title: "Подбор тура", sub: "3 быстрых вопроса" },
+            { kind: "mode", val: "quote", icon: "🧮", title: "Калькулятор", sub: "Точная цена и скидки" },
+            { kind: "query", val: "Порекомендуй семейное сафари на закате", icon: "🌅", title: "Закат и Семья", sub: "Хиты в Шарме" },
+            { kind: "promo", val: "MOSA20", icon: "🏷️", title: "Скидка 20% сразу", sub: "Промокод MOSA20" }
+        ]
     }
 };
 
@@ -848,6 +872,25 @@ function formatRichText(txt) {
         .replace(/\n/g, "<br>");
 }
 
+function renderWelcomeBentoHtml(lang) {
+    const actions = getCopy(lang).welcome_actions || [];
+    if (!actions.length) return "";
+    return `
+        <div class="grid grid-cols-2 gap-2 mt-2.5">
+            ${actions.map(a => `
+                <button type="button" data-ai-action="welcome-action" data-kind="${escHtml(a.kind)}" data-val="${escHtml(a.val)}"
+                    class="p-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 hover:border-champagne active:scale-[0.98] text-start flex items-center gap-2 transition">
+                    <span class="w-8 h-8 rounded-lg bg-white dark:bg-carbon-800 flex items-center justify-center text-sm shrink-0 shadow-sm">${a.icon}</span>
+                    <span class="min-w-0">
+                        <span class="block text-[11px] font-black leading-tight truncate">${escHtml(a.title)}</span>
+                        <span class="block text-[9.5px] opacity-65 truncate mt-0.5">${escHtml(a.sub)}</span>
+                    </span>
+                </button>
+            `).join("")}
+        </div>
+    `;
+}
+
 export function appendAiMsg(txt, sender = "bot", options = null) {
     const box = document.getElementById("ai-messages");
     if (!box) return;
@@ -870,6 +913,9 @@ export function appendAiMsg(txt, sender = "bot", options = null) {
             html += `<div class="mt-2.5 space-y-2">${renderTourCardHtml(trip, aiLang)}</div>`;
         }
     } else if (options && typeof options === "object") {
+        if (options.welcomeBento) {
+            html += renderWelcomeBentoHtml(aiLang);
+        }
         if (options.comparePair && options.comparePair.length === 2) {
             html += renderComparisonCardHtml(options.comparePair[0], options.comparePair[1], aiLang);
         }
@@ -913,11 +959,13 @@ function renderContextMemoryBar() {
 
     if (!pills.length) {
         bar.classList.add("hidden");
+        bar.classList.remove("flex");
         bar.innerHTML = "";
         return;
     }
 
     bar.classList.remove("hidden");
+    bar.classList.add("flex");
     bar.innerHTML = `
         <div class="flex items-center gap-1.5 flex-wrap min-w-0">${pills.join("")}</div>
         <button type="button" data-ai-action="clear-context" class="px-2 py-0.5 rounded bg-carbon-950/10 dark:bg-white/10 hover:bg-rose-500/20 text-[10px] font-black shrink-0 transition">${escHtml(c.ctx_clear)}</button>
@@ -1302,66 +1350,100 @@ function renderQuoteBuilderView() {
     const q = aiSession.quote;
     const defaultPromo = state.platformConfig?.promos?.find(p => p.active !== false)?.code || "MOSA20";
     const calc = computeAiQuote(q.tripIds, q.adults, q.children, q.usePromo ? (aiSession.promoCode || defaultPromo) : "");
+    const tripIdsAttr = calc.trips.map(t => t.id).join(",");
+    const selectedTitles = calc.trips.map(t => getTripTitle(t, lang)).join(" + ");
 
     view.innerHTML = `
-        <div class="space-y-3 ai-msg-enter">
+        <div class="flex-1 overflow-y-auto overscroll-contain p-3 sm:p-3.5 space-y-2.5 ai-msg-enter">
             <div>
                 <h4 class="text-xs font-black text-champagne-dark dark:text-champagne">${escHtml(c.qb_title)}</h4>
                 <p class="text-[10px] opacity-70">${escHtml(c.qb_sub)}</p>
             </div>
 
+            <!-- Horizontal Scrollable Compact Tour Cards -->
             <div class="p-2.5 rounded-xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 space-y-2">
-                <div class="text-[10px] font-black opacity-75">${escHtml(c.qb_pick_tours)}</div>
-                <div class="flex flex-wrap gap-1.5">
+                <div class="flex items-center justify-between text-[10px] font-black opacity-80">
+                    <span>${escHtml(c.qb_pick_tours)}</span>
+                    <span class="text-champagne-dark dark:text-champagne">${calc.trips.length}</span>
+                </div>
+                <div class="m-hscroll flex items-stretch gap-2 overflow-x-auto pb-1">
                     ${catalog.map(t => {
                         const active = q.tripIds.includes(t.id);
                         const fullT = getTripTitle(t, lang);
                         const shortT = fullT.includes(":") ? fullT.split(":").slice(1).join(":").trim() : fullT;
                         return `<button type="button" data-ai-action="quote-toggle-trip" data-trip-id="${escHtml(t.id)}"
-                            class="px-2 py-1 rounded-lg border text-[10px] font-extrabold text-start transition ${active ? "border-champagne bg-champagne text-carbon-950 font-black" : "border-carbon-900/10 dark:border-white/10 hover:border-champagne/50"}">
-                            ${escHtml(shortT)} · ${escHtml(fmtPrice(t.adultPrice))}
+                            class="shrink-0 w-[10.5rem] sm:w-[11rem] p-2 rounded-xl border text-start flex items-center gap-2 transition ${active ? "border-champagne bg-champagne/15 ring-1 ring-champagne shadow-sm" : "border-carbon-900/10 dark:border-white/10 bg-[#F6F3EC]/60 dark:bg-carbon-900 hover:border-champagne/50"}">
+                            <img src="${escHtml(t.img)}" alt="${escHtml(shortT)}" class="w-10 h-10 rounded-lg object-cover shrink-0 border border-white/15" />
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span class="text-[10.5px] font-black text-sea-dark dark:text-sea">${escHtml(fmtPrice(t.adultPrice))}</span>
+                                    <span class="w-4 h-4 rounded-full text-[9px] flex items-center justify-center font-black ${active ? "bg-champagne text-carbon-950" : "bg-carbon-900/10 dark:bg-white/10 opacity-50"}">${active ? "✓" : "+"}</span>
+                                </div>
+                                <div class="text-[10px] font-extrabold leading-tight line-clamp-2 mt-0.5">${escHtml(shortT)}</div>
+                            </div>
                         </button>`;
                     }).join("")}
                 </div>
             </div>
 
+            <!-- Comfortable Full-Width / Responsive Guest Steppers -->
             <div class="p-2.5 rounded-xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 space-y-2">
                 <div class="text-[10px] font-black opacity-75">${escHtml(c.qb_guests)}</div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div class="p-2 rounded-lg bg-[#F6F3EC] dark:bg-carbon-900 flex items-center justify-between">
-                        <span class="text-[10px] font-extrabold">${escHtml(c.qb_adults)}</span>
-                        <div class="flex items-center gap-1.5">
-                            <button type="button" data-ai-action="quote-step" data-field="adults" data-delta="-1" class="w-6 h-6 rounded bg-white dark:bg-carbon-800 font-black text-xs border border-carbon-900/10 dark:border-white/10">−</button>
-                            <span class="w-5 text-center font-black text-xs">${q.adults}</span>
-                            <button type="button" data-ai-action="quote-step" data-field="adults" data-delta="1" class="w-6 h-6 rounded bg-champagne text-carbon-950 font-black text-xs">+</button>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div class="p-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 flex items-center justify-between gap-2">
+                        <span class="text-[11px] font-extrabold">${escHtml(c.qb_adults)}</span>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button type="button" data-ai-action="quote-step" data-field="adults" data-delta="-1" class="w-8 h-8 rounded-lg bg-white dark:bg-carbon-800 font-black text-sm border border-carbon-900/15 dark:border-white/15 active:scale-95 transition">−</button>
+                            <span class="w-6 text-center font-black text-xs">${q.adults}</span>
+                            <button type="button" data-ai-action="quote-step" data-field="adults" data-delta="1" class="w-8 h-8 rounded-lg bg-champagne text-carbon-950 font-black text-sm active:scale-95 transition">+</button>
                         </div>
                     </div>
-                    <div class="p-2 rounded-lg bg-[#F6F3EC] dark:bg-carbon-900 flex items-center justify-between">
-                        <span class="text-[10px] font-extrabold">${escHtml(c.qb_children)}</span>
-                        <div class="flex items-center gap-1.5">
-                            <button type="button" data-ai-action="quote-step" data-field="children" data-delta="-1" class="w-6 h-6 rounded bg-white dark:bg-carbon-800 font-black text-xs border border-carbon-900/10 dark:border-white/10">−</button>
-                            <span class="w-5 text-center font-black text-xs">${q.children}</span>
-                            <button type="button" data-ai-action="quote-step" data-field="children" data-delta="1" class="w-6 h-6 rounded bg-champagne text-carbon-950 font-black text-xs">+</button>
+                    <div class="p-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 flex items-center justify-between gap-2">
+                        <span class="text-[11px] font-extrabold">${escHtml(c.qb_children)}</span>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button type="button" data-ai-action="quote-step" data-field="children" data-delta="-1" class="w-8 h-8 rounded-lg bg-white dark:bg-carbon-800 font-black text-sm border border-carbon-900/15 dark:border-white/15 active:scale-95 transition">−</button>
+                            <span class="w-6 text-center font-black text-xs">${q.children}</span>
+                            <button type="button" data-ai-action="quote-step" data-field="children" data-delta="1" class="w-8 h-8 rounded-lg bg-champagne text-carbon-950 font-black text-sm active:scale-95 transition">+</button>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Departure Time Slot + Promo Toggle -->
             <div class="p-2.5 rounded-xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 space-y-2">
                 <div class="text-[10px] font-black opacity-75">${escHtml(c.qb_slot)}</div>
                 <div class="grid grid-cols-2 gap-2">
                     <button type="button" data-ai-action="quote-slot" data-slot="morning"
-                        class="py-1.5 px-2 rounded-lg border text-[11px] font-black transition ${q.slot !== "evening" ? "border-champagne bg-champagne/15 text-champagne-dark dark:text-champagne" : "border-carbon-900/10 dark:border-white/10"}">☀️ ${escHtml(c.qb_morning)}</button>
+                        class="py-2 px-2 rounded-xl border text-[11px] font-black transition ${q.slot !== "evening" ? "border-champagne bg-champagne/15 text-champagne-dark dark:text-champagne" : "border-carbon-900/10 dark:border-white/10"}">☀️ ${escHtml(c.qb_morning)}</button>
                     <button type="button" data-ai-action="quote-slot" data-slot="evening"
-                        class="py-1.5 px-2 rounded-lg border text-[11px] font-black transition ${q.slot === "evening" ? "border-champagne bg-champagne/15 text-champagne-dark dark:text-champagne" : "border-carbon-900/10 dark:border-white/10"}">🌙 ${escHtml(c.qb_evening)}</button>
+                        class="py-2 px-2 rounded-xl border text-[11px] font-black transition ${q.slot === "evening" ? "border-champagne bg-champagne/15 text-champagne-dark dark:text-champagne" : "border-carbon-900/10 dark:border-white/10"}">🌙 ${escHtml(c.qb_evening)}</button>
                 </div>
                 <label class="flex items-center justify-between gap-2 pt-1 cursor-pointer">
                     <span class="text-[11px] font-extrabold text-sea-dark dark:text-sea">${escHtml(c.qb_promo_lbl)}</span>
-                    <input type="checkbox" data-ai-action="quote-promo-toggle" ${q.usePromo ? "checked" : ""} class="accent-champagne w-4 h-4" />
+                    <input type="checkbox" data-ai-action="quote-promo-toggle" ${q.usePromo ? "checked" : ""} class="accent-champagne w-4 h-4 shrink-0" />
                 </label>
             </div>
+        </div>
 
-            ${renderQuoteCardHtml(calc, lang, q.slot, true)}
+        <!-- Pinned Sticky Bottom Quote Receipt + Book CTA -->
+        <div id="ai-quote-sticky-bar" class="shrink-0 p-3 bg-carbon-950 text-white border-t border-champagne/30 space-y-2 shadow-2xl">
+            <div class="flex items-center justify-between gap-2 text-[11px]">
+                <span class="text-[#B5B0A8] truncate min-w-0">${escHtml(selectedTitles)}</span>
+                ${calc.totalSavedUsd > 0 ? `<span class="px-2 py-0.5 rounded-md bg-sea/20 text-sea text-[10px] font-black shrink-0">${escHtml(c.quote_saved(fmtPrice(calc.totalSavedUsd)))}</span>` : ""}
+            </div>
+            <div class="flex items-baseline justify-between gap-2">
+                <div class="text-[10.5px] text-[#B5B0A8]">
+                    <span>${escHtml(c.ctx_guests(calc.adults, calc.children))}</span>
+                    ${calc.groupPct > 0 ? `<span class="text-sea font-bold"> · -${calc.groupPct}%</span>` : ""}
+                    ${calc.promo ? `<span class="text-champagne font-bold"> · ${escHtml(calc.promo.code)} (-${calc.promo.discount}%)</span>` : ""}
+                </div>
+                <div class="flex items-baseline gap-1.5 shrink-0">
+                    ${calc.totalSavedUsd > 0 ? `<span class="text-[11px] line-through opacity-55">${escHtml(fmtPrice(calc.baseUsd))}</span>` : ""}
+                    <span class="text-base font-black text-champagne">${escHtml(fmtPrice(calc.netUsd))}</span>
+                </div>
+            </div>
+            <button type="button" data-ai-action="book-chat-quote" data-trip-ids="${escHtml(tripIdsAttr)}" data-adults="${calc.adults}" data-children="${calc.children}" data-slot="${escHtml(q.slot)}" data-promo="${escHtml(calc.promo?.code || "")}"
+                class="w-full py-2.5 px-3 rounded-xl bg-champagne hover:bg-champagne-light text-carbon-950 text-xs font-black shadow-lg active:scale-[0.98] transition">${escHtml(c.qb_cta)}</button>
         </div>
     `;
 }
@@ -1376,7 +1458,11 @@ export function switchAiMode(mode) {
 
     document.getElementById("ai-chat-view")?.classList.toggle("hidden", mode !== "chat");
     document.getElementById("ai-matcher-view")?.classList.toggle("hidden", mode !== "matcher");
-    document.getElementById("ai-quote-view")?.classList.toggle("hidden", mode !== "quote");
+    const quoteView = document.getElementById("ai-quote-view");
+    if (quoteView) {
+        quoteView.classList.toggle("hidden", mode !== "quote");
+        quoteView.classList.toggle("flex", mode === "quote");
+    }
 
     if (mode === "matcher") renderMatcherView();
     if (mode === "quote") renderQuoteBuilderView();
@@ -1444,6 +1530,18 @@ function toggleVoiceInput() {
     }
 }
 
+function applyPromoSelection(rawCode = "MOSA20") {
+    const code = String(rawCode || "MOSA20").toUpperCase();
+    state.booking.promoCode = code;
+    aiSession.promoCode = code;
+    renderContextMemoryBar();
+    syncWhatsAppConciergeLink();
+    if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(code).catch(() => {});
+    }
+    showToast(getCopy(getAiLang()).promo_copied(code));
+}
+
 function resetAiConversation() {
     aiSession.adults = null;
     aiSession.children = null;
@@ -1463,7 +1561,7 @@ function resetAiConversation() {
     syncWhatsAppConciergeLink();
 
     const lang = getAiLang();
-    appendAiMsg(AI_GREETINGS[lang] || AI_GREETINGS.en, "bot");
+    appendAiMsg(AI_GREETINGS[lang] || AI_GREETINGS.en, "bot", { welcomeBento: true });
     if (aiSession.mode === "matcher") renderMatcherView();
     if (aiSession.mode === "quote") renderQuoteBuilderView();
 }
@@ -1485,6 +1583,7 @@ export function toggleAiWidget(force = null) {
     const shouldOpen = force === true || (force === null && isHidden);
 
     if (shouldOpen) {
+        p.style.transform = "";
         const sel = document.getElementById("ai-lang-select");
         const msgs = document.getElementById("ai-messages");
         if (sel && msgs && !msgs.children.length) {
@@ -1496,15 +1595,18 @@ export function toggleAiWidget(force = null) {
             document.body.classList.add("ai-sheet-open");
         }
         if (msgs && !msgs.children.length) {
-            appendAiMsg(AI_GREETINGS[getAiLang()], "bot");
+            appendAiMsg(AI_GREETINGS[getAiLang()], "bot", { welcomeBento: true });
             updateDynamicChips("default");
         }
         syncWhatsAppConciergeLink();
-        setTimeout(() => document.getElementById("ai-input")?.focus({ preventScroll: true }), 120);
+        if (window.innerWidth >= 640 && window.matchMedia?.("(pointer: fine)")?.matches) {
+            setTimeout(() => document.getElementById("ai-input")?.focus({ preventScroll: true }), 140);
+        }
     } else {
         p.classList.add("hidden");
+        p.style.transform = "";
         if (backdrop) backdrop.classList.add("hidden");
-        document.body.classList.remove("ai-sheet-open");
+        document.body.classList.remove("ai-sheet-open", "ai-keyboard-open");
     }
 }
 
@@ -1521,9 +1623,68 @@ export function initAiAssistant() {
     document.getElementById("ai-close-btn")?.addEventListener("click", () => toggleAiWidget(false));
     document.getElementById("ai-lang-select")?.addEventListener("change", e => {
         const nextLang = e.target.value;
-        appendAiMsg(AI_GREETINGS[nextLang] || AI_GREETINGS.en, "bot");
+        appendAiMsg(AI_GREETINGS[nextLang] || AI_GREETINGS.en, "bot", { welcomeBento: true });
         refreshAiAssistantUI();
     });
+
+    // Virtual keyboard awareness for mobile viewports (< 640px)
+    const vv = window.visualViewport;
+    if (vv) {
+        let baseH = Math.max(window.innerHeight, vv.height);
+        const onVvResize = () => {
+            if (window.innerWidth >= 640) {
+                document.body.classList.remove("ai-keyboard-open");
+                return;
+            }
+            if (vv.height > baseH) baseH = vv.height;
+            const kbOpen = document.body.classList.contains("ai-sheet-open") && vv.height < baseH * 0.78;
+            document.body.classList.toggle("ai-keyboard-open", kbOpen);
+            if (kbOpen) {
+                const msgs = document.getElementById("ai-messages");
+                if (msgs) setTimeout(() => { msgs.scrollTop = msgs.scrollHeight; }, 60);
+            }
+        };
+        vv.addEventListener("resize", onVvResize);
+    }
+
+    // Touch swipe-down gesture & tap to dismiss mobile bottom sheet
+    const panelEl = document.getElementById("ai-chat-panel");
+    const sheetHandle = document.getElementById("ai-sheet-handle");
+    const headerDragTarget = panelEl?.querySelector(".ai-concierge-header");
+    let dragStartY = 0;
+    let dragDelta = 0;
+    const onTouchStart = ev => {
+        if (window.innerWidth >= 640 || !ev.touches?.length) return;
+        dragStartY = ev.touches[0].clientY;
+        dragDelta = 0;
+        if (panelEl) panelEl.style.transition = "none";
+    };
+    const onTouchMove = ev => {
+        if (!dragStartY || window.innerWidth >= 640 || !ev.touches?.length) return;
+        const dy = Math.max(0, ev.touches[0].clientY - dragStartY);
+        dragDelta = dy;
+        if (dy > 4 && panelEl) {
+            panelEl.style.transform = `translate3d(0, ${dy}px, 0)`;
+        }
+    };
+    const onTouchEnd = () => {
+        if (!dragStartY) return;
+        if (panelEl) panelEl.style.transition = "";
+        if (dragDelta > 65) {
+            toggleAiWidget(false);
+        } else if (panelEl) {
+            panelEl.style.transform = "";
+        }
+        dragStartY = 0;
+        dragDelta = 0;
+    };
+    [sheetHandle, headerDragTarget].forEach(el => {
+        if (!el) return;
+        el.addEventListener("touchstart", onTouchStart, { passive: true });
+        el.addEventListener("touchmove", onTouchMove, { passive: true });
+        el.addEventListener("touchend", onTouchEnd, { passive: true });
+    });
+    sheetHandle?.addEventListener("click", () => toggleAiWidget(false));
 
     document.getElementById("ai-form")?.addEventListener("submit", e => {
         e.preventDefault();
@@ -1569,6 +1730,12 @@ export function initAiAssistant() {
             aiSession.promoCode = "";
             renderContextMemoryBar();
             syncWhatsAppConciergeLink();
+        } else if (action === "welcome-action") {
+            const kind = actEl.dataset.kind;
+            const val = actEl.dataset.val || "";
+            if (kind === "mode") switchAiMode(val);
+            else if (kind === "query" && val) handleAiQuery(val);
+            else if (kind === "promo") applyPromoSelection(val || "MOSA20");
         } else if (action === "toggle-voice") {
             toggleVoiceInput();
         } else if (action === "chip-query") {
@@ -1600,14 +1767,7 @@ export function initAiAssistant() {
             if (id) aiSession.quote.tripIds = [id];
             switchAiMode("quote");
         } else if (action === "apply-promo") {
-            const code = actEl.dataset.code || "MOSA20";
-            state.booking.promoCode = code;
-            aiSession.promoCode = code;
-            renderContextMemoryBar();
-            if (navigator.clipboard?.writeText) {
-                navigator.clipboard.writeText(code).catch(() => {});
-            }
-            showToast(getCopy(getAiLang()).promo_copied(code));
+            applyPromoSelection(actEl.dataset.code || "MOSA20");
         } else if (action === "quiz-pick") {
             const step = parseInt(actEl.dataset.step, 10);
             const val = actEl.dataset.val;

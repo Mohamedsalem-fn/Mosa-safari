@@ -480,7 +480,7 @@ body.ai-sheet-open { overflow: hidden; }
     #booking-modal input, #booking-modal select, #ai-input,
     #hero-search-form select { font-size: 16px; }
 
-    /* MOSA AI 2.0 Assistant -> Dedicated Mobile Bottom Sheet (Full Width, Safe Area, Backdrop) */
+    /* MOSA AI 2.0 Assistant -> Dedicated Mobile Bottom Sheet (Full Width, Native Slide-Up, Keyboard Resilient) */
     #ai-fab { display: none; }
     #ai-dock {
         inset-inline: 0;
@@ -488,19 +488,51 @@ body.ai-sheet-open { overflow: hidden; }
         align-items: stretch;
         gap: 0;
     }
+    @keyframes aiSheetSlideUp {
+        from { opacity: 0; transform: translate3d(0, 100%, 0); }
+        to { opacity: 1; transform: translate3d(0, 0, 0); }
+    }
     #ai-chat-panel {
         width: 100%;
         max-width: 100%;
-        height: 84dvh;
-        max-height: 84dvh;
-        border-radius: 1.35rem 1.35rem 0 0;
+        height: 88dvh;
+        max-height: 88dvh;
+        border-radius: 1.45rem 1.45rem 0 0;
         border-bottom: 0;
         border-inline: 0;
         transform-origin: bottom center !important;
     }
+    #ai-chat-panel:not(.hidden) {
+        animation: aiSheetSlideUp 0.36s var(--ease-out) both;
+    }
     #ai-matcher-view select, #ai-quote-view select, #ai-input { font-size: 16px; }
     #ai-form {
-        padding-bottom: calc(0.65rem + env(safe-area-inset-bottom, 0px));
+        padding-bottom: calc(0.6rem + env(safe-area-inset-bottom, 0px));
+    }
+    #ai-quote-sticky-bar {
+        padding-bottom: calc(0.7rem + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* Compact layout automatically when virtual keyboard opens on phones */
+    body.ai-keyboard-open #ai-chat-panel {
+        height: 98dvh;
+        max-height: 98dvh;
+        border-radius: 0.9rem 0.9rem 0 0;
+    }
+    body.ai-keyboard-open #ai-chips-strip,
+    body.ai-keyboard-open #ai-status-sub,
+    body.ai-keyboard-open #ai-sheet-handle {
+        display: none;
+    }
+    body.ai-keyboard-open .ai-concierge-header {
+        padding-block: 0.45rem;
+    }
+    body.ai-keyboard-open .ai-orb-avatar {
+        width: 2rem;
+        height: 2rem;
+    }
+    body.ai-keyboard-open #ai-form {
+        padding-bottom: 0.45rem;
     }
 }
 

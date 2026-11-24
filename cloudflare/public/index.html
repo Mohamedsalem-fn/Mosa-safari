@@ -1258,39 +1258,47 @@
 
     <!-- FLOATING MOSA AI 2.0 CONCIERGE (Desktop Luxury Panel / Mobile Bottom Sheet) -->
     <div id="ai-backdrop" onclick="toggleAiWidget(false)"
-        class="hidden fixed inset-0 z-[55] bg-carbon-950/70 backdrop-blur-sm sm:hidden transition-opacity"></div>
+        class="hidden fixed inset-0 z-[60] bg-carbon-950/75 backdrop-blur-sm sm:hidden transition-opacity"></div>
 
-    <div id="ai-dock" class="fixed bottom-5 end-5 z-[60] flex flex-col items-end gap-3 pointer-events-none">
+    <div id="ai-dock" class="fixed inset-x-0 bottom-0 sm:inset-x-auto sm:bottom-5 sm:end-5 z-[65] flex flex-col items-stretch sm:items-end gap-0 sm:gap-3 pointer-events-none">
         <div id="ai-chat-panel"
-            class="hidden pointer-events-auto w-[94vw] sm:w-[26rem] max-h-[84dvh] flex flex-col rounded-2xl bg-white/95 dark:bg-carbon-900/95 border border-champagne/30 shadow-2xl overflow-hidden transition-all duration-300">
-            <!-- Mobile Sheet Grab Handle -->
-            <div class="sm:hidden pt-2 pb-1 bg-carbon-950 flex justify-center shrink-0">
-                <span class="w-11 h-1 rounded-full bg-champagne/40"></span>
+            class="hidden pointer-events-auto w-full sm:w-[26rem] h-[88dvh] sm:h-auto max-h-[88dvh] sm:max-h-[84dvh] flex flex-col rounded-t-3xl sm:rounded-2xl bg-white/95 dark:bg-carbon-900/95 border-t sm:border border-champagne/30 shadow-2xl overflow-hidden transition-all duration-300">
+            <!-- Mobile Sheet Swipe/Tap Grab Handle -->
+            <div id="ai-sheet-handle" class="sm:hidden pt-2.5 pb-1 bg-carbon-950 flex justify-center shrink-0 cursor-pointer touch-none">
+                <span class="w-11 h-1 rounded-full bg-champagne/45"></span>
             </div>
 
             <!-- Luxury Aurora Header -->
-            <div class="ai-concierge-header relative px-4 py-3 bg-carbon-950 text-white flex items-center justify-between border-b border-champagne/20 shrink-0 overflow-hidden">
-                <div class="relative z-10 flex items-center gap-3 min-w-0">
-                    <div class="ai-orb-avatar relative shrink-0 w-10 h-10 rounded-xl flex items-center justify-center bg-carbon-900/90 border border-champagne/40 shadow-lg">
-                        <img src="assets/images/logo-icon.svg" alt="MOSA AI" class="w-7 h-7 rounded-lg relative z-10">
+            <div class="ai-concierge-header relative px-3 sm:px-4 py-2.5 sm:py-3 bg-carbon-950 text-white flex items-center justify-between gap-2 border-b border-champagne/20 shrink-0 overflow-hidden">
+                <div class="relative z-10 flex items-center gap-2.5 sm:gap-3 min-w-0">
+                    <div class="ai-orb-avatar relative shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center bg-carbon-900/90 border border-champagne/40 shadow-lg">
+                        <img src="assets/images/logo-icon.svg" alt="MOSA AI" class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg relative z-10">
                         <span class="ai-live-dot absolute -bottom-0.5 -end-0.5 w-2.5 h-2.5 rounded-full bg-sea ring-2 ring-carbon-950 z-20"></span>
                     </div>
                     <div class="min-w-0">
                         <div class="flex items-center gap-1.5">
-                            <span class="text-sm font-black truncate" data-i18n="ai_title">MOSA AI · مستشارك السياحي</span>
+                            <span class="text-xs sm:text-sm font-black truncate" data-i18n="ai_title">MOSA AI · مستشارك السياحي</span>
                             <span class="hidden sm:inline px-1.5 py-0.5 rounded-md bg-champagne/20 border border-champagne/40 text-champagne text-[9px] font-black tracking-wider shrink-0">2.0</span>
                         </div>
-                        <div id="ai-status-sub" class="text-[10px] text-champagne/90 font-bold truncate" data-i18n="ai_status_sub">ذكاء اصطناعي تفاعلي · 4 لغات · أسعار لحظية</div>
+                        <div id="ai-status-sub" class="text-[10px] text-champagne/90 font-bold truncate" data-i18n="ai_status_sub">متصل الآن · 4 لغات · أسعار حية</div>
                     </div>
                 </div>
                 <div class="relative z-10 flex items-center gap-1 shrink-0">
                     <select id="ai-lang-select" aria-label="AI Language"
-                        class="bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[11px] font-bold px-2 py-1.5 rounded-lg focus:outline-none cursor-pointer transition">
-                        <option value="ar" class="text-carbon-950">العربية</option>
-                        <option value="en" class="text-carbon-950">English</option>
-                        <option value="it" class="text-carbon-950">Italiano</option>
-                        <option value="ru" class="text-carbon-950">Русский</option>
+                        class="bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[11px] font-bold px-1.5 sm:px-2 py-1.5 rounded-lg focus:outline-none cursor-pointer transition">
+                        <option value="ar" class="text-carbon-950">عربي</option>
+                        <option value="en" class="text-carbon-950">EN</option>
+                        <option value="it" class="text-carbon-950">IT</option>
+                        <option value="ru" class="text-carbon-950">RU</option>
                     </select>
+                    <a id="ai-wa-link" href="https://wa.me/201023355550" target="_blank" rel="noopener noreferrer"
+                        title="واتساب الدعم البشري" aria-label="WhatsApp Concierge"
+                        class="p-1.5 rounded-lg bg-sea/20 hover:bg-sea text-sea hover:text-carbon-950 border border-sea/40 shrink-0 transition"><svg
+                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="w-3.5 h-3.5">
+                            <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path>
+                        </svg></a>
                     <button id="ai-expand-btn" type="button" data-ai-action="toggle-expand" title="Expand / Compact" aria-label="Toggle Panel Size"
                         class="hidden sm:inline-flex p-1.5 rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 text-[#E6E0D4] transition">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
@@ -1320,29 +1328,29 @@
             <!-- Interactive Concierge Mode Bar -->
             <div id="ai-mode-tabs" class="px-2.5 py-2 bg-carbon-900 text-white border-b border-white/10 grid grid-cols-3 gap-1.5 shrink-0">
                 <button type="button" data-ai-mode="chat"
-                    class="ai-mode-btn is-active flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl text-[11px] font-black transition">
+                    class="ai-mode-btn is-active flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-1.5 px-1.5 sm:px-2 rounded-xl text-[11px] font-black transition">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 shrink-0"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
                     <span class="truncate" data-i18n="ai_mode_chat">المحادثة الذكية</span>
                 </button>
                 <button type="button" data-ai-mode="matcher"
-                    class="ai-mode-btn flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl text-[11px] font-black transition">
+                    class="ai-mode-btn flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-1.5 px-1.5 sm:px-2 rounded-xl text-[11px] font-black transition">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 shrink-0"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
                     <span class="truncate" data-i18n="ai_mode_matcher">مستشار الاختيار</span>
                 </button>
                 <button type="button" data-ai-mode="quote"
-                    class="ai-mode-btn flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl text-[11px] font-black transition">
+                    class="ai-mode-btn flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-1.5 px-1.5 sm:px-2 rounded-xl text-[11px] font-black transition">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 shrink-0"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="8" x2="8" y1="14" y2="18"/><path d="M16 14h.01M12 14h.01M12 18h.01M16 18h.01M8 10h.01M12 10h.01M16 10h.01"/></svg>
                     <span class="truncate" data-i18n="ai_mode_quote">حاسبة السعر</span>
                 </button>
             </div>
 
             <!-- Live Traveler Memory Pill Bar (auto-shown when AI detects group/slot/budget/promo) -->
-            <div id="ai-context-bar" class="hidden px-3 py-1.5 bg-champagne/10 border-b border-champagne/20 flex items-center justify-between gap-2 text-[10px] font-extrabold shrink-0"></div>
+            <div id="ai-context-bar" class="hidden px-3 py-1.5 bg-champagne/10 border-b border-champagne/20 items-center justify-between gap-2 text-[10px] font-extrabold shrink-0"></div>
 
             <!-- VIEW 1: SMART CHAT -->
             <div id="ai-chat-view" class="flex-1 flex flex-col min-h-0">
                 <div id="ai-messages"
-                    class="flex-1 p-3.5 space-y-3 overflow-y-auto text-xs sm:text-sm bg-[#F6F3EC] dark:bg-carbon-950 min-h-[14rem]">
+                    class="flex-1 p-3 sm:p-3.5 space-y-2.5 sm:space-y-3 overflow-y-auto overscroll-contain text-xs sm:text-sm bg-[#F6F3EC] dark:bg-carbon-950 min-h-0 sm:min-h-[14rem]">
                 </div>
 
                 <!-- Dynamic Contextual Follow-up Chips -->
@@ -1355,43 +1363,39 @@
                         class="ai-chip shrink-0 whitespace-nowrap px-2.5 py-1.5 rounded-lg bg-copper/15 text-copper text-[11px] font-extrabold hover:bg-copper/25 transition">عايز خصم 20% وأرخص رحلة</button>
                 </div>
 
-                <form id="ai-form" class="p-2.5 border-t border-carbon-900/10 dark:border-white/10 flex items-center gap-1.5 bg-white dark:bg-carbon-800 shrink-0">
-                    <button id="ai-mic-btn" type="button" data-ai-action="toggle-voice" title="Voice Input" aria-label="Voice Search"
-                        class="p-2.5 rounded-xl bg-carbon-900/5 dark:bg-white/10 hover:bg-champagne/20 text-carbon-900 dark:text-champagne shrink-0 transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-                            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
-                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                            <line x1="12" x2="12" y1="19" y2="22"></line>
-                        </svg>
-                    </button>
-                    <input id="ai-input" type="text" data-i18n-placeholder="ai_placeholder" autocomplete="off"
-                        placeholder="مثال: 4 كبار وطفلين مساءً، أو قارن جبال الصدى ونبق..."
-                        class="flex-1 min-w-0 px-3 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 text-xs sm:text-sm focus:border-champagne focus:outline-none">
-                    <button type="submit" aria-label="Send"
-                        class="p-2.5 rounded-xl bg-champagne hover:bg-champagne-light text-carbon-950 font-black shrink-0 shadow-sm transition"><svg
-                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="w-4 h-4">
-                            <path
-                                d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z">
-                            </path>
-                            <path d="m21.854 2.147-10.94 10.939"></path>
-                        </svg></button>
-                    <a id="ai-wa-link" href="https://wa.me/201023355550" target="_blank" rel="noopener noreferrer"
-                        title="واتساب الدعم البشري" class="p-2.5 rounded-xl bg-sea hover:bg-sea-dark text-carbon-950 shrink-0 transition"><svg
-                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="w-4 h-4">
-                            <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path>
-                        </svg></a>
+                <!-- Unified Luxury Composer Capsule -->
+                <form id="ai-form" class="p-2.5 border-t border-carbon-900/10 dark:border-white/10 bg-white dark:bg-carbon-800 shrink-0">
+                    <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 focus-within:border-champagne transition">
+                        <button id="ai-mic-btn" type="button" data-ai-action="toggle-voice" title="Voice Input" aria-label="Voice Search"
+                            class="w-9 h-9 rounded-xl flex items-center justify-center bg-white/75 dark:bg-carbon-800 hover:bg-champagne/20 text-carbon-900 dark:text-champagne shrink-0 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                <line x1="12" x2="12" y1="19" y2="22"></line>
+                            </svg>
+                        </button>
+                        <input id="ai-input" type="text" data-i18n-placeholder="ai_placeholder" autocomplete="off"
+                            placeholder="اكتب سؤالك أو عدد المسافرين..."
+                            class="flex-1 min-w-0 px-2 py-2 bg-transparent text-base sm:text-sm placeholder:text-xs font-medium focus:outline-none">
+                        <button type="submit" aria-label="Send"
+                            class="w-9 h-9 rounded-xl flex items-center justify-center bg-champagne hover:bg-champagne-light text-carbon-950 font-black shrink-0 shadow-sm active:scale-95 transition"><svg
+                                xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+                                class="w-4 h-4">
+                                <path
+                                    d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z">
+                                </path>
+                                <path d="m21.854 2.147-10.94 10.939"></path>
+                            </svg></button>
+                    </div>
                 </form>
             </div>
 
             <!-- VIEW 2: INTERACTIVE 3-STEP SAFARI MATCHER WIZARD -->
-            <div id="ai-matcher-view" class="hidden flex-1 overflow-y-auto p-3.5 bg-[#F6F3EC] dark:bg-carbon-950 min-h-[16rem] space-y-3"></div>
+            <div id="ai-matcher-view" class="hidden flex-1 overflow-y-auto overscroll-contain p-3 sm:p-3.5 bg-[#F6F3EC] dark:bg-carbon-950 min-h-0 sm:min-h-[16rem] space-y-3"></div>
 
-            <!-- VIEW 3: LIVE INSTANT QUOTE & DISCOUNT BUILDER -->
-            <div id="ai-quote-view" class="hidden flex-1 overflow-y-auto p-3.5 bg-[#F6F3EC] dark:bg-carbon-950 min-h-[16rem] space-y-3"></div>
+            <!-- VIEW 3: LIVE INSTANT QUOTE & DISCOUNT BUILDER (Scrollable options + Pinned sticky CTA) -->
+            <div id="ai-quote-view" class="hidden flex-1 flex-col min-h-0 bg-[#F6F3EC] dark:bg-carbon-950"></div>
         </div>
 
         <button id="ai-fab" type="button"
