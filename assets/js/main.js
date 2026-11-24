@@ -33,10 +33,12 @@ import {
 } from "./modules/trips.js";
 import {
     openBookingWithTrip,
+    openBookingWithStop,
     openBookingModal,
     closeBookingModal,
     toggleBookingTrip,
     adjustGuests,
+    selectPickupStop,
     selectTripTime,
     selectPaymentMethod,
     formatCardNumberInput,
@@ -69,8 +71,10 @@ window.switchHubTab = switchHubTab;
 window.toggleFav = toggleFav;
 window.toggleCompare = toggleCompare;
 window.openBookingWithTrip = openBookingWithTrip;
+window.openBookingWithStop = openBookingWithStop;
 window.toggleBookingTrip = toggleBookingTrip;
 window.adjustGuests = adjustGuests;
+window.selectPickupStop = selectPickupStop;
 window.selectTripTime = selectTripTime;
 window.selectPaymentMethod = selectPaymentMethod;
 window.formatCardNumberInput = formatCardNumberInput;

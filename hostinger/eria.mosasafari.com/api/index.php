@@ -406,7 +406,7 @@ if (preg_match('#^/api/admin/bookings/([^/]+)$#', $path, $m)) {
         if (!is_array($patch)) {
             mosa_send_json(['ok' => false, 'error' => 'Invalid JSON'], 400);
         }
-        $allowed = ['status', 'adminNotes', 'tripDate', 'tripTime', 'tripTimeDisplay', 'pickupHotel', 'totalUsd', 'totalFormatted', 'paymentMethod', 'name', 'phone', 'email', 'adults', 'children', 'vehicleOpt', 'vehicleDisplay'];
+        $allowed = ['status', 'adminNotes', 'tripDate', 'tripTime', 'tripTimeDisplay', 'pickupRoute', 'pickupStation', 'pickupTime', 'pickupPointDisplay', 'pickupHotel', 'totalUsd', 'totalFormatted', 'paymentMethod', 'name', 'phone', 'email', 'adults', 'children', 'vehicleOpt', 'vehicleDisplay'];
         $updatedRecord = null;
         mosa_kv_mutate($vaultDir, 'bookings', [], function ($arr) use ($ref, $patch, $allowed, &$updatedRecord) {
             $list = is_array($arr) ? $arr : [];
@@ -455,7 +455,7 @@ if ($path === '/api/admin/trips' && $method === 'PUT') {
     }
     if (($body['trips'] ?? null) === null) {
         @unlink(mosa_kv_path($vaultDir, 'trips'));
-        mosa_append_audit($vaultDir, 'TRIPS_RESET', 'Reset catalog to built-in 8 default safari tours');
+        mosa_append_audit($vaultDir, 'TRIPS_RESET', 'Reset catalog to built-in 4 official safari tours');
         mosa_send_json(['ok' => true, 'trips' => null]);
     }
     if (!is_array($body['trips'])) {

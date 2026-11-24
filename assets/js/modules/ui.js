@@ -61,7 +61,7 @@ export function setHeroPreview(idx) {
 }
 
 export function switchHubTab(tab) {
-    ["prices", "faq", "tourism"].forEach(id => {
+    ["schedule", "prices", "faq", "tourism"].forEach(id => {
         document.getElementById(`hub-panel-${id}`)?.classList.toggle("hidden", tab !== id);
         const btn = document.getElementById(`hub-tab-${id}`);
         if (btn) {

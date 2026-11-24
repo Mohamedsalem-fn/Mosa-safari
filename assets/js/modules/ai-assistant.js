@@ -6,11 +6,18 @@
  * -------------------------------------------------------------------------------
  */
 
-import { SAFARI_TRIPS } from "../data/trips.js";
+import {
+    SAFARI_TRIPS,
+    PICKUP_STATIONS,
+    MOSA_RULES,
+    getStationLabel,
+    getTripRoutes,
+    getRouteLabel
+} from "../data/trips.js";
 import { I18N, BADGE_I18N, AI_GREETINGS } from "../data/i18n.js";
 import { state, fmtPrice } from "../state.js";
-import { getTripTitle, getTripDesc, getTripDuration } from "./trips.js";
-import { openBookingWithTrip, findActivePromo } from "./booking.js";
+import { getTripTitle, getTripDesc, getTripDuration, getStopClock } from "./trips.js";
+import { openBookingWithTrip, openBookingWithStop, findActivePromo } from "./booking.js";
 import { showToast } from "./ui.js";
 
 function escHtml(val) {
@@ -70,16 +77,16 @@ const AI_COPY = {
         ],
         quiz_q2: "ما هو التوقيت الأفضل ليومك؟",
         quiz_q2_opts: [
-            { id: "morning", title: "شروق الشمس والصباح", sub: "هواء نقي ودرجة حرارة منعشة", icon: "☀️" },
-            { id: "sunset", title: "وقت الغروب الذهبي", sub: "صور بانورامية وسط الجبال", icon: "🌄" },
-            { id: "night", title: "سهرة ليلية ونجوم", sub: "عشاء مشوي وتلسكوب وعرض بدوي", icon: "✨" },
-            { id: "fullday", title: "رحلة اليوم الكامل", sub: "دهب والوادي الملون والبلو هول", icon: "🏝️" }
+            { id: "sunrise", title: "🌅 رحلة الشروق (من 04:00 ص)", sub: "أولى ساعات الفجر والهواء المنعش", icon: "🌅" },
+            { id: "morning", title: "☀️ الرحلة الصباحية (من 08:00 ص)", sub: "مغامرة صباحية بالطاقة الكاملة", icon: "☀️" },
+            { id: "standard", title: "🌄 الرحلات العادية (من 14:15)", sub: "جولة ظهيرة مرنة قبل الغروب", icon: "🌄" },
+            { id: "dinner", title: "🌙 رحلة العشاء (من 15:30 – 16:15)", sub: "غروب + عشاء بدوي مشوي وعرض", icon: "🌙" }
         ],
         quiz_q3: "ما نوع التجربة التي تفضلها؟",
         quiz_q3_opts: [
-            { id: "scenic", title: "طبيعة واستجمام متوازن", sub: "جولات هادئة وشاي بدوي", icon: "🐪" },
-            { id: "thrill", title: "إثارة وسرعة قصوى", sub: "دراجات ATV + Dune Buggy", icon: "⚡" },
-            { id: "vip", title: "فخامة VIP وعشاء بحري", sub: "محمية نبق أو مأكولات بحرية", icon: "👑" }
+            { id: "scenic", title: "طبيعة وهدوء وشاي بدوي", sub: "الشروق أو الرحلات العادية", icon: "🐪" },
+            { id: "thrill", title: "إثارة وبيتش باجي وباجي", sub: "الرحلة الصباحية السريعة", icon: "⚡" },
+            { id: "dinner", title: "سهرة كاملة مع العشاء", sub: "رحلة العشاء البدوية والشو", icon: "🌙" }
         ],
         quiz_result_title: "الترشيح الذكي الأنسب لك",
         quiz_best_badge: "التطابق الأفضل · 98%",
@@ -111,31 +118,31 @@ const AI_COPY = {
             quote_intro: (title, guestsText) => `حسبت لك التكلفة الدقيقة لـ **${title}** (${guestsText}):`,
             booking_intro: (title) => `ممتاز! جهزت لك طلب الحجز لـ **${title}** مع كافة التفضيلات التي ذكرتها. اضغط الزر بالأسفل لفتح الاستمارة فوراً:`,
             budget_intro: (maxText) => `بحثت في كل برامج شرم الشيخ المتاحة بميزانية حتى **${maxText}** ورتبتها لك حسب القيمة والتقييم:`,
-            family: "للعائلات والأطفال: الدراجات أوتوماتيك بالكامل وتُعقد تجربة قيادة قصيرة قبل التحرك، والأطفال (6-11 سنة) يحصلون على **خصم 50%** ويمكنهم الركوب بالباجي العائلي أو خلف مرافق بالغ بأمان تام:",
-            couple: "للأزواج وشهر العسل أنصحكم بلحظة الغروب الذهبية في **جبال الصدى** أو تجربة **غسق نبق مع عشاء المأكولات البحرية** على ساحل البحر الأحمر:",
-            thrill: "لعشاق السرعة والإثارة القصوى: تجربة **الإثارة المزدوجة (ATV + باجي صحراوي)** بتقييم **4.8★** تمنحك قيادة مركبتين في مسارات مفتوحة، أو جولة **VIP أسرار الصحراء** في نبق:",
-            nabq: "محمية نبق الطبيعية تمتد وسط غابات المانجروف الساحلية وتصاريح الدخول مشمولة بالكامل. اختر بين البريميوم أو VIP أسرار الصحراء أو غسق نبق مع عشاء سي فود:",
-            night: "سفاري شرم الشيخ الليلية **5 في 1** (6 ساعات) هي الأشهر للعائلات والسهرات: بيتش باجي + ركوب جمال + عشاء بدوي مشوي + عرض شرقي + مراقبة النجوم بالتلسكوب:",
-            canyon: "مغامرة اليوم الكامل إلى **الوادي الملون والبلو هول ودهب** (10 ساعات) بسيارات جيب 4×4 تشمل المشي داخل الأخاديد، السنوركلينج في البلو هول، والغداء على البحر:",
-            morning: "الرحلات الصباحية مثالية للأجواء المنعشة والنسيم النقي في صحراء سيناء! نوصي بـ **شروق الشمس بالبيتش باجي** أو انطلاق **الوادي الملون ودهب**:",
-            safety: "الأمان هو أولويتنا في موسى سفاري:\n• جميع الدراجات أوتوماتيك بالكامل — **لا يُشترط رخصة قيادة** وتُعقد حصة تدريب قبل الانطلاق.\n• توفير خوذات ونظارات واقية من الرمال مع مرشد مرافق.\n• للأطفال (من 6 سنوات) يتوفر مقعد مزدوج آمن أو باجي عائلي.\n• للحوامل أو أصحاب آلام الظهر الشديدة نوصي بسيارة **جيب 4×4 مكيفة** بدلاً من الـ ATV.",
-            packing: "ماذا ترتدي وتحضر معك للرحلة؟\n• **حذاء رياضي مغلق** وملابس مريحة (يفضل قطنية).\n• **نظارة شمسية + كوفية/شال بدوي** (متوفرة أيضاً عند نقطة الانطلاق).\n• **واقي شمس** وزجاجة مياه إضافية، ومعطف خفيف في ليالي الشتاء (نوفمبر–مارس).\n• لرحلة البلو هول ودهب: لا تنسَ **ملابس السباحة والمنشفة**!",
-            pickup: "الاستلام والتوصيل **مجاني 100%** بسيارات مكيفة من وإلى باب جميع فنادق ومنتجعات شرم الشيخ:\nخليج نعمة · سوهو سكوير · خليج القرش (Sharks Bay) · هضبة أم السيد · محمية نبق · غاردنز باي.\nنؤكد لك ساعة التحرك الدقيقة عبر واتساب قبل الرحلة.",
-            payment: "الدفع في موسى سفاري بأقصى درجات المرونة:\n• **الدفع عند الوصول (Pay on Arrival):** احجز بـ **0 مقدم** وادفع لمندوبنا يوم الرحلة كاش أو بالبطاقة.\n• **Visa / Mastercard:** متاح عبر الاستمارة الإلكترونية.\n• **إلغاء وتعديل مجاني** حتى ساعتين قبل موعد التحرك.",
-            promo: code => `فعّل كود الخصم **${code}** للحصول على **خصم 20% فوري** على جميع البرامج، وعند حجز **5 أفراد فأكثر** يضيف النظام **10% خصم مجموعات تلقائياً**! اضغط على التذكرة بالأسفل لتفعيل الكود:`,
-            price: "إليك أحدث الأسعار اللحظية اليوم شاملة الانتقالات من الفندق. كل البطاقات بالأسفل تتحول فوراً حسب عملتك المختارة (USD / EGP / EUR):",
-            fallback: "إليك أفضل ترشيحاتنا في شرم الشيخ حالياً! يمكنك كتابة طلب أدق مثل: **\"4 كبار وطفلين مساءً\"** أو **\"ميزانية تحت 20 دولار\"** أو **\"قارن جبال الصدى ونبق\"**:"
+            family: "للعائلات والأطفال: الدراجات أوتوماتيك بالكامل وتُعقد تجربة قيادة قصيرة قبل التحرك، والأطفال (6-11 سنة) يحصلون على **خصم 50%** ويمكنهم الركوب بأمان تام. أنسب البرامج: **الرحلة الصباحية (08:00 ص)** أو **رحلة العشاء (15:30)**:",
+            couple: "للأزواج وشهر العسل ننصحكم بـ **رحلة الشروق (04:00 ص)** وسط الهدوء الذهبي أو **رحلة العشاء (15:30)** مع السهرة البدوية:",
+            thrill: "لعشاق السرعة والإثارة: **الرحلة الصباحية (08:00 ص)** تجمع بين البيتش باجي والباجي الصحراوي، أو **رحلة الشروق (04:00 ص)**:",
+            nabq: "إليك مواعيد **الرحلات العادية (14:15)** و**الرحلة الصباحية (08:00 ص)** المتاحة يومياً في شرم الشيخ:",
+            night: "**🌙 رحلة العشاء** — المواعيد الرسمية:\n• **المسار الأول:** 15:30 الهضبة · 15:45 خليج نعمة · 16:00 قاعة المؤتمرات.\n• **المسار الثاني (العشاء):** 16:00 خلف المطار · 16:15 الغرقانة.\n📌 يرجى التواجد في نقطة الاستلام قبل موعد التحرك بـ 10 دقائق.",
+            canyon: "**🌄 الرحلات العادية** — المواعيد الرسمية:\n• **المسار الأول:** 14:15 الهضبة · 14:15 خليج نعمة · 14:30 قاعة المؤتمرات.\n• **المسار الثاني:** 14:15 خلف المطار · 14:30 الغرقانة.\n📌 يرجى التواجد قبل التحرك بـ 10 دقائق.",
+            morning: "**🌅 رحلة الشروق** (04:00–04:30 ص) و**☀️ الرحلة الصباحية** (08:00–08:40 ص) — المواعيد المتاحة صباحاً:",
+            safety: "الأمان والتعليمات الهامة في شركة موسى سفاري:\n• جميع الدراجات أوتوماتيك بالكامل ولا يُشترط رخصة قيادة مع حصة تدريب قبل التحرك.\n• يرجى التواجد في نقطة الاستلام قبل موعد التحرك بـ **10 دقائق**.\n• في حال التأخير، تتحمل الشركة حق تعديل أو إلغاء الحجز وفقًا لجدول التشغيل.",
+            packing: "ماذا ترتدي وتحضر معك؟\n• حذاء رياضي مغلق وملابس مريحة، نظارة شمسية وكوفية بدوية.\n• معطف خفيف في رحلة الشروق (04:00 ص) أو العشاء شتاءً.\n• لا تنسَ التواجد في نقطة الاستلام قبل موعد التحرك بـ 10 دقائق.",
+            pickup: "نقاط الاستلام المعتمدة لشركة موسى سفاري عبر **المسار الأول والمسار الثاني**:\n• **الهضبة:** 04:00 ص (شروق) · 08:00 ص (صباحية) · 14:15 (عادية) · 15:30 (عشاء).\n• **خليج نعمة:** 04:15 ص (شروق) · 08:30 ص (صباحية) · 14:15 (عادية) · 15:45 (عشاء).\n• **قاعة المؤتمرات:** 04:30 ص (شروق) · 14:30 (عادية) · 16:00 (عشاء).\n• **خلف المطار:** 04:00 ص (شروق) · 08:00/08:40 ص (صباحية) · 14:15 (عادية) · 16:00 (عشاء).\n• **الغرقانة:** 04:30 ص (شروق) · 08:30 ص (صباحية) · 14:30 (عادية) · 16:15 (عشاء).\n📌 يرجى التواجد قبل التحرك بـ 10 دقائق.",
+            payment: "الدفع بأقصى مرونة:\n• **الدفع عند الوصول:** بدون أي مقدم وادفع يوم الرحلة كاش أو بالبطاقة.\n• **Visa / Mastercard:** متاح أونلاين.\n• في حال التأخير، تتحمل الشركة حق تعديل أو إلغاء الحجز وفقًا لجدول التشغيل.",
+            promo: code => `فعّل كود الخصم **${code}** للحصول على **خصم 20% فوري** على رحلات شركة موسى سفاري الـ 4، وعند حجز **5 أفراد فأكثر** تحصلون على **10% خصم مجموعات تلقائياً**!`,
+            price: "إليك أسعار الرحلات الـ 4 الرسمية لشركة موسى سفاري مع مواعيد التحرك:",
+            fallback: "إليك الرحلات الرسمية المتاحة في شركة موسى سفاري! يمكنك السؤال عن أي نقطة استلام (**الهضبة، خليج نعمة، قاعة المؤتمرات، خلف المطار، الغرقانة**) أو طلب **\"احسب رحلة العشاء لـ 4 أفراد\"**:"
         },
         chips: {
-            default: ["احسب السعر لـ 4 أفراد", "قارن بين جبال الصدى ونبق", "ما هي نصائح الأمان والملابس؟", "فعّل خصم 20% MOSA20"],
-            family: ["احسبها لـ 2 كبار وطفلين", "أرخص رحلة عائلية؟", "الاستلام من الفندق مجاني؟", "تفاصيل الدفع عند الوصول"],
-            compare: ["احسب سعر الفائز لـ 3 أفراد", "أيهما أفضل للأطفال؟", "مواعيد الصباح أم المساء؟", "فعّل كود MOSA20"],
-            quote: ["أضف كود MOSA20 للحسبة", "قارنها مع رحلة أخرى", "سياسة الإلغاء المجاني", "تواصل واتساب مع مرشد"]
+            default: ["مواعيد الاستلام من خليج نعمة والهضبة", "احسب رحلة العشاء لـ 4 أفراد", "ما مواعيد الغرقانة وخلف المطار؟", "فعّل خصم 20% MOSA20"],
+            family: ["احسب الرحلة الصباحية لـ 2 كبار وطفلين", "أرخص رحلة متاحة؟", "مواعيد نقطة الاستلام من فندقي", "تفاصيل الدفع عند الوصول"],
+            compare: ["قارن الشروق والعشاء", "أيهما أفضل للأطفال؟", "ما هي التعليمات الهامة قبل التحرك؟", "فعّل كود MOSA20"],
+            quote: ["أضف كود MOSA20 للحسبة", "قارنها مع رحلة أخرى", "تعليمات التواجد قبل 10 دقائق", "تواصل واتساب مع موسى سفاري"]
         },
         welcome_actions: [
             { kind: "mode", val: "matcher", icon: "🧭", title: "مستشار الاختيار", sub: "3 أسئلة لأفضل رحلة" },
             { kind: "mode", val: "quote", icon: "🧮", title: "حاسبة السعر", sub: "احسب التكلفة والخصم" },
-            { kind: "query", val: "رشح لي رحلة عائلية في الغروب", icon: "🌅", title: "غروب وعائلات", sub: "الأكثر طلباً بشرم" },
+            { kind: "query", val: "مواعيد الاستلام من خليج نعمة والهضبة", icon: "📍", title: "مواعيد الاستلام", sub: "المسار الأول والثاني" },
             { kind: "promo", val: "MOSA20", icon: "🏷️", title: "خصم 20% فوري", sub: "تفعيل كود MOSA20" }
         ]
     },
@@ -177,16 +184,16 @@ const AI_COPY = {
         ],
         quiz_q2: "What is your ideal time of day?",
         quiz_q2_opts: [
-            { id: "morning", title: "Sunrise & Cool Morning", sub: "Crisp desert breeze & dawn views", icon: "☀️" },
-            { id: "sunset", title: "Golden Hour Sunset", sub: "Iconic mountain canyon light", icon: "🌄" },
-            { id: "night", title: "Night BBQ & Stargazing", sub: "Bedouin dinner, show & telescope", icon: "✨" },
-            { id: "fullday", title: "Full-Day Expedition", sub: "Colored Canyon, Blue Hole & Dahab", icon: "🏝️" }
+            { id: "sunrise", title: "🌅 Sunrise Safari (04:00 AM+)", sub: "First dawn light & cool desert breeze", icon: "🌅" },
+            { id: "morning", title: "☀️ Morning Safari (08:00 AM+)", sub: "Crisp sunlit ATV & dune buggy trails", icon: "☀️" },
+            { id: "standard", title: "🌄 Standard Afternoon (14:15+)", sub: "Classic canyon & Echo Mountains ride", icon: "🌄" },
+            { id: "dinner", title: "🌙 Dinner & Show (15:30–16:15)", sub: "Sunset quad, Bedouin BBQ & live show", icon: "🌙" }
         ],
         quiz_q3: "Pick your preferred adventure pace:",
         quiz_q3_opts: [
-            { id: "scenic", title: "Scenic & Relaxed", sub: "Echo Mountains, camel trek & tea", icon: "🐪" },
-            { id: "thrill", title: "Pure Adrenaline", sub: "ATV Quad + High-Speed Dune Buggy", icon: "⚡" },
-            { id: "vip", title: "VIP Nature & Seafood", sub: "Nabq Mangroves or Red Sea seafood", icon: "👑" }
+            { id: "scenic", title: "Scenic & Balanced", sub: "Sunrise or Standard Canyon safari", icon: "🐪" },
+            { id: "thrill", title: "Quad & Buggy Action", sub: "Morning high-energy desert trails", icon: "⚡" },
+            { id: "dinner", title: "Full Evening BBQ & Show", sub: "Sunset Dinner & Bedouin hospitality", icon: "🌙" }
         ],
         quiz_result_title: "Your Tailored Safari Matches",
         quiz_best_badge: "98% Top Match",
@@ -218,31 +225,31 @@ const AI_COPY = {
             quote_intro: (title, guestsText) => `Here is your exact live calculation for **${title}** (${guestsText}):`,
             booking_intro: (title) => `All set! I pre-loaded **${title}** with your group preferences. Tap below to open the booking form at Traveler Details:`,
             budget_intro: maxText => `Here are the best Sharm El Sheikh safaris matching your budget up to **${maxText}**:`,
-            family: "For families & kids: all quads are fully automatic with a safety briefing before departure. Kids aged **6–11 enjoy 50% OFF** and can ride a family dune buggy or double quad with an adult:",
-            couple: "For couples & honeymoons, golden hour at **Echo Mountains** or the **Nabq Twilight Seafood Dusk** creates unforgettable Red Sea sunset memories:",
-            thrill: "For adrenaline lovers: **Double Thrill (4.8★)** lets you drive both an ATV Quad and a high-speed Dune Buggy, or upgrade to **Nabq Desert Secrets VIP**:",
-            nabq: "**Nabq Protected Area** tours include coastal mangroves and official reserve permits — choose Classic Reserve, VIP Desert Secrets, or Twilight Seafood Dusk:",
-            night: "Our **Night 5-in-1 Safari & Stargazing** (6 hours) combines quad biking, camel trek, BBQ Bedouin dinner, folkloric show, and telescope stargazing:",
-            canyon: "The full-day **Colored Canyon, Blue Hole & Dahab** 4x4 Jeep tour (10 hours) includes canyon hiking, Blue Hole snorkeling, seaside lunch, and Dahab bazaar:",
-            morning: "Morning tours offer crisp air and quieter desert trails! We recommend **Sunrise ATV & Camel Trek** or the early departure to **Colored Canyon & Dahab**:",
-            safety: "Safety & Comfort Guarantees:\n• **No driver's license needed** — automatic ATV quads with a practice test before riding.\n• **Helmets, goggles & pro guides** are included on every tour.\n• Kids 6+ can ride safely as a passenger or inside a 4x4 / Dune Buggy.\n• Pregnant travelers or back conditions should pick our **A/C 4x4 Jeep** tours.",
-            packing: "What to wear & bring:\n• **Closed-toe sneakers** and breathable casual clothing.\n• **Sunglasses & Bedouin desert scarf** (also available at base camp).\n• Sunscreen, light jacket on winter evenings (Nov–Mar), plus **swimwear & towel** for Dahab/Blue Hole.",
-            pickup: "**Free round-trip hotel transfers** in A/C vehicles across all Sharm El Sheikh areas:\nNaama Bay · Sharks Bay · Soho Square · Nabq Bay · Hadaba · Gardens Bay.\nExact pickup time is sent via WhatsApp before departure.",
-            payment: "Flexible Checkout Options:\n• **Pay on Arrival:** Reserve with **$0 upfront** and pay cash or card at hotel pickup.\n• **Visa / Mastercard** checkout available online.\n• **Free cancellation & rescheduling** up to 2 hours before pickup.",
-            promo: code => `Apply promo code **${code}** for an instant **20% OFF** any tour — plus parties of **5+ guests** receive an automatic **10% group discount** on top! Tap the voucher below:`,
-            price: "Here are today's live rates in your active currency including free hotel pickup. Tap any card to book or calculate:",
-            fallback: "Here are Sharm El Sheikh's top-rated tours right now! Try asking e.g. **\"Quote 4 adults sunset\"**, **\"Under $20\"**, or **\"Compare Echo vs Double Thrill\"**:"
+            family: "For families & kids: automatic ATV Quads with 50% OFF for ages 6–11. Our **Morning Safari (08:00 AM)** and **Dinner Safari (15:30)** are family favorites:",
+            couple: "For couples: **Sunrise Safari (04:00 AM)** or **Dinner Safari (15:30)** with Bedouin BBQ under the stars:",
+            thrill: "For desert speed lovers: **Morning Safari (08:00 AM)** combines ATV Quads & Dune Buggies across South Sinai trails:",
+            nabq: "Here are Mosa Safari's daily **Standard Afternoon (14:15)** and **Morning (08:00 AM)** departures:",
+            night: "**🌙 Dinner Safari Official Timetable:**\n• **Route 1:** 15:30 Al-Hadaba · 15:45 Naama Bay · 16:00 Conference Center\n• **Route 2 (Dinner):** 16:00 Behind Airport · 16:15 Al-Gharqana\n📌 Please arrive at your pickup point 10 minutes before departure.",
+            canyon: "**🌄 Standard Afternoon Safari Official Timetable:**\n• **Route 1:** 14:15 Al-Hadaba · 14:15 Naama Bay · 14:30 Conference Center\n• **Route 2:** 14:15 Behind Airport · 14:30 Al-Gharqana\n📌 Please arrive 10 minutes early.",
+            morning: "**🌅 Sunrise Safari (04:00–04:30 AM)** and **☀️ Morning Safari (08:00–08:40 AM)** departures:",
+            safety: "Safety & Important Pickup Rules:\n• Automatic ATV Quads — **no driver's license needed** with safety helmets & briefing.\n• **Arrive 10 minutes early** at your pickup point.\n• In case of delay, Mosa Safari reserves the right to reschedule or cancel per the timetable.",
+            packing: "What to wear & bring:\n• Closed-toe sneakers, casual breathable clothing, sunglasses & desert scarf.\n• Light jacket for 04:00 AM Sunrise or winter Dinner departures.\n• Wait at your pickup stop 10 minutes before departure.",
+            pickup: "Mosa Safari Official 2-Route Pickup Schedule:\n• **Al-Hadaba:** 04:00 AM (Sunrise) · 08:00 AM (Morning) · 14:15 (Standard) · 15:30 (Dinner)\n• **Naama Bay:** 04:15 AM (Sunrise) · 08:30 AM (Morning) · 14:15 (Standard) · 15:45 (Dinner)\n• **Conference Center:** 04:30 AM (Sunrise) · 14:30 (Standard) · 16:00 (Dinner)\n• **Behind Airport:** 04:00 AM (Sunrise) · 08:00/08:40 AM (Morning) · 14:15 (Standard) · 16:00 (Dinner)\n• **Al-Gharqana:** 04:30 AM (Sunrise) · 08:30 AM (Morning) · 14:30 (Standard) · 16:15 (Dinner)\n📌 Please be present 10 minutes before departure time.",
+            payment: "Flexible Checkout:\n• **Pay on Arrival:** Reserve with $0 upfront.\n• **Visa / Mastercard** accepted online.\n• In case of delay, bookings follow the operating timetable.",
+            promo: code => `Apply promo code **${code}** for **20% OFF** + automatic **10% group discount** for 5+ guests!`,
+            price: "Here are our 4 official daily tours with live pricing:",
+            fallback: "Ask me for exact pickup clock times from **Hadaba, Naama Bay, Conference Center, Behind Airport, or Gharqana** or tap a tour below to book:"
         },
         chips: {
-            default: ["Quote 4 adults & 2 kids", "Compare Echo vs Double Thrill", "Safety & what to wear?", "Activate 20% MOSA20"],
-            family: ["Calculate 2 adults + 2 kids", "Cheapest family tour?", "Free hotel pickup zones?", "How Pay on Arrival works"],
-            compare: ["Quote the winner for 3 adults", "Best one for kids?", "Morning vs Sunset slot?", "Apply MOSA20 code"],
-            quote: ["Apply MOSA20 to my quote", "Compare with another tour", "Cancellation policy", "Chat on WhatsApp"]
+            default: ["Pickup times from Naama Bay & Hadaba", "Quote Dinner Safari for 4 adults", "Gharqana & Behind Airport schedule?", "Activate 20% MOSA20"],
+            family: ["Quote Morning Safari 2+2", "Cheapest tour option?", "10-minute pickup rule?", "How Pay on Arrival works"],
+            compare: ["Compare Sunrise vs Dinner", "Best one for kids?", "All 5 pickup zones?", "Apply MOSA20 code"],
+            quote: ["Apply MOSA20 to my quote", "Compare with another tour", "Important pickup rules", "Chat on WhatsApp"]
         },
         welcome_actions: [
             { kind: "mode", val: "matcher", icon: "🧭", title: "Trip Matcher", sub: "3 quick questions" },
             { kind: "mode", val: "quote", icon: "🧮", title: "Price Builder", sub: "Live quote & savings" },
-            { kind: "query", val: "Recommend a sunset or family safari", icon: "🌅", title: "Sunset & Family", sub: "Top Sharm picks" },
+            { kind: "query", val: "Pickup times from Naama Bay & Hadaba", icon: "📍", title: "Pickup Routes", sub: "Route 1 & Route 2 times" },
             { kind: "promo", val: "MOSA20", icon: "🏷️", title: "Unlock 20% OFF", sub: "Apply code MOSA20" }
         ]
     },
@@ -284,16 +291,16 @@ const AI_COPY = {
         ],
         quiz_q2: "Qual è il momento migliore della giornata?",
         quiz_q2_opts: [
-            { id: "morning", title: "Alba e Mattina", sub: "Aria fresca nel deserto", icon: "☀️" },
-            { id: "sunset", title: "Ora d'Oro al Tramonto", sub: "Luci spettacolari tra i canyon", icon: "🌄" },
-            { id: "night", title: "Notte BBQ & Stelle", sub: "Cena beduina e telescopio", icon: "✨" },
-            { id: "fullday", title: "Giornata Intera", sub: "Canyon Colorato, Blue Hole e Dahab", icon: "🏝️" }
+            { id: "sunrise", title: "🌅 Safari all'Alba (04:00 AM+)", sub: "Prime luci fresche nel deserto", icon: "🌅" },
+            { id: "morning", title: "☀️ Safari del Mattino (08:00 AM+)", sub: "Quad ATV e Dune Buggy nel Sinai", icon: "☀️" },
+            { id: "standard", title: "🌄 Safari Pomeridiano (14:15+)", sub: "Percorso classico tra i canyon", icon: "🌄" },
+            { id: "dinner", title: "🌙 Safari con Cena (15:30–16:15)", sub: "Tramonto, BBQ beduino e spettacolo", icon: "🌙" }
         ],
         quiz_q3: "Scegli lo stile di avventura:",
         quiz_q3_opts: [
-            { id: "scenic", title: "Natura & Relax", sub: "Montagne dell'Eco e tè beduino", icon: "🐪" },
-            { id: "thrill", title: "Adrenalina Pura", sub: "Quad ATV + Dune Buggy veloce", icon: "⚡" },
-            { id: "vip", title: "VIP & Cena di Pesce", sub: "Riserva di Nabq sul Mar Rosso", icon: "👑" }
+            { id: "scenic", title: "Natura & Relax", sub: "Safari all'Alba o Pomeridiano", icon: "🐪" },
+            { id: "thrill", title: "Quad & Buggy Azione", sub: "Safari del Mattino dinamico", icon: "⚡" },
+            { id: "dinner", title: "Cena BBQ & Spettacolo", sub: "Sera beduina completa", icon: "🌙" }
         ],
         quiz_result_title: "I Tour Perfetti Per Te",
         quiz_best_badge: "98% Scelta Ideale",
@@ -325,31 +332,31 @@ const AI_COPY = {
             quote_intro: (title, guestsText) => `Ecco il calcolo live per **${title}** (${guestsText}):`,
             booking_intro: title => `Perfetto! Ho preparato **${title}** con le tue preferenze. Tocca qui sotto per completare i dati:`,
             budget_intro: maxText => `I migliori tour a Sharm El Sheikh entro **${maxText}**:`,
-            family: "Per famiglie e bambini: quad automatici con breve prova pratica prima di partire. I bambini **6–11 anni hanno il 50% di sconto**:",
-            couple: "Per coppie e luna di miele: il **Tramonto nelle Montagne dell'Eco** o la **Cena di Pesce a Nabq** sono impareggiabili:",
-            thrill: "Per chi ama la velocità: **Doppia Emozione (4.8★)** unisce Quad ATV e Dune Buggy, oppure scegli **Nabq VIP Segreti**:",
-            nabq: "La **Riserva di Nabq** include permessi ufficiali e foreste di mangrovie — disponibile in versione Premium, VIP o Cena di Pesce:",
-            night: "Il **Safari Notturno 5-in-1** (6 ore) include quad ATV, cammello, cena BBQ beduina, spettacolo e telescopio:",
-            canyon: "La gita di un giorno al **Canyon Colorato, Blue Hole e Dahab** (10 ore) in Jeep 4x4 include trekking, snorkeling e pranzo:",
-            morning: "I tour mattutini offrono aria fresca nel deserto! Consigliamo **Alba in Quad ATV** o **Canyon Colorato & Dahab**:",
-            safety: "Sicurezza Garantita:\n• **Nessuna patente richiesta** — quad automatici con test di prova.\n• Caschi, occhiali e guide esperte inclusi.\n• Bambini 6+ viaggiano con un adulto o in Buggy familiare.\n• Per donne in gravidanza consigliamo Jeep 4x4.",
-            packing: "Cosa indossare e portare:\n• **Scarpe sportive chiuse**, occhiali da sole e kefiah.\n• Crema solare, felpa leggera nelle sere invernali e **costume** per il Blue Hole.",
-            pickup: "**Trasferimento hotel gratuito A/R** in veicoli climatizzati in tutta Sharm El Sheikh: Naama Bay, Soho Square, Sharks Bay, Nabq Bay e Hadaba.",
-            payment: "Metodi Flessibili:\n• **Paga all'arrivo:** Zero acconto, contanti o carta alla guida.\n• **Visa / Mastercard** disponibile.\n• **Cancellazione gratuita** fino a 2 ore prima.",
-            promo: code => `Usa **${code}** per avere subito il **20% di sconto**, più **10% extra** per gruppi di 5+ persone! Tocca qui:`,
-            price: "Ecco i prezzi aggiornati in tempo reale con transfer incluso:",
-            fallback: "Ecco i tour più richiesti a Sharm El Sheikh! Prova a scrivere **\"Preventivo 4 adulti\"**, **\"Sotto 20$\"** o **\"Confronta Eco e Nabq\"**:"
+            family: "Per famiglie e bambini: quad automatici con breve prova pratica e **50% di sconto** per bambini 6–11 anni. Consigliamo **Safari Mattina (08:00)** o **Safari Cena (15:30)**:",
+            couple: "Per coppie: **Safari Alba (04:00)** o **Safari Cena (15:30)** con BBQ beduino sotto le stelle:",
+            thrill: "Per chi ama l'azione: **Safari Mattina (08:00 AM)** unisce Quad ATV e Dune Buggy:",
+            nabq: "Ecco gli orari giornalieri di **Safari Pomeridiano (14:15)** e **Safari Mattina (08:00)**:",
+            night: "**🌙 Safari Cena — Orari Ufficiali:**\n• **Percorso 1:** 15:30 Hadaba · 15:45 Naama Bay · 16:00 Centro Congressi\n• **Percorso 2 (Cena):** 16:00 Aeroporto · 16:15 Al-Gharqana\n📌 Presentarsi 10 minuti prima.",
+            canyon: "**🌄 Safari Pomeridiano — Orari:** 14:15 Hadaba/Naama Bay/Aeroporto · 14:30 Centro Congressi/Al-Gharqana.",
+            morning: "**🌅 Safari Alba (04:00 AM)** e **☀️ Safari Mattina (08:00 AM)**:",
+            safety: "Sicurezza & Regole:\n• **Nessuna patente richiesta** — quad automatici con casco e test.\n• **Presentarsi 10 minuti prima** al punto di ritiro.\n• In caso di ritardo, l'azienda può modificare o annullare la prenotazione secondo il programma.",
+            packing: "Cosa portare: scarpe sportive chiuse, occhiali da sole, kefiah e giacca leggera per l'alba delle 04:00.",
+            pickup: "Orari ufficiali Mosa Safari su 2 percorsi:\n• **Hadaba:** 04:00 (Alba) · 08:00 (Mattina) · 14:15 · 15:30 (Cena)\n• **Naama Bay:** 04:15 · 08:30 · 14:15 · 15:45\n• **Centro Congressi:** 04:30 · 14:30 · 16:00\n• **Aeroporto:** 04:00 · 08:00/08:40 · 14:15 · 16:00\n• **Al-Gharqana:** 04:30 · 08:30 · 14:30 · 16:15\n📌 Presentarsi 10 minuti prima.",
+            payment: "Paga all'arrivo senza acconto oppure online con Visa/Mastercard.",
+            promo: code => `Usa **${code}** per il **20% di sconto** + **10% extra** per 5+ persone!`,
+            price: "Ecco i prezzi live dei 4 tour ufficiali:",
+            fallback: "Chiedi gli orari per **Hadaba, Naama Bay, Centro Congressi, Aeroporto o Al-Gharqana**:"
         },
         chips: {
-            default: ["Preventivo 4 adulti e 2 bimbi", "Confronta Eco e Doppia Emozione", "Sicurezza e cosa portare?", "Attiva 20% MOSA20"],
-            family: ["Calcola 2 adulti + 2 bimbi", "Tour più economico?", "Transfer hotel gratis?", "Paga all'arrivo"],
-            compare: ["Calcola per 3 adulti", "Migliore per bambini?", "Mattina o Tramonto?", "Applica MOSA20"],
-            quote: ["Applica MOSA20", "Confronta con altro tour", "Cancellazione gratuita", "Supporto WhatsApp"]
+            default: ["Orari Naama Bay e Hadaba", "Preventivo Safari Cena 4 adulti", "Orari Al-Gharqana?", "Attiva 20% MOSA20"],
+            family: ["Calcola Safari Mattina 2+2", "Tour più economico?", "Regola 10 minuti?", "Paga all'arrivo"],
+            compare: ["Confronta Alba e Cena", "Migliore per bambini?", "Tutte le 5 fermate?", "Applica MOSA20"],
+            quote: ["Applica MOSA20", "Confronta con altro tour", "Regole importanti ritiro", "Supporto WhatsApp"]
         },
         welcome_actions: [
             { kind: "mode", val: "matcher", icon: "🧭", title: "Trova Tour", sub: "3 domande veloci" },
             { kind: "mode", val: "quote", icon: "🧮", title: "Calcola Prezzo", sub: "Preventivo live" },
-            { kind: "query", val: "Consiglia un safari tramonto o famiglia", icon: "🌅", title: "Tramonto & Famiglia", sub: "I più scelti" },
+            { kind: "query", val: "Orari Naama Bay e Hadaba", icon: "📍", title: "Orari Ritiro", sub: "Percorsi 1 e 2" },
             { kind: "promo", val: "MOSA20", icon: "🏷️", title: "Sconto 20% Subito", sub: "Codice MOSA20" }
         ]
     },
@@ -391,16 +398,16 @@ const AI_COPY = {
         ],
         quiz_q2: "Какое время суток вам ближе?",
         quiz_q2_opts: [
-            { id: "morning", title: "Рассвет и утро", sub: "Прохлада и свежий воздух", icon: "☀️" },
-            { id: "sunset", title: "Золотой закат", sub: "Панорамные фото в Горах Эхо", icon: "🌄" },
-            { id: "night", title: "Ночь BBQ и звёзды", sub: "Бедуинский ужин и телескоп", icon: "✨" },
-            { id: "fullday", title: "Экскурсия на весь день", sub: "Цветной каньон, Голубая дыра и Дахаб", icon: "🏝️" }
+            { id: "sunrise", title: "🌅 Рассветное сафари (04:00+)", sub: "Прохлада пустыни на рассвете", icon: "🌅" },
+            { id: "morning", title: "☀️ Утреннее сафари (08:00+)", sub: "Квадроциклы и багги по трассам", icon: "☀️" },
+            { id: "standard", title: "🌄 Дневное сафари (14:15+)", sub: "Классический каньон и Горы Эхо", icon: "🌄" },
+            { id: "dinner", title: "🌙 Ужин-сафари (15:30–16:15)", sub: "Закат, бедуинский ужин и шоу", icon: "🌙" }
         ],
         quiz_q3: "Какой формат впечатлений вы ищете?",
         quiz_q3_opts: [
-            { id: "scenic", title: "Природа и комфорт", sub: "Спокойный маршрут и чай бедуинов", icon: "🐪" },
-            { id: "thrill", title: "Максимум адреналина", sub: "Квадроцикл ATV + скоростной багги", icon: "⚡" },
-            { id: "vip", title: "VIP Набк и морепродукты", sub: "Заповедник Набк на закате", icon: "👑" }
+            { id: "scenic", title: "Природа и комфорт", sub: "Рассвет или дневной маршрут", icon: "🐪" },
+            { id: "thrill", title: "Квадроциклы и багги", sub: "Динамичное утреннее сафари", icon: "⚡" },
+            { id: "dinner", title: "Ужин BBQ и восточное шоу", sub: "Полный вечерний тур", icon: "🌙" }
         ],
         quiz_result_title: "Идеальные туры для вас",
         quiz_best_badge: "98% Совпадение",
@@ -432,51 +439,56 @@ const AI_COPY = {
             quote_intro: (title, guestsText) => `Точный расчёт стоимости для **${title}** (${guestsText}):`,
             booking_intro: title => `Готово! Я предзаполнил **${title}** вашими параметрами. Нажмите ниже, чтобы открыть бронирование:`,
             budget_intro: maxText => `Лучшие туры в Шарм-эль-Шейхе в бюджете до **${maxText}**:`,
-            family: "Для семей с детьми: все квадроциклы автоматические с инструктажем перед стартом, а для детей **6–11 лет действует скидка 50%**:",
-            couple: "Для пар и медового месяца идеально подойдут **Закат в Горах Эхо** или **Ужин из морепродуктов в Набке**:",
-            thrill: "Для любителей скорости: **Двойной драйв (4.8★)** объединяет квадроцикл ATV и мощный багги, или выберите **VIP Тайны пустыни**:",
-            nabq: "Туры в **Заповедник Набк** включают входные разрешения и мангровые рощи — доступны Премиум, VIP и закат с морепродуктами:",
-            night: "**Ночное сафари 5-в-1** (6 часов): квадроциклы ATV, верблюды, ужин-барбекю у бедуинов, шоу и телескоп:",
-            canyon: "Экскурсия на весь день **Цветной каньон, Голубая дыра и Дахаб** (10 часов) на джипах 4x4 со снорклингом и обедом:",
-            morning: "Утренние выезды комфортны прохладой пустыни! Рекомендуем **Рассвет на квадроциклах** или выезд в **Дахаб и Каньон**:",
-            safety: "Гарантия безопасности:\n• **Права не требуются** — автоматические квадроциклы и тест-заезд.\n• Шлемы, очки и сопровождение гида включены.\n• Дети 6+ едут безопасно со взрослым или в семейном багги.\n• Беременным рекомендуем джип 4x4.",
-            packing: "Что надеть и взять:\n• **Закрытую удобную обувь**, солнечные очки и арафатку.\n• Солнцезащитный крем, кофту на зимний вечер и **купальник** для Голубой дыры.",
-            pickup: "**Бесплатный трансфер туда-обратно** на авто с кондиционером из любого отеля Шарма: Наама-Бей, Сохо-сквер, Шаркс-Бей, Набк-Бей, Хадаба.",
-            payment: "Удобная оплата:\n• **Оплата при получении:** 0% предоплаты, наличные или карта при выезде.\n• **Visa / Mastercard** на сайте.\n• **Бесплатная отмена** за 2 часа до выезда.",
-            promo: code => `Промокод **${code}** даёт **скидку 20%** сразу, а для **5+ гостей** автоматически добавляется **10% групповая скидка**! Нажмите на купон:`,
-            price: "Актуальные цены на сегодня в выбранной валюте с включённым трансфером:",
-            fallback: "Популярные сафари-туры Шарм-эль-Шейха прямо сейчас! Попробуйте спросить **\"Расчёт 4 взрослых закат\"**, **\"До $20\"** или **\"Сравни Эхо и Набк\"**:"
+            family: "Для семей: автоматические квадроциклы и **скидка 50%** детям 6–11 лет. Рекомендуем **Утреннее сафари (08:00)** или **Ужин-сафари (15:30)**:",
+            couple: "Для пар идеально подойдут **Рассветное сафари (04:00)** или **Ужин-сафари (15:30)** с барбекю у бедуинов:",
+            thrill: "Для любителей скорости: **Утреннее сафари (08:00)** сочетает квадроциклы ATV и багги:",
+            nabq: "Актуальные выезды **Дневного (14:15)** и **Утреннего (08:00)** сафари:",
+            night: "**🌙 Ужин-сафари — официальное время:**\n• **Маршрут 1:** 15:30 Хадаба · 15:45 Наама-Бей · 16:00 Конференц-центр\n• **Маршрут 2 (Ужин):** 16:00 За аэропортом · 16:15 Эль-Гаркана\n📌 Будьте на точке посадки за 10 минут.",
+            canyon: "**🌄 Дневное сафари — время:** 14:15 Хадаба/Наама-Бей/Аэропорт · 14:30 Конференц-центр/Эль-Гаркана.",
+            morning: "**🌅 Рассвет (04:00)** и **☀️ Утреннее сафари (08:00)**:",
+            safety: "Безопасность и правила:\n• **Права не нужны** — автоматические квадроциклы и инструктаж.\n• **Выходите за 10 минут** до времени отправления.\n• При опоздании компания вправе изменить или отменить бронь согласно графику.",
+            packing: "Возьмите закрытую обувь, очки, арафатку и лёгкую кофту на утренний рассвет в 04:00.",
+            pickup: "Расписание сбора по 2 маршрутам:\n• **Хадаба:** 04:00 · 08:00 · 14:15 · 15:30\n• **Наама-Бей:** 04:15 · 08:30 · 14:15 · 15:45\n• **Конференц-центр:** 04:30 · 14:30 · 16:00\n• **За аэропортом:** 04:00 · 08:00/08:40 · 14:15 · 16:00\n• **Эль-Гаркана:** 04:30 · 08:30 · 14:30 · 16:15\n📌 Будьте за 10 минут до выезда.",
+            payment: "Оплата на месте без предоплаты или онлайн Visa/Mastercard.",
+            promo: code => `Промокод **${code}** даёт **20% скидки** + **10%** группам от 5 чел.!`,
+            price: "Актуальные цены всех 4 официальных программ:",
+            fallback: "Спросите точное время для **Хадабы, Наама-Бей, Конференц-центра, Аэропорта или Эль-Гарканы**:"
         },
         chips: {
-            default: ["Расчёт на 4 взрослых и 2 детей", "Сравни Закат Эхо и Двойной драйв", "Безопасность и что взять?", "Активировать MOSA20 (-20%)"],
-            family: ["Посчитай 2 взр. + 2 реб.", "Самый выгодный тур?", "Бесплатный трансфер?", "Оплата при получении"],
-            compare: ["Расчёт лидера на 3 взр.", "Что лучше для детей?", "Утром или на закат?", "Применить MOSA20"],
-            quote: ["Добавить скидку MOSA20", "Сравнить с другим туром", "Условия отмены", "Написать в WhatsApp"]
+            default: ["Время из Наама-Бей и Хадабы", "Расчёт Ужин-сафари для 4 взр.", "График из Эль-Гарканы?", "Активировать MOSA20 (-20%)"],
+            family: ["Расчёт Утро 2+2", "Самый выгодный тур?", "Правило 10 минут?", "Оплата при получении"],
+            compare: ["Сравни Рассвет и Ужин", "Что лучше для детей?", "Все 5 точек сбора?", "Применить MOSA20"],
+            quote: ["Добавить скидку MOSA20", "Сравнить с другим туром", "Правила посадки", "Написать в WhatsApp"]
         },
         welcome_actions: [
             { kind: "mode", val: "matcher", icon: "🧭", title: "Подбор тура", sub: "3 быстрых вопроса" },
             { kind: "mode", val: "quote", icon: "🧮", title: "Калькулятор", sub: "Точная цена и скидки" },
-            { kind: "query", val: "Порекомендуй семейное сафари на закате", icon: "🌅", title: "Закат и Семья", sub: "Хиты в Шарме" },
+            { kind: "query", val: "Время из Наама-Бей и Хадабы", icon: "📍", title: "Точки сбора", sub: "Маршруты 1 и 2" },
             { kind: "promo", val: "MOSA20", icon: "🏷️", title: "Скидка 20% сразу", sub: "Промокод MOSA20" }
         ]
     }
 };
 
 const TOUR_KEYWORDS = {
-    "sharm-sunrise-atv": ["شروق", "فجر", "صبح", "صباح", "sunrise", "dawn", "alba", "рассвет", "утро"],
-    "sharm-sunset-echo": ["غروب", "صدى", "الصدى", "جبال", "sunset", "echo", "tramonto", "eco", "закат", "эхо"],
-    "sharm-double-thrill": ["مزدوج", "مزدوجة", "باجي", "اثاره", "إثارة", "سريع", "ثريل", "double", "thrill", "buggy", "doppia", "emozione", "двойн", "драйв", "багги"],
-    "sharm-night-5in1": ["ليل", "ليليه", "ليلية", "نجوم", "عشاء", "بدوي", "5 في 1", "سهره", "night", "star", "stargazing", "dinner", "bbq", "5-in-1", "notte", "stelle", "ноч", "звезд", "ужин", "5-в-1"],
-    "sharm-canyon-bluehole": ["ملون", "وادي", "الوادي", "بلو", "هول", "دهب", "جيب", "يوم كامل", "سنوركل", "canyon", "colored", "blue hole", "dahab", "snorkel", "jeep", "colorato", "цветн", "каньон", "голуб", "дахаб", "сноркл"],
-    "sharm-nabq-premium": ["نبق", "محمية", "مانجروف", "nabq", "mangrove", "reserve", "riserva", "набк", "заповед", "мангр"],
-    "sharm-nabq-secrets": ["اسرار", "أسرار", "موتو", "في اي بي", "vip", "secrets", "moto", "segreti", "тайн", "вип"],
-    "sharm-nabq-seafood": ["سمك", "بحري", "بحرية", "سي فود", "غسق", "اسماك", "seafood", "fish", "dusk", "pesce", "морепрод", "рыб"]
+    "mosa-sunrise": ["شروق", "الشروق", "فجر", "4", "04:00", "04:15", "04:30", "sunrise", "dawn", "alba", "рассвет"],
+    "mosa-morning": ["صباح", "صباحيه", "الصباحية", "8", "08:00", "08:30", "08:40", "morning", "buggy", "mattina", "утрен", "утро"],
+    "mosa-standard": ["عاديه", "العادية", "عادي", "ظهير", "ظهر", "عصر", "14:15", "14:30", "standard", "afternoon", "classic", "pomeriggio", "дневн", "обычн"],
+    "mosa-dinner": ["عشاء", "العشاء", "غروب", "ليل", "سهره", "بدوي", "15:30", "15:45", "16:00", "16:15", "dinner", "bbq", "sunset", "night", "cena", "tramonto", "ужин", "закат", "ноч"]
+};
+
+const STATION_PATTERNS = {
+    hadaba: /هضب|الهضبه|\bhadaba\b|хадаб/,
+    naama: /نعمه|خليج نعمه|\bnaama\b|наама/,
+    conference: /قاعه|المؤتمرات|\bconference\b|congressi|конференц/,
+    airport: /مطار|خلف المطار|\bairport\b|aeroporto|аэропорт/,
+    gharqana: /غرقان|الغرقانه|\bgharqana\b|garqana|гаркан/
 };
 
 const aiSession = {
     adults: null,
     children: null,
     slot: null,
+    station: null,
     vibe: null,
     maxBudgetUsd: null,
     promoCode: "",
@@ -487,7 +499,7 @@ const aiSession = {
     quizStep: 1,
     quizAnswers: { party: null, time: null, style: null },
     quote: {
-        tripIds: ["sharm-sunset-echo"],
+        tripIds: ["mosa-sunrise"],
         adults: 2,
         children: 0,
         slot: "morning",
@@ -599,10 +611,19 @@ function extractEntities(raw) {
         ent.children = 1;
     }
 
+    // Pickup Station detection
+    ent.station = null;
+    for (const [stKey, rx] of Object.entries(STATION_PATTERNS)) {
+        if (rx.test(norm)) {
+            ent.station = stKey;
+            break;
+        }
+    }
+
     // Time Slot
     if (/صباح|شروق|فجر|\bmorning\b|\bsunrise\b|\bdawn\b|\bmattin|\balba\b|утр|рассвет/.test(norm)) {
         ent.slot = "morning";
-    } else if (/مساء|غروب|ليل|عشاء|نجوم|غسق|\bevening\b|\bsunset\b|\bdusk\b|\bnight\b|\bstar|ser[ae]|tramont|notte|вечер|закат|ноч/.test(norm)) {
+    } else if (/مساء|غروب|ليل|عشاء|عاديه|ظهير|غسق|\bevening\b|\bsunset\b|\bdinner\b|\bstandard\b|ser[ae]|cena|Вечер|ужин/.test(norm)) {
         ent.slot = "evening";
     }
 
@@ -658,6 +679,7 @@ export function analyzeUserPrompt(raw) {
     if (ent.adults !== null) aiSession.adults = ent.adults;
     if (ent.children !== null) aiSession.children = ent.children;
     if (ent.slot) aiSession.slot = ent.slot;
+    if (ent.station) aiSession.station = ent.station;
     if (ent.maxBudgetUsd !== null) aiSession.maxBudgetUsd = ent.maxBudgetUsd;
     if (ent.promoCode) aiSession.promoCode = ent.promoCode;
 
@@ -700,7 +722,7 @@ export function analyzeUserPrompt(raw) {
         intent = "safety";
     } else if (/ملابس|البس|حذاء|نظار|كوفيه|جو|طقس|برد|حر|اخد معايا|اجيب|wear|pack|bring|clothes|shoes|weather|abbigliam|scarpe|одеж|взять|погод|обув/.test(n)) {
         intent = "packing";
-    } else if (/فندق|توصيل|استلام|نعمة|سوهو|هضب|قرش|مكان|فين|pickup|hotel|transfer|location|naama|sharks|ritiro|trasfer|трансфер|отель|наама/.test(n)) {
+    } else if (ent.station || /فندق|توصيل|استلام|مسار|مسارين|مواعيد|تحرك|هضب|نعمه|مؤتمرات|مطار|غرقان|pickup|hotel|transfer|route|schedule|timetable|ritiro|percors|трансфер|точк|маршрут/.test(n)) {
         intent = "pickup";
     } else if (/دفع|فيزا|كاش|مقدم|الغاء|تعديل|استرداد|pay|visa|cash|deposit|cancel|pagam|contanti|оплат|налич|отмен/.test(n)) {
         intent = "payment";
@@ -710,11 +732,10 @@ export function analyzeUserPrompt(raw) {
         intent = "price";
     } else if (explicitMatches.length) {
         const topId = explicitMatches[0].id;
-        if (topId === "sharm-night-5in1") intent = "night";
-        else if (topId === "sharm-canyon-bluehole") intent = "canyon";
-        else if (topId.includes("nabq")) intent = "nabq";
-        else if (topId === "sharm-double-thrill") intent = "thrill";
-        else if (topId === "sharm-sunrise-atv") intent = "morning";
+        if (topId === "mosa-dinner") intent = "night";
+        else if (topId === "mosa-standard") intent = "canyon";
+        else if (topId === "mosa-morning") intent = "thrill";
+        else if (topId === "mosa-sunrise") intent = "morning";
         else intent = "matched_tours";
     } else if (ent.slot === "morning") {
         intent = "morning";
@@ -950,6 +971,9 @@ function renderContextMemoryBar() {
         const lbl = aiSession.slot === "evening" ? `🌙 ${c.ctx_evening}` : `☀️ ${c.ctx_morning}`;
         pills.push(`<span class="px-2 py-0.5 rounded-md bg-white/80 dark:bg-carbon-800 border border-champagne/30 text-carbon-950 dark:text-champagne">${escHtml(lbl)}</span>`);
     }
+    if (aiSession.station && PICKUP_STATIONS[aiSession.station]) {
+        pills.push(`<span class="px-2 py-0.5 rounded-md bg-white/80 dark:bg-carbon-800 border border-sea/40 text-sea-dark dark:text-sea">📍 ${escHtml(getStationLabel(aiSession.station, lang))}</span>`);
+    }
     if (aiSession.maxBudgetUsd) {
         pills.push(`<span class="px-2 py-0.5 rounded-md bg-sea/15 border border-sea/30 text-sea-dark dark:text-sea">💰 ${escHtml(c.ctx_budget(fmtPrice(aiSession.maxBudgetUsd)))}</span>`);
     }
@@ -1025,6 +1049,10 @@ function launchBookingWithPrefs({ tripIds = [], adults = null, children = null, 
     if (slot === "morning" || slot === "evening") b.tripTime = slot;
     else if (aiSession.slot) b.tripTime = aiSession.slot;
 
+    if (aiSession.station && PICKUP_STATIONS[aiSession.station]) {
+        b.pickupStation = aiSession.station;
+    }
+
     if (promoCode) b.promoCode = promoCode;
     else if (aiSession.promoCode) b.promoCode = aiSession.promoCode;
 
@@ -1034,7 +1062,11 @@ function launchBookingWithPrefs({ tripIds = [], adults = null, children = null, 
 
     const c = getCopy(getAiLang());
     toggleAiWidget(false);
-    openBookingWithTrip(b.selectedIds[0]);
+    if (aiSession.station) {
+        openBookingWithStop(b.selectedIds[0], null, aiSession.station);
+    } else {
+        openBookingWithTrip(b.selectedIds[0]);
+    }
     showToast(c.applied_prefill);
 }
 
@@ -1058,7 +1090,7 @@ export function handleAiQuery(q) {
         renderContextMemoryBar();
         syncWhatsAppConciergeLink();
 
-        const primaryId = explicitMatches[0]?.id || aiSession.lastTripIds[0] || "sharm-sunset-echo";
+        const primaryId = explicitMatches[0]?.id || aiSession.lastTripIds[0] || "mosa-sunrise";
 
         if (intent === "greeting") {
             appendAiMsg(m.greeting, "bot");
@@ -1072,10 +1104,10 @@ export function handleAiQuery(q) {
                 pair.push(explicitMatches[0], explicitMatches[1]);
             } else if (explicitMatches.length === 1) {
                 pair.push(explicitMatches[0]);
-                const fallbackSecond = catalog.find(t => t.id !== explicitMatches[0].id && (aiSession.lastTripIds.includes(t.id) || t.id === "sharm-double-thrill")) || catalog.find(t => t.id !== explicitMatches[0].id);
+                const fallbackSecond = catalog.find(t => t.id !== explicitMatches[0].id && (aiSession.lastTripIds.includes(t.id) || t.id === "mosa-dinner")) || catalog.find(t => t.id !== explicitMatches[0].id);
                 if (fallbackSecond) pair.push(fallbackSecond);
             } else {
-                const defaults = pickTripsByIds(["sharm-sunset-echo", "sharm-double-thrill"]);
+                const defaults = pickTripsByIds(["mosa-sunrise", "mosa-dinner"]);
                 pair.push(...defaults.slice(0, 2));
             }
             if (pair.length === 2) {
@@ -1094,7 +1126,7 @@ export function handleAiQuery(q) {
             const quoteData = computeAiQuote([targetTrip.id], a, ch, promoToUse);
             appendAiMsg(m.quote_intro(getTripTitle(targetTrip, lang), c.ctx_guests(a, ch)), "bot", {
                 quoteData,
-                slot: aiSession.slot || "morning"
+                slot: aiSession.slot || targetTrip.slotType || "morning"
             });
             updateDynamicChips("quote");
             return;
@@ -1108,7 +1140,7 @@ export function handleAiQuery(q) {
         }
 
         if (intent === "budget") {
-            const maxUsd = ent.maxBudgetUsd || aiSession.maxBudgetUsd || 25;
+            const maxUsd = ent.maxBudgetUsd || aiSession.maxBudgetUsd || 20;
             let matches = catalog.filter(t => t.fromPrice <= maxUsd).sort((a, b) => a.fromPrice - b.fromPrice);
             if (!matches.length) matches = [...catalog].sort((a, b) => a.fromPrice - b.fromPrice).slice(0, 2);
             aiSession.lastTripIds = matches.slice(0, 3).map(t => t.id);
@@ -1118,7 +1150,7 @@ export function handleAiQuery(q) {
         }
 
         if (intent === "family") {
-            const trips = pickTripsByIds(["sharm-sunset-echo", "sharm-night-5in1", "sharm-nabq-premium"]);
+            const trips = pickTripsByIds(["mosa-morning", "mosa-dinner", "mosa-standard"]);
             aiSession.lastTripIds = trips.map(t => t.id);
             appendAiMsg(m.family, "bot", { trips: trips.slice(0, 2) });
             updateDynamicChips("family");
@@ -1126,7 +1158,7 @@ export function handleAiQuery(q) {
         }
 
         if (intent === "couple") {
-            const trips = pickTripsByIds(["sharm-sunset-echo", "sharm-nabq-seafood"]);
+            const trips = pickTripsByIds(["mosa-sunrise", "mosa-dinner"]);
             aiSession.lastTripIds = trips.map(t => t.id);
             appendAiMsg(m.couple, "bot", { trips });
             updateDynamicChips("compare");
@@ -1134,7 +1166,7 @@ export function handleAiQuery(q) {
         }
 
         if (intent === "thrill") {
-            const trips = pickTripsByIds(["sharm-double-thrill", "sharm-nabq-secrets"]);
+            const trips = pickTripsByIds(["mosa-morning", "mosa-sunrise"]);
             aiSession.lastTripIds = trips.map(t => t.id);
             appendAiMsg(m.thrill, "bot", { trips });
             updateDynamicChips("compare");
@@ -1142,15 +1174,15 @@ export function handleAiQuery(q) {
         }
 
         if (intent === "nabq") {
-            const trips = pickTripsByIds(["sharm-nabq-premium", "sharm-nabq-secrets", "sharm-nabq-seafood"]);
+            const trips = pickTripsByIds(["mosa-standard", "mosa-morning"]);
             aiSession.lastTripIds = trips.map(t => t.id);
-            appendAiMsg(m.nabq, "bot", { trips: trips.slice(0, 3) });
+            appendAiMsg(m.nabq, "bot", { trips: trips.slice(0, 2) });
             updateDynamicChips("compare");
             return;
         }
 
         if (intent === "night") {
-            const trips = pickTripsByIds(["sharm-night-5in1"]);
+            const trips = pickTripsByIds(["mosa-dinner"]);
             aiSession.lastTripIds = trips.map(t => t.id);
             appendAiMsg(m.night, "bot", { trips });
             updateDynamicChips("quote");
@@ -1158,7 +1190,7 @@ export function handleAiQuery(q) {
         }
 
         if (intent === "canyon") {
-            const trips = pickTripsByIds(["sharm-canyon-bluehole"]);
+            const trips = pickTripsByIds(["mosa-standard"]);
             aiSession.lastTripIds = trips.map(t => t.id);
             appendAiMsg(m.canyon, "bot", { trips });
             updateDynamicChips("quote");
@@ -1166,7 +1198,7 @@ export function handleAiQuery(q) {
         }
 
         if (intent === "morning") {
-            const trips = pickTripsByIds(["sharm-sunrise-atv", "sharm-canyon-bluehole"]);
+            const trips = pickTripsByIds(["mosa-sunrise", "mosa-morning"]);
             aiSession.lastTripIds = trips.map(t => t.id);
             appendAiMsg(m.morning, "bot", { trips });
             updateDynamicChips("quote");
@@ -1186,7 +1218,24 @@ export function handleAiQuery(q) {
         }
 
         if (intent === "pickup") {
-            appendAiMsg(m.pickup, "bot");
+            if (ent.station) {
+                const stName = getStationLabel(ent.station, lang);
+                const lines = catalog.map(t => {
+                    const hits = [];
+                    getTripRoutes(t).forEach(r => {
+                        const match = (r.stops || []).find(s => s.station === ent.station);
+                        if (match) hits.push(`${getRouteLabel(r, lang)}: **${getStopClock(match, lang)}**`);
+                    });
+                    return hits.length ? `• ${getTripTitle(t, lang)} → ${hits.join(" | ")}` : null;
+                }).filter(Boolean);
+                const ruleLine = (MOSA_RULES[lang] || MOSA_RULES.en).items[0];
+                const header = lang === "ar"
+                    ? `📍 مواعيد التحرك الرسمية من **${stName}**:`
+                    : `📍 Official pickup schedule from **${stName}**:`;
+                appendAiMsg(`${header}\n${lines.join("\n")}\n\n📌 ${ruleLine}`, "bot", { trips: catalog.slice(0, 2) });
+            } else {
+                appendAiMsg(m.pickup, "bot", { trips: catalog.slice(0, 2) });
+            }
             updateDynamicChips("default");
             return;
         }
@@ -1208,9 +1257,8 @@ export function handleAiQuery(q) {
 
         if (intent === "price") {
             const sorted = [...catalog].sort((a, b) => a.fromPrice - b.fromPrice);
-            const featured = [sorted[0], catalog.find(t => t.id === "sharm-sunset-echo"), sorted[sorted.length - 1]].filter(Boolean);
-            aiSession.lastTripIds = featured.map(t => t.id);
-            appendAiMsg(m.price, "bot", { trips: featured });
+            aiSession.lastTripIds = sorted.map(t => t.id);
+            appendAiMsg(m.price, "bot", { trips: sorted.slice(0, 3) });
             updateDynamicChips("quote");
             return;
         }
@@ -1236,20 +1284,20 @@ function scoreQuizCatalog() {
     const catalog = activeCatalog();
 
     const ranked = catalog.map(trip => {
-        let s = 50 + Number(trip.rating || 4.3) * 4;
-        if (time === "morning" && trip.id === "sharm-sunrise-atv") s += 30;
-        if (time === "sunset" && ["sharm-sunset-echo", "sharm-nabq-seafood", "sharm-double-thrill"].includes(trip.id)) s += 26;
-        if (time === "night" && trip.id === "sharm-night-5in1") s += 38;
-        if (time === "fullday" && trip.id === "sharm-canyon-bluehole") s += 42;
+        let s = 50 + Number(trip.rating || 4.8) * 4;
+        if (time === "sunrise" && trip.id === "mosa-sunrise") s += 42;
+        if (time === "morning" && trip.id === "mosa-morning") s += 42;
+        if (time === "standard" && trip.id === "mosa-standard") s += 42;
+        if (time === "dinner" && trip.id === "mosa-dinner") s += 44;
 
-        if (party === "family" && ["sharm-sunset-echo", "sharm-night-5in1", "sharm-nabq-premium"].includes(trip.id)) s += 16;
-        if (party === "couple" && ["sharm-sunset-echo", "sharm-nabq-seafood", "sharm-nabq-secrets"].includes(trip.id)) s += 16;
-        if (party === "group" && ["sharm-double-thrill", "sharm-night-5in1", "sharm-canyon-bluehole"].includes(trip.id)) s += 15;
-        if (party === "solo" && ["sharm-double-thrill", "sharm-sunrise-atv"].includes(trip.id)) s += 16;
+        if (party === "family" && ["mosa-morning", "mosa-dinner"].includes(trip.id)) s += 16;
+        if (party === "couple" && ["mosa-sunrise", "mosa-dinner"].includes(trip.id)) s += 16;
+        if (party === "group" && ["mosa-dinner", "mosa-morning"].includes(trip.id)) s += 15;
+        if (party === "solo" && ["mosa-standard", "mosa-sunrise"].includes(trip.id)) s += 16;
 
-        if (style === "thrill" && ["sharm-double-thrill", "sharm-nabq-secrets", "sharm-sunrise-atv"].includes(trip.id)) s += 24;
-        if (style === "vip" && trip.category === "nabq") s += 26;
-        if (style === "scenic" && ["sharm-sunset-echo", "sharm-canyon-bluehole", "sharm-night-5in1"].includes(trip.id)) s += 20;
+        if (style === "thrill" && ["mosa-morning", "mosa-sunrise"].includes(trip.id)) s += 24;
+        if (style === "dinner" && trip.id === "mosa-dinner") s += 28;
+        if (style === "scenic" && ["mosa-sunrise", "mosa-standard"].includes(trip.id)) s += 22;
 
         return { trip, score: s };
     }).sort((a, b) => b.score - a.score);
@@ -1546,6 +1594,7 @@ function resetAiConversation() {
     aiSession.adults = null;
     aiSession.children = null;
     aiSession.slot = null;
+    aiSession.station = null;
     aiSession.vibe = null;
     aiSession.maxBudgetUsd = null;
     aiSession.promoCode = "";
@@ -1726,6 +1775,7 @@ export function initAiAssistant() {
             aiSession.adults = null;
             aiSession.children = null;
             aiSession.slot = null;
+            aiSession.station = null;
             aiSession.maxBudgetUsd = null;
             aiSession.promoCode = "";
             renderContextMemoryBar();
@@ -1755,7 +1805,7 @@ export function initAiAssistant() {
             const catalog = activeCatalog();
             const first = catalog.find(t => t.id === id);
             if (!first) return;
-            const secondId = aiSession.lastTripIds.find(x => x !== id) || (id === "sharm-sunset-echo" ? "sharm-double-thrill" : "sharm-sunset-echo");
+            const secondId = aiSession.lastTripIds.find(x => x !== id) || (id === "mosa-sunrise" ? "mosa-dinner" : "mosa-sunrise");
             const second = catalog.find(t => t.id === secondId) || catalog.find(t => t.id !== id);
             if (second) {
                 const c = getCopy(getAiLang());

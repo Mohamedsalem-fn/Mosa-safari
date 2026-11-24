@@ -51,14 +51,15 @@ export function buildOwnerWhatsAppMessage(payload) {
     const payLabel = payload.paymentMethod === "visa"
         ? `💳 بالفيزا / البطاقة البنكية (Placeholder — ${payload.cardMask || "جاهز للبوابة"})`
         : "💵 الدفع عند الوصول (Pay on Arrival)";
+    const pickupText = payload.pickupPointDisplay || payload.tripTimeDisplay || (payload.tripTime === "evening" ? "مساءً" : "صباحاً");
 
     return [
-        "🐪 *حجز سفاري جديد — موسى سفاري (mosasafari.com)*",
+        "🐪 *حجز سفاري جديد — شركة موسى سفاري (mosasafari.com)*",
         "━━━━━━━━━━━━━━━━━━━━",
         `🔖 *رقم الحجز:* ${payload.ref}`,
         `📅 *تاريخ الرحلة:* ${payload.tripDate || "غير محدد"}`,
-        `🕒 *ميعاد الرحلة:* ${payload.tripTimeDisplay || (payload.tripTime === "evening" ? "مساءً" : "صباحاً")}`,
-        `🏜️ *البرامج المختارة:* ${payload.selectedTours}`,
+        `📍 *نقطة الاستلام والميعاد:* ${pickupText}`,
+        `🏜️ *البرنامج المختار:* ${payload.selectedTours}`,
         `🚐 *نوع المركبة:* ${payload.vehicleDisplay}`,
         `👥 *عدد الضيوف:* ${payload.adults} بالغين · ${payload.children} أطفال`,
         "━━━━━━━━━━━━━━━━━━━━",
@@ -66,7 +67,7 @@ export function buildOwnerWhatsAppMessage(payload) {
         `📱 *واتساب العميل:* ${payload.phone}`,
         `📧 *إيميل العميل:* ${payload.email || "غير متوفر"}`,
         `🌍 *الجنسية:* ${payload.nationality || "غير محدد"}`,
-        `🏨 *فندق الاستلام:* ${payload.pickupHotel || "سيتم التحديد لاحقاً"}`,
+        `🏨 *نقطة الاستلام / الفندق:* ${payload.pickupHotel || "سيتم التحديد لاحقاً"}`,
         "━━━━━━━━━━━━━━━━━━━━",
         `💳 *طريقة الدفع:* ${payLabel}`,
         payload.promoCode ? `🏷️ *كود الخصم:* ${payload.promoCode}` : null,
@@ -91,53 +92,61 @@ export function buildCustomerConfirmationContent(payload) {
         ? "Visa / Mastercard (Order registered — payment gateway confirmation pending)"
         : "Pay on Arrival on tour day";
 
+    const pickupDisplay = payload.pickupPointDisplay || payload.tripTimeDisplay || (payload.tripTime === "evening" ? (isAr ? "مساءً" : "Evening (PM)") : (isAr ? "صباحاً" : "Morning (AM)"));
+
     const subject = isAr
-        ? `تأكيد حجزك في موسى سفاري شرم الشيخ — رقم ${payload.ref}`
+        ? `تأكيد حجزك في شركة موسى سفاري شرم الشيخ — رقم ${payload.ref}`
         : `Your Mosa Safari Booking Confirmation — Ref ${payload.ref}`;
 
     const text = isAr
         ? [
-            `أهلاً بك يا ${payload.name} في موسى سفاري (mosasafari.com)!`,
+            `أهلاً بك يا ${payload.name} في شركة موسى سفاري (mosasafari.com)!`,
             "",
             `تم استلام وتأكيد طلب حجزك بنجاح. تفاصيل الحجز:`,
             `• رقم المرجع: ${payload.ref}`,
-            `• البرامج: ${payload.selectedTours}`,
+            `• الرحلة: ${payload.selectedTours}`,
             `• التاريخ: ${payload.tripDate}`,
-            `• الميعاد: ${payload.tripTimeDisplay || (payload.tripTime === "evening" ? "مساءً" : "صباحاً")}`,
+            `• نقطة الاستلام وموعد التحرك: ${pickupDisplay}`,
+            `• الفندق / المنطقة: ${payload.pickupHotel || "شرم الشيخ"}`,
             `• الضيوف: ${payload.adults} بالغين، ${payload.children} أطفال`,
             `• المركبة: ${payload.vehicleDisplay}`,
-            `• فندق الاستلام: ${payload.pickupHotel || "شرم الشيخ"}`,
             `• طريقة الدفع: ${payTextAr}`,
             `• الإجمالي: ${payload.totalFormatted}`,
             "",
-            "سيتواصل معك فريق العمليات في شرم الشيخ لتأكيد موعد التحرك الدقيق من الفندق.",
-            "للتواصل السريع عبر واتساب: +201023355550",
-            "شكراً لاختيارك موسى سفاري!"
+            "📌 تعليمات هامة:",
+            "- يرجى التواجد في نقطة الاستلام قبل موعد التحرك بـ 10 دقائق.",
+            "- في حال التأخير، تتحمل الشركة حق تعديل أو إلغاء الحجز وفقًا لجدول التشغيل.",
+            "- نتمنى لكم رحلة ممتعة مع شركة موسى سفاري.",
+            "",
+            "للتواصل السريع عبر واتساب: +201023355550"
         ].join("\n")
         : [
             `Hello ${payload.name}, welcome to Mosa Safari (mosasafari.com)!`,
             "",
             `Your desert safari booking has been confirmed. Booking Summary:`,
             `• Reference ID: ${payload.ref}`,
-            `• Safari Programs: ${payload.selectedTours}`,
+            `• Safari Program: ${payload.selectedTours}`,
             `• Tour Date: ${payload.tripDate}`,
-            `• Time Slot: ${payload.tripTimeDisplay || (payload.tripTime === "evening" ? "Evening (PM)" : "Morning (AM)")}`,
+            `• Pickup Point & Departure Time: ${pickupDisplay}`,
+            `• Pickup Hotel / Area: ${payload.pickupHotel || "Sharm El Sheikh"}`,
             `• Guests: ${payload.adults} Adults, ${payload.children} Children`,
             `• Vehicle: ${payload.vehicleDisplay}`,
-            `• Pickup Hotel: ${payload.pickupHotel || "Sharm El Sheikh"}`,
             `• Payment Method: ${payTextEn}`,
             `• Total Amount: ${payload.totalFormatted}`,
             "",
-            "Our Sharm El Sheikh operations team will contact you to confirm your exact hotel pickup time.",
-            "24/7 WhatsApp Support: +201023355550",
-            "Thank you for choosing Mosa Safari!"
+            "📌 Important Instructions:",
+            "- Please be present at your pickup point 10 minutes before departure time.",
+            "- In case of delay, the company reserves the right to reschedule or cancel the booking according to the operating timetable.",
+            "- We wish you a wonderful trip with Mosa Safari.",
+            "",
+            "24/7 WhatsApp Support: +201023355550"
         ].join("\n");
 
     const safeName = escHtml(payload.name);
     const safeRef = escHtml(payload.ref);
     const safeTours = escHtml(payload.selectedTours);
     const safeDate = escHtml(payload.tripDate);
-    const safeTime = escHtml(payload.tripTimeDisplay || (payload.tripTime === "evening" ? (isAr ? "مساءً" : "Evening (PM)") : (isAr ? "صباحاً" : "Morning (AM)")));
+    const safeTime = escHtml(pickupDisplay);
     const safeVehicle = escHtml(payload.vehicleDisplay);
     const safeHotel = escHtml(payload.pickupHotel || "-");
     const safeTotal = escHtml(payload.totalFormatted);
@@ -146,22 +155,28 @@ export function buildCustomerConfirmationContent(payload) {
     <div style="font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0E1015; color: #F4EFE6; border-radius: 16px; overflow: hidden; border: 1px solid rgba(217,179,108,0.3); direction: ${isAr ? "rtl" : "ltr"};">
       <div style="background: linear-gradient(135deg, #161922, #08090C); padding: 24px; border-bottom: 1px solid rgba(217,179,108,0.2); text-align: center;">
         <div style="color: #D9B36C; font-size: 12px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;">MOSASAFARI.COM · SHARM EL SHEIKH</div>
-        <h1 style="margin: 8px 0 4px; font-size: 22px; color: #FFFFFF;">${isAr ? "تم تأكيد حجزك في موسى سفاري" : "Booking Confirmed — Mosa Safari"}</h1>
+        <h1 style="margin: 8px 0 4px; font-size: 22px; color: #FFFFFF;">${isAr ? "تم تأكيد حجزك — شركة موسى سفاري" : "Booking Confirmed — Mosa Safari"}</h1>
         <div style="display: inline-block; margin-top: 6px; padding: 4px 14px; border-radius: 99px; background: rgba(44,181,160,0.18); color: #2CB5A0; font-weight: 800; font-size: 13px;">${safeRef}</div>
       </div>
       <div style="padding: 24px; line-height: 1.7; font-size: 14px;">
-        <p style="margin-top: 0;">${isAr ? `مرحباً <strong>${safeName}</strong>، يسعدنا تأكيد استلام حجزك لرحلة السفاري في شرم الشيخ:` : `Dear <strong>${safeName}</strong>, we are delighted to confirm your Sharm El Sheikh desert safari booking:`}</p>
+        <p style="margin-top: 0;">${isAr ? `مرحباً <strong>${safeName}</strong>، يسعدنا تأكيد استلام حجزك مع شركة موسى سفاري:` : `Dear <strong>${safeName}</strong>, we are delighted to confirm your Mosa Safari booking:`}</p>
         <div style="background: #161922; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; margin: 16px 0;">
-          <p style="margin: 6px 0;"><strong>${isAr ? "البرامج:" : "Programs:"}</strong> ${safeTours}</p>
+          <p style="margin: 6px 0;"><strong>${isAr ? "الرحلة:" : "Program:"}</strong> ${safeTours}</p>
           <p style="margin: 6px 0;"><strong>${isAr ? "تاريخ الرحلة:" : "Tour Date:"}</strong> ${safeDate}</p>
-          <p style="margin: 6px 0;"><strong>${isAr ? "ميعاد الرحلة:" : "Time Slot:"}</strong> ${safeTime}</p>
+          <p style="margin: 6px 0; color: #D9B36C;"><strong>${isAr ? "نقطة الاستلام وموعد التحرك:" : "Pickup Point & Departure:"}</strong> ${safeTime}</p>
+          <p style="margin: 6px 0;"><strong>${isAr ? "نقطة التجمع / الفندق:" : "Pickup Hotel / Area:"}</strong> ${safeHotel}</p>
           <p style="margin: 6px 0;"><strong>${isAr ? "عدد الضيوف:" : "Guests:"}</strong> ${Number(payload.adults) || 1} ${isAr ? "بالغين" : "Adults"} · ${Number(payload.children) || 0} ${isAr ? "أطفال" : "Children"}</p>
           <p style="margin: 6px 0;"><strong>${isAr ? "نوع المركبة:" : "Vehicle:"}</strong> ${safeVehicle}</p>
-          <p style="margin: 6px 0;"><strong>${isAr ? "فندق الاستلام:" : "Pickup Hotel:"}</strong> ${safeHotel}</p>
           <p style="margin: 6px 0;"><strong>${isAr ? "طريقة الدفع:" : "Payment Method:"}</strong> ${isAr ? payTextAr : payTextEn}</p>
           <p style="margin: 10px 0 4px; font-size: 16px; color: #D9B36C;"><strong>${isAr ? "الإجمالي:" : "Total:"} ${safeTotal}</strong></p>
         </div>
-        <p style="font-size: 13px; color: #B5B0A8;">${isAr ? "سيتواصل معك مندوبنا عبر الواتساب لتأكيد موعد التحرك الدقيق من الفندق. لأي استفسار فوري يمكنك مراسلتنا على واتساب: +201023355550" : "Our representative will contact you via WhatsApp with your exact hotel pickup time. For immediate assistance, message us on WhatsApp: +201023355550"}</p>
+        <div style="background: rgba(217,179,108,0.12); border: 1px solid rgba(217,179,108,0.4); border-radius: 12px; padding: 14px; margin: 16px 0; font-size: 13px;">
+          <div style="color: #D9B36C; font-weight: 800; margin-bottom: 6px;">${isAr ? "📌 تعليمات هامة" : "📌 Important Pickup Instructions"}</div>
+          <p style="margin: 4px 0;">• ${isAr ? "يرجى التواجد في نقطة الاستلام قبل موعد التحرك بـ 10 دقائق." : "Please be present at your pickup point 10 minutes before departure time."}</p>
+          <p style="margin: 4px 0;">• ${isAr ? "في حال التأخير، تتحمل الشركة حق تعديل أو إلغاء الحجز وفقًا لجدول التشغيل." : "In case of delay, the company reserves the right to reschedule or cancel the booking according to the operating timetable."}</p>
+          <p style="margin: 4px 0;">• ${isAr ? "نتمنى لكم رحلة ممتعة مع شركة موسى سفاري." : "We wish you a wonderful trip with Mosa Safari."}</p>
+        </div>
+        <p style="font-size: 13px; color: #B5B0A8;">${isAr ? "لأي استفسار فوري يمكنك مراسلتنا عبر واتساب: +201023355550" : "For immediate assistance, message us on WhatsApp: +201023355550"}</p>
       </div>
     </div>`;
 

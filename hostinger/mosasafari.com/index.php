@@ -28,30 +28,30 @@ $metaMap = [
     'ar' => [
         'dir' => 'rtl',
         'locale' => 'ar_EG',
-        'title' => 'موسى سفاري شرم الشيخ | رحلات سفاري وبيتش باجي ATV تبدأ من $10.13 (تقييم 4.9★) — Mosa Safari Sharm El Sheikh 2026',
-        'desc' => 'احجز أفضل 8 رحلات سفاري وسياحة في شرم الشيخ مع موسى سفاري (mosasafari.com) بأسعار تبدأ من $10.13 وتقييم 4.9★: بيتش باجي ATV، جبال الصدى، محمية نبق، مراقبة النجوم، الوادي الملون ودهب مع الدفع عند الوصول.',
-        'og_title' => 'موسى سفاري شرم الشيخ | رحلات سفاري وبيتش باجي ATV تبدأ من $10.13 (تقييم 4.9★)'
+        'title' => 'شركة موسى سفاري شرم الشيخ | مواعيد الرحلات الرسمية وأماكن الاستلام (تبدأ من $10) — Mosa Safari 2026',
+        'desc' => 'احجز رحلات سفاري شرم الشيخ الرسمية مع شركة موسى سفاري (mosasafari.com) بدءاً من $10 وتقييم 4.9★: رحلة الشروق (04:00 ص)، الرحلة الصباحية (08:00 ص)، الرحلات العادية (14:15)، ورحلة العشاء البدوية (15:30) عبر مسارين من الهضبة، خليج نعمة، قاعة المؤتمرات، خلف المطار، والغرقانة.',
+        'og_title' => 'شركة موسى سفاري شرم الشيخ | رحلة الشروق، الصباحية، العادية، والعشاء (تبدأ من $10)'
     ],
     'en' => [
         'dir' => 'ltr',
         'locale' => 'en_US',
-        'title' => 'Mosa Safari Sharm El Sheikh | Desert Safari, ATV Quad & Tourism Tours from $10.13 (4.9★) 2026',
-        'desc' => 'Book top-rated Sharm El Sheikh desert safari & Red Sea excursions from $10.13 (4.9★, 1,240+ reviews): Sunrise & Sunset ATV Quad in Echo Mountains, Dune Buggy, Nabq Reserve, Stargazing BBQ, Colored Canyon & Dahab. Free hotel pickup & Pay on Arrival.',
-        'og_title' => 'Mosa Safari Sharm El Sheikh | ATV Quad & Desert Safari Tours from $10.13 (4.9★)'
+        'title' => 'Mosa Safari Sharm El Sheikh | Official Safari Schedule, Pickup Routes & Prices from $10 (4.9★) 2026',
+        'desc' => 'Book Mosa Safari Sharm El Sheikh official desert tours from $10 (4.9★, 1,240+ reviews): Sunrise Safari (04:00 AM), Morning Safari (08:00 AM), Standard Afternoon (14:15), and Dinner Safari (15:30). Punctual pickup routes across Al-Hadaba, Naama Bay, Conference Center, Behind Airport & Al-Gharqana.',
+        'og_title' => 'Mosa Safari Sharm El Sheikh | Sunrise, Morning, Afternoon & Dinner Safaris from $10'
     ],
     'it' => [
         'dir' => 'ltr',
         'locale' => 'it_IT',
-        'title' => 'Mosa Safari Sharm El Sheikh | Escursioni Deserto, Quad ATV & Buggy da $10.13 (4.9★) 2026',
-        'desc' => 'Prenota gli 8 migliori tour safari e turismo a Sharm El Sheikh da $10.13 (voto 4.9★, 1.240+ recensioni): Quad ATV alba e tramonto nelle Montagne dell\'Eco, Dune Buggy, Riserva di Nabq, Cena Beduina, Canyon Colorato e Dahab. Ritiro in hotel e pagamento all\'arrivo.',
-        'og_title' => 'Mosa Safari Sharm El Sheikh | Safari Deserto & Quad ATV da $10.13 (4.9★)'
+        'title' => 'Mosa Safari Sharm El Sheikh | Orari Ufficiali, Punti di Ritiro & Prezzi da $10 (4.9★) 2026',
+        'desc' => 'Prenota i 4 tour safari ufficiali Mosa Safari a Sharm El Sheikh da $10 (4.9★): Alba (04:00 AM), Mattina (08:00 AM), Pomeriggio (14:15) e Cena Beduina (15:30). Ritiro puntuale da Hadaba, Naama Bay, Centro Congressi, Zona Aeroporto e Al-Gharqana.',
+        'og_title' => 'Mosa Safari Sharm El Sheikh | Alba, Mattina, Pomeriggio & Cena Beduina da $10'
     ],
     'ru' => [
         'dir' => 'ltr',
         'locale' => 'ru_RU',
-        'title' => 'Mosa Safari Шарм-эль-Шейх | Сафари, Квадроциклы ATV и Экскурсии от $10.13 (4.9★) 2026',
-        'desc' => 'Забронируйте 8 лучших сафари-туров и экскурсий в Шарм-эль-Шейхе от $10.13 (рейтинг 4.9★, 1 240+ отзывов): квадроциклы на рассвете и закате в Горах Эхо, багги, заповедник Набк, ужин бедуинов и звёзды, Цветной каньон и Дахаб. Трансфер и оплата на месте.',
-        'og_title' => 'Mosa Safari Шарм-эль-Шейх | Сафари-туры и квадроциклы от $10.13 (4.9★)'
+        'title' => 'Mosa Safari Шарм-эль-Шейх | Официальное расписание, точки сбора и цены от $10 (4.9★) 2026',
+        'desc' => 'Бронируйте 4 официальных сафари-тура Mosa Safari в Шарм-эль-Шейхе от $10 (4.9★): Рассвет (04:00), Утро (08:00), Дневное (14:15) и Ужин-сафари (15:30). Точное время выезда из Хадабы, Наама-Бей, Конференц-центра, За аэропортом и Эль-Гарканы.',
+        'og_title' => 'Mosa Safari Шарм-эль-Шейх | Рассвет, Утро, День и Ужин-сафари от $10'
     ]
 ];
 

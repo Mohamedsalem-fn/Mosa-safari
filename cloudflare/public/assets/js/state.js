@@ -45,7 +45,7 @@ export const state = {
     },
     booking: {
         step: 1,
-        selectedIds: ["sharm-sunset-echo"],
+        selectedIds: ["mosa-sunrise"],
         name: "",
         phone: "",
         email: "",
@@ -53,6 +53,9 @@ export const state = {
         adults: 2,
         children: 0,
         vehicleOpt: "Double ATV Quad",
+        pickupRoute: "route1",
+        pickupStation: "naama",
+        pickupTime: "04:15 ص",
         pickupHotel: "",
         tripDate: "",
         tripTime: "morning",

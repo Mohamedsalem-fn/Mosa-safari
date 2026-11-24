@@ -6,10 +6,25 @@
  * -------------------------------------------------------------------------------
  */
 
-import { SAFARI_TRIPS } from "../data/trips.js";
+import {
+    SAFARI_TRIPS,
+    MOSA_RULES,
+    getStationLabel,
+    getTripRoutes,
+    getRouteLabel
+} from "../data/trips.js";
 import { I18N, BADGE_I18N } from "../data/i18n.js";
 import { state, fmtPrice, safeSetStorage } from "../state.js";
 import { showToast } from "./ui.js";
+
+function esc(val) {
+    return String(val ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
 
 export function getTripTitle(trip, lang = state.lang) {
     if (lang === "ar") return trip.titleAr;
@@ -32,6 +47,103 @@ export function getTripDuration(trip, lang = state.lang) {
     return trip.durationEn;
 }
 
+export function getStopClock(stop, lang = state.lang) {
+    if (!stop) return "";
+    return lang === "ar" ? (stop.timeAr || stop.timeEn || "") : (stop.timeEn || stop.timeAr || "");
+}
+
+function buildCompactRoutesStrip(trip, lang = state.lang) {
+    const routes = getTripRoutes(trip);
+    return `
+        <div class="rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 p-2.5 space-y-2 text-[11px]">
+            ${routes.map(route => `
+                <div>
+                    <div class="font-black text-champagne-dark dark:text-champagne mb-1">${esc(getRouteLabel(route, lang))}</div>
+                    <div class="flex flex-wrap gap-1">
+                        ${(route.stops || []).map(st => `
+                            <button type="button" onclick="openBookingWithStop('${esc(trip.id)}', '${esc(route.id)}', '${esc(st.station)}')"
+                                class="px-2 py-0.5 rounded-md bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 hover:border-champagne text-[10.5px] font-bold transition">
+                                ${st.emoji || "🕒"} ${esc(getStopClock(st, lang))} – ${esc(getStationLabel(st.station, lang))}
+                            </button>
+                        `).join("")}
+                    </div>
+                </div>
+            `).join("")}
+        </div>
+    `;
+}
+
+export function renderScheduleMatrix() {
+    const root = document.getElementById("schedule-matrix-root");
+    if (!root) return;
+
+    const lang = state.lang || "ar";
+    const trips = SAFARI_TRIPS.filter(t => t.active !== false);
+    const rules = MOSA_RULES[lang] || MOSA_RULES.en;
+    const tapHint = {
+        ar: "اضغط على أي نقطة استلام للحجز الفوري على نفس الموعد",
+        en: "Tap any pickup station to book that exact time slot",
+        it: "Tocca un punto di ritiro per prenotare quell'orario",
+        ru: "Нажмите на точку сбора для быстрого бронирования"
+    }[lang] || "Tap any station to book";
+
+    root.innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-5">
+            <p class="text-xs sm:text-sm text-carbon-900/75 dark:text-[#B5B0A8] font-bold">${esc(tapHint)}</p>
+            <span class="px-3 py-1 rounded-full bg-sea/15 border border-sea/30 text-sea text-[11px] font-black">${trips.length} ${lang === "ar" ? "رحلات رسمية يومية" : "Official Daily Trips"}</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            ${trips.map(trip => {
+                const title = getTripTitle(trip, lang);
+                const routes = getTripRoutes(trip);
+                return `
+                    <article class="rounded-2xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 p-5 flex flex-col justify-between gap-4">
+                        <div class="space-y-3">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <h3 class="text-base font-black leading-snug text-carbon-950 dark:text-champagne">${esc(title)}</h3>
+                                    <div class="text-[11px] font-bold opacity-70 mt-0.5">${esc(getTripDuration(trip, lang))} · ${esc(trip.vehicle)}</div>
+                                </div>
+                                <span class="px-2.5 py-1 rounded-lg bg-white dark:bg-carbon-800 border border-champagne/35 text-sea font-black text-xs shrink-0">${fmtPrice(trip.fromPrice)}</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                ${routes.map(route => `
+                                    <div class="rounded-xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 p-3 space-y-2">
+                                        <div class="text-xs font-black text-champagne-dark dark:text-champagne border-b border-carbon-900/10 dark:border-white/10 pb-1.5">${esc(getRouteLabel(route, lang))}</div>
+                                        <div class="space-y-1.5">
+                                            ${(route.stops || []).map(st => `
+                                                <button type="button" onclick="openBookingWithStop('${esc(trip.id)}', '${esc(route.id)}', '${esc(st.station)}')"
+                                                    class="w-full px-2.5 py-1.5 rounded-lg bg-[#F6F3EC] dark:bg-carbon-900 hover:bg-champagne hover:text-carbon-950 text-start text-xs font-bold flex items-center justify-between gap-2 transition">
+                                                    <span>${st.emoji || "🕒"} <strong class="font-mono">${esc(getStopClock(st, lang))}</strong></span>
+                                                    <span class="font-extrabold">${esc(getStationLabel(st.station, lang))}</span>
+                                                </button>
+                                            `).join("")}
+                                        </div>
+                                    </div>
+                                `).join("")}
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="openBookingWithTrip('${esc(trip.id)}')"
+                            class="w-full py-2.5 rounded-xl bg-carbon-900 dark:bg-champagne hover:bg-champagne hover:text-carbon-950 text-white dark:text-carbon-950 font-black text-xs transition">
+                            ${esc(I18N[lang]?.book_now || "Book Now")}
+                        </button>
+                    </article>
+                `;
+            }).join("")}
+        </div>
+
+        <div class="mt-6 rounded-2xl p-5 bg-gradient-to-br from-amber-500/10 via-champagne/10 to-carbon-900/5 dark:from-champagne/15 dark:to-carbon-900 border border-champagne/40 space-y-2.5">
+            <div class="text-sm sm:text-base font-black text-champagne-dark dark:text-champagne">${esc(rules.title)}</div>
+            <ul class="space-y-1.5 text-xs sm:text-sm font-bold text-carbon-900/85 dark:text-[#F4EFE6]">
+                ${rules.items.map(line => `<li class="flex items-start gap-2"><span class="text-champagne-dark dark:text-champagne shrink-0">•</span><span>${esc(line)}</span></li>`).join("")}
+            </ul>
+        </div>
+    `;
+}
+
 export function renderPriceTable() {
     const tbody = document.getElementById("price-table-body");
     if (!tbody) return;
@@ -42,13 +154,13 @@ export function renderPriceTable() {
         const dur = getTripDuration(trip);
         return `
             <tr class="hover:bg-champagne/5 transition">
-                <td data-label="${L.tbl_prog}" class="p-3.5 font-bold">${title}</td>
-                <td data-label="${L.tbl_veh}" class="p-3.5 text-xs text-carbon-900/70 dark:text-[#B5B0A8]">${trip.vehicle}</td>
+                <td data-label="${L.tbl_prog}" class="p-3.5 font-bold">${esc(title)}</td>
+                <td data-label="${L.tbl_veh}" class="p-3.5 text-xs text-carbon-900/70 dark:text-[#B5B0A8]">${esc(trip.vehicle)}</td>
                 <td data-label="${L.tbl_price}" class="p-3.5 text-sea font-extrabold whitespace-nowrap">${fmtPrice(trip.fromPrice)} <span class="text-[11px] font-normal text-carbon-900/55 dark:text-[#9E9990]">(${fmtPrice(trip.adultPrice)})</span></td>
-                <td data-label="${L.tbl_dur}" class="p-3.5 whitespace-nowrap">${dur}</td>
+                <td data-label="${L.tbl_dur}" class="p-3.5 whitespace-nowrap">${esc(dur)}</td>
                 <td data-label="${L.tbl_rate}" class="p-3.5 font-bold text-champagne-dark dark:text-champagne whitespace-nowrap">${trip.rating} ★</td>
                 <td class="p-3.5">
-                    <button type="button" onclick="openBookingWithTrip('${trip.id}')" class="px-3 py-1.5 rounded-lg bg-champagne hover:bg-champagne-light text-carbon-950 font-black text-xs transition whitespace-nowrap">
+                    <button type="button" onclick="openBookingWithTrip('${esc(trip.id)}')" class="px-3 py-1.5 rounded-lg bg-champagne hover:bg-champagne-light text-carbon-950 font-black text-xs transition whitespace-nowrap">
                         ${L.book_now}
                     </button>
                 </td>
@@ -83,12 +195,12 @@ export function renderTrips() {
         return `
           <article style="--si:${idx}" class="trip-card in group rounded-2xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 hover:border-champagne/60 shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col overflow-hidden">
             <div class="relative h-52 overflow-hidden bg-carbon-900">
-              <img src="${trip.img}" alt="${title}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+              <img src="${esc(trip.img)}" alt="${esc(title)}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
               <div class="absolute inset-0 bg-gradient-to-t from-carbon-950/90 via-transparent to-carbon-950/30"></div>
-              <span class="absolute top-3 start-3 px-2.5 py-1 rounded-md bg-carbon-950/75 backdrop-blur-md border border-white/15 text-champagne text-[11px] font-extrabold">${badgeText}</span>
+              <span class="absolute top-3 start-3 px-2.5 py-1 rounded-md bg-carbon-950/75 backdrop-blur-md border border-white/15 text-champagne text-[11px] font-extrabold">${esc(badgeText)}</span>
               <div class="absolute top-3 end-3 flex gap-1.5">
-                <button type="button" onclick="toggleCompare('${trip.id}')" title="${I18N[state.lang].compare_btn}" aria-label="${I18N[state.lang].compare_btn}" class="p-2 rounded-lg ${isCmp ? 'bg-champagne text-carbon-950' : 'bg-carbon-950/60 text-white hover:bg-carbon-950'} backdrop-blur-md transition"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/></svg></button>
-                <button type="button" onclick="toggleFav('${trip.id}')" aria-label="Favorite" class="p-2 rounded-lg ${isFav ? 'bg-rose-500 text-white' : 'bg-carbon-950/60 text-white hover:bg-carbon-950'} backdrop-blur-md transition"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></button>
+                <button type="button" onclick="toggleCompare('${esc(trip.id)}')" title="${I18N[state.lang].compare_btn}" aria-label="${I18N[state.lang].compare_btn}" class="p-2 rounded-lg ${isCmp ? 'bg-champagne text-carbon-950' : 'bg-carbon-950/60 text-white hover:bg-carbon-950'} backdrop-blur-md transition"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/></svg></button>
+                <button type="button" onclick="toggleFav('${esc(trip.id)}')" aria-label="Favorite" class="p-2 rounded-lg ${isFav ? 'bg-rose-500 text-white' : 'bg-carbon-950/60 text-white hover:bg-carbon-950'} backdrop-blur-md transition"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></button>
               </div>
               <div class="absolute bottom-3 inset-x-3 flex items-end justify-between text-white">
                 <div>
@@ -102,19 +214,20 @@ export function renderTrips() {
               </div>
             </div>
 
-            <div class="p-5 flex-1 flex flex-col justify-between gap-4">
-              <div>
-                <div class="flex items-center gap-2.5 text-[11px] font-bold text-sea-dark dark:text-sea mb-2 flex-wrap">
-                  <span>${cityLabel}</span>
+            <div class="p-4 flex-1 flex flex-col justify-between gap-3.5">
+              <div class="space-y-2">
+                <div class="flex items-center gap-2 text-[11px] font-bold text-sea-dark dark:text-sea flex-wrap">
+                  <span>${esc(cityLabel)}</span>
                   <span>•</span>
-                  <span>${dur}</span>
+                  <span>${esc(dur)}</span>
                   <span>•</span>
-                  <span class="text-carbon-900/60 dark:text-[#9E9990]">${trip.vehicle}</span>
+                  <span class="text-carbon-900/60 dark:text-[#9E9990]">${esc(trip.vehicle)}</span>
                 </div>
-                <h3 class="text-base font-black leading-snug mb-2">${title}</h3>
-                <p class="text-xs text-carbon-900/70 dark:text-[#9E9990] leading-relaxed">${descText}</p>
+                <h3 class="text-base font-black leading-snug">${esc(title)}</h3>
+                <p class="text-xs text-carbon-900/70 dark:text-[#9E9990] leading-relaxed">${esc(descText)}</p>
+                ${buildCompactRoutesStrip(trip, state.lang)}
               </div>
-              <button type="button" onclick="openBookingWithTrip('${trip.id}')" class="w-full py-2.5 px-4 rounded-xl bg-carbon-900 dark:bg-champagne hover:bg-champagne hover:text-carbon-950 text-white dark:text-carbon-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition">
+              <button type="button" onclick="openBookingWithTrip('${esc(trip.id)}')" class="w-full py-2.5 px-4 rounded-xl bg-carbon-900 dark:bg-champagne hover:bg-champagne hover:text-carbon-950 text-white dark:text-carbon-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition">
                 <span>${I18N[state.lang].book_now}</span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 ${state.lang !== 'ar' ? 'rotate-180' : ''}"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
               </button>
@@ -122,6 +235,7 @@ export function renderTrips() {
           </article>`;
     }).join("");
 
+    renderScheduleMatrix();
     renderPriceTable();
     document.dispatchEvent(new CustomEvent("mosa:trips-rendered"));
 }
@@ -157,36 +271,48 @@ export function toggleCompare(id) {
 export function openCompareModal() {
     const b = document.getElementById("compare-body");
     if (!b) return;
+    const lang = state.lang || "ar";
     const items = SAFARI_TRIPS.filter(t => state.compareIds.includes(t.id));
+    const routesLbl = {
+        ar: "مواعيد التحرك والمسارات",
+        en: "Pickup Routes & Times",
+        it: "Percorsi e Orari Ritiro",
+        ru: "Маршруты и время"
+    }[lang] || "Pickup Routes";
+
     b.innerHTML = !items.length
-        ? `<p class="text-center text-sm opacity-60 py-8">${I18N[state.lang].cmp_empty}</p>`
+        ? `<p class="text-center text-sm opacity-60 py-8">${I18N[lang].cmp_empty}</p>`
         : `<table class="w-full text-xs sm:text-sm text-start">
             <thead>
                 <tr class="border-b border-carbon-900/10 dark:border-white/10">
-                    <th class="p-3">${I18N[state.lang].cmp_crit}</th>
-                    ${items.map(i => `<th class="p-3 font-black text-champagne-dark dark:text-champagne">${getTripTitle(i)}</th>`).join("")}
+                    <th class="p-3">${I18N[lang].cmp_crit}</th>
+                    ${items.map(i => `<th class="p-3 font-black text-champagne-dark dark:text-champagne">${esc(getTripTitle(i))}</th>`).join("")}
                 </tr>
             </thead>
             <tbody class="divide-y divide-carbon-900/10 dark:divide-white/10">
                 <tr>
-                    <td class="p-3 font-bold">${I18N[state.lang].cmp_veh}</td>
-                    ${items.map(i => `<td class="p-3">${i.vehicle}</td>`).join("")}
+                    <td class="p-3 font-bold">${I18N[lang].cmp_veh}</td>
+                    ${items.map(i => `<td class="p-3">${esc(i.vehicle)}</td>`).join("")}
                 </tr>
                 <tr>
-                    <td class="p-3 font-bold">${I18N[state.lang].cmp_price}</td>
+                    <td class="p-3 font-bold">${I18N[lang].cmp_price}</td>
                     ${items.map(i => `<td class="p-3 font-black text-sea">${fmtPrice(i.fromPrice)} (${fmtPrice(i.adultPrice)})</td>`).join("")}
                 </tr>
                 <tr>
-                    <td class="p-3 font-bold">${I18N[state.lang].tbl_dur}</td>
-                    ${items.map(i => `<td class="p-3">${getTripDuration(i)}</td>`).join("")}
+                    <td class="p-3 font-bold">${I18N[lang].tbl_dur}</td>
+                    ${items.map(i => `<td class="p-3">${esc(getTripDuration(i))}</td>`).join("")}
                 </tr>
                 <tr>
-                    <td class="p-3 font-bold">${I18N[state.lang].tbl_rate}</td>
+                    <td class="p-3 font-bold">${routesLbl}</td>
+                    ${items.map(i => `<td class="p-3 text-xs space-y-1">${getTripRoutes(i).map(r => `<div><strong class="text-champagne-dark dark:text-champagne">${esc(getRouteLabel(r, lang))}:</strong> ${(r.stops || []).map(st => `${esc(getStopClock(st, lang))} ${esc(getStationLabel(st.station, lang))}`).join(" · ")}</div>`).join("")}</td>`).join("")}
+                </tr>
+                <tr>
+                    <td class="p-3 font-bold">${I18N[lang].tbl_rate}</td>
                     ${items.map(i => `<td class="p-3 font-bold text-champagne-dark dark:text-champagne">${i.rating} ★</td>`).join("")}
                 </tr>
                 <tr>
-                    <td class="p-3 font-bold">${I18N[state.lang].tbl_action}</td>
-                    ${items.map(i => `<td class="p-3"><button type="button" onclick="document.getElementById('compare-modal').classList.add('hidden'); openBookingWithTrip('${i.id}')" class="px-3 py-1.5 rounded-lg bg-champagne text-carbon-950 font-black text-xs">${I18N[state.lang].book_now}</button></td>`).join("")}
+                    <td class="p-3 font-bold">${I18N[lang].tbl_action}</td>
+                    ${items.map(i => `<td class="p-3"><button type="button" onclick="document.getElementById('compare-modal').classList.add('hidden'); openBookingWithTrip('${esc(i.id)}')" class="px-3 py-1.5 rounded-lg bg-champagne text-carbon-950 font-black text-xs">${I18N[lang].book_now}</button></td>`).join("")}
                 </tr>
             </tbody>
            </table>`;

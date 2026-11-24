@@ -12,10 +12,10 @@ const STORAGE_LANG_KEY = "mosa_admin_lang_v1";
 const STORAGE_THEME_KEY = "mosa_admin_theme_v1";
 
 const IMAGE_CHOICES = [
-    { value: "assets/images/hero-atv-sunset.jpg", label: "ATV Quad Sunset (Hero)" },
-    { value: "assets/images/safari-night-stars.jpg", label: "Night 5-in-1 & Stargazing" },
-    { value: "assets/images/safari-nabq-buggy.jpg", label: "Nabq Reserve & Dune Buggy" },
-    { value: "assets/images/safari-canyon-dahab.jpg", label: "Colored Canyon & Dahab" }
+    { value: "assets/images/safari-sunrise.jpg", label: "Sunrise Safari (04:00 AM)" },
+    { value: "assets/images/safari-morning.jpg", label: "Morning Safari (08:00 AM)" },
+    { value: "assets/images/safari-standard.jpg", label: "Standard Afternoon Safari (14:15)" },
+    { value: "assets/images/safari-dinner.jpg", label: "Dinner & BBQ Show Safari (15:30)" }
 ];
 
 const AT = {
@@ -57,7 +57,7 @@ const AT = {
         add_promo: "إضافة كود خصم",
         no_data: "لا توجد بيانات مطابقة حتى الآن.",
         confirm_delete_bk: "هل أنت متأكد من حذف هذا الحجز نهائياً؟",
-        confirm_reset_tours: "استعادة الـ 8 رحلات الافتراضية وحذف التعديلات المخصصة؟",
+        confirm_reset_tours: "استعادة الـ 4 رحلات الرسمية الافتراضية وحذف التعديلات المخصصة؟",
         confirm_reset_analytics: "تصفير جميع عدادات الزيارات والتحليلات؟"
     },
     en: {
@@ -712,7 +712,7 @@ function renderBookingsTab(root) {
                             </td>
                             <td class="p-3 whitespace-nowrap">
                                 <div class="font-bold">${esc(b.tripDate)}</div>
-                                <div class="text-[11px] opacity-75">${b.tripTime === "evening" ? "🌙 " + t("slot_evening") : "☀️ " + t("slot_morning")}</div>
+                                <div class="text-[11px] opacity-80">${esc(b.pickupPointDisplay || b.tripTimeDisplay || (b.tripTime === "evening" ? "🌙 " + t("slot_evening") : "☀️ " + t("slot_morning")))}</div>
                             </td>
                             <td class="p-3 whitespace-nowrap">
                                 <div class="font-black text-sea">$${Number(b.totalUsd || 0).toFixed(2)}</div>
@@ -1880,16 +1880,17 @@ function openTourEditorModal(idx) {
     const list = effectiveTrips().map(x => ({ ...x }));
     const isNew = idx < 0;
     const item = isNew ? {
-        id: "sharm-custom-" + Date.now().toString(36),
-        category: "atv",
+        id: "mosa-custom-" + Date.now().toString(36),
+        category: "sunrise",
+        slotType: "morning",
         city: "Sharm El Sheikh",
         cityAr: "شرم الشيخ",
         titleAr: "",
         titleEn: "",
         titleIt: "",
         titleRu: "",
-        fromPrice: 15,
-        adultPrice: 30,
+        fromPrice: 12,
+        adultPrice: 20,
         duration: "3 ساعات",
         durationEn: "3 hours",
         durationIt: "3 ore",
@@ -1915,10 +1916,10 @@ function openTourEditorModal(idx) {
             <div><label class="block font-extrabold mb-1">${isAr ? "سعر الفرد الكامل ($)" : "Adult Price ($)"}</label><input id="tr-adult" type="number" step="0.01" value="${item.adultPrice}" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-black"></div>
             <div><label class="block font-extrabold mb-1">${isAr ? "الفئة" : "Category"}</label>
                 <select id="tr-cat" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-bold">
-                    <option value="atv" ${item.category === "atv" ? "selected" : ""}>ATV & Buggy</option>
-                    <option value="nabq" ${item.category === "nabq" ? "selected" : ""}>Nabq Reserve</option>
-                    <option value="night" ${item.category === "night" ? "selected" : ""}>Night & Stars</option>
-                    <option value="canyon" ${item.category === "canyon" ? "selected" : ""}>Canyon & Dahab</option>
+                    <option value="sunrise" ${item.category === "sunrise" ? "selected" : ""}>🌅 رحلة الشروق (Sunrise)</option>
+                    <option value="morning" ${item.category === "morning" ? "selected" : ""}>☀️ الرحلة الصباحية (Morning)</option>
+                    <option value="standard" ${item.category === "standard" ? "selected" : ""}>🌄 الرحلات العادية (Standard)</option>
+                    <option value="dinner" ${item.category === "dinner" ? "selected" : ""}>🌙 رحلة العشاء (Dinner)</option>
                 </select>
             </div>
             <div><label class="block font-extrabold mb-1">${isAr ? "التقييم (★)" : "Rating"}</label><input id="tr-rate" type="number" step="0.1" max="5" min="1" value="${item.rating}" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-black"></div>

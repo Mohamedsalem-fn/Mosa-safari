@@ -6,10 +6,16 @@
  * -------------------------------------------------------------------------------
  */
 
-import { SAFARI_TRIPS } from "../data/trips.js";
+import {
+    SAFARI_TRIPS,
+    MOSA_RULES,
+    getStationLabel,
+    getTripRoutes,
+    getRouteLabel
+} from "../data/trips.js";
 import { I18N, STEP_TITLES_I18N, BOOKING_I18N } from "../data/i18n.js";
 import { state, fmtPrice, trackEvent } from "../state.js";
-import { getTripTitle, getTripDuration } from "./trips.js";
+import { getTripTitle, getTripDuration, getStopClock } from "./trips.js";
 import { showToast } from "./ui.js";
 import { dispatchBookingNotifications } from "./notifications.js";
 
@@ -24,12 +30,14 @@ function esc(val) {
 
 export const UI_EXTRAs = {
     ar: {
-        step_pills: ["1. الرحلات", "2. المسافر", "3. الضيوف", "4. الفندق والدفع", "5. التأكيد"],
+        step_pills: ["1. الرحلات", "2. المسافر", "3. الضيوف", "4. الاستلام والدفع", "5. التأكيد"],
         email_req: "البريد الإلكتروني * (لإرسال تذكرة التأكيد)",
-        email_hint: "سيتم إرسال تفاصيل وتأكيد الحجز فوراً على هذا الإيميل",
+        email_hint: "سيتم إرسال تفاصيل وتأكيد الحجز وميعاد الاستلام فوراً على هذا الإيميل",
+        pickup_route_title: "اختر مسار ونقطة الاستلام (حسب رحلتك المختارة)",
+        selected_stop_lbl: "نقطة الاستلام وموعد التحرك المختار:",
         pay_section_title: "اختر طريقة الدفع",
         pay_arrival_title: "الدفع عند الوصول (Pay on Arrival)",
-        pay_arrival_desc: "ادفع نقداً أو بالبطاقة لمندوبنا يوم الرحلة عند الاستلام من الفندق بدون أي دفعة مقدمة.",
+        pay_arrival_desc: "ادفع نقداً أو بالبطاقة لمندوبنا يوم الرحلة عند نقطة الاستلام بدون أي دفعة مقدمة.",
         pay_Arrival_badge: "الأكثر مرونة · 0% مقدم",
         pay_visa_title: "الدفع بالفيزا / البطاقة البنكية (Visa / Mastercard)",
         pay_visa_desc: "دفع إلكتروني آمن ومباشر بالبطاقة البنكية (بوابة الدفع قيد التفعيل المباشر).",
@@ -47,18 +55,17 @@ export const UI_EXTRAs = {
         conf_email_ok: "✓ تم إرسال تفاصيل وتأكيد الحجز إلى بريدك الإلكتروني",
         conf_new_btn: "حجز جديد / إغلاق",
         err_invalid_email: "يرجى إدخال بريد إلكتروني صحيح لإرسال رسالة التأكيد",
-        time_slot_label: "ميعاد الرحلة",
-        time_morning: "صباحاً (الفترة الصباحية)",
-        time_evening: "مساءً (الغروب / الفترة المسائية)",
-        sum_time: "الميعاد:"
+        sum_time: "نقطة وميعاد التحرك:"
     },
     en: {
-        step_pills: ["1. Tours", "2. Traveler", "3. Guests", "4. Hotel & Payment", "5. Review"],
+        step_pills: ["1. Tours", "2. Traveler", "3. Guests", "4. Pickup & Pay", "5. Review"],
         email_req: "Email Address * (For Booking Confirmation)",
-        email_hint: "Your instant booking confirmation ticket will be sent to this email",
+        email_hint: "Your booking ticket and exact pickup time will be sent to this email",
+        pickup_route_title: "Select Route & Pickup Point (for your selected tour)",
+        selected_stop_lbl: "Selected Pickup Point & Departure Time:",
         pay_section_title: "Select Payment Method",
         pay_arrival_title: "Pay on Arrival",
-        pay_arrival_desc: "Pay cash or card directly to our representative at hotel pickup on tour day with zero deposit.",
+        pay_arrival_desc: "Pay cash or card directly to our representative at pickup on tour day with zero deposit.",
         pay_Arrival_badge: "Most Flexible · $0 Upfront",
         pay_visa_title: "Pay with Visa / Mastercard",
         pay_visa_desc: "Direct credit/debit card checkout (Gateway integration placeholder ready).",
@@ -76,18 +83,17 @@ export const UI_EXTRAs = {
         conf_email_ok: "✓ Booking confirmation sent to your email",
         conf_new_btn: "Done / Close",
         err_invalid_email: "Please enter a valid email address to receive your confirmation",
-        time_slot_label: "Tour Time Slot",
-        time_morning: "Morning (AM)",
-        time_evening: "Evening (Sunset / PM)",
-        sum_time: "Time Slot:"
+        sum_time: "Route & Departure:"
     },
     it: {
-        step_pills: ["1. Tour", "2. Viaggiatore", "3. Ospiti", "4. Hotel & Pagamento", "5. Conferma"],
+        step_pills: ["1. Tour", "2. Viaggiatore", "3. Ospiti", "4. Ritiro & Pagamento", "5. Conferma"],
         email_req: "Indirizzo Email * (Per Conferma Prenotazione)",
-        email_hint: "Il voucher di conferma verrà inviato istantaneamente a questa email",
+        email_hint: "Il voucher con punto e orario di ritiro verrà inviato a questa email",
+        pickup_route_title: "Scegli Percorso e Punto di Ritiro",
+        selected_stop_lbl: "Punto di Ritiro e Orario Selezionati:",
         pay_section_title: "Scegli il Metodo di Pagamento",
         pay_arrival_title: "Pagamento all'Arrivo (Pay on Arrival)",
-        pay_arrival_desc: "Paga in contanti o carta direttamente alla guida il giorno del tour in hotel senza anticipo.",
+        pay_arrival_desc: "Paga in contanti o carta direttamente alla guida il giorno del tour senza anticipo.",
         pay_Arrival_badge: "Più Flessibile · Zero Acconto",
         pay_visa_title: "Paga con Visa / Mastercard",
         pay_visa_desc: "Pagamento elettronico con carta (Gateway Visa in modalità placeholder).",
@@ -105,18 +111,17 @@ export const UI_EXTRAs = {
         conf_email_ok: "✓ Conferma inviata alla tua email",
         conf_new_btn: "Chiudi",
         err_invalid_email: "Inserisci un indirizzo email valido per ricevere la conferma",
-        time_slot_label: "Orario del Tour",
-        time_morning: "Mattina (AM)",
-        time_evening: "Sera (Tramonto / PM)",
-        sum_time: "Orario:"
+        sum_time: "Percorso e Partenza:"
     },
     ru: {
-        step_pills: ["1. Туры", "2. Турист", "3. Гости", "4. Отель и Оплата", "5. Подтверждение"],
+        step_pills: ["1. Туры", "2. Турист", "3. Гости", "4. Посадка и Оплата", "5. Подтверждение"],
         email_req: "Эл. почта * (для отправки подтверждения)",
-        email_hint: "Ваучер подтверждения бронирования будет отправлен на этот email",
+        email_hint: "Ваучер с точным местом и временем выезда придёт на этот email",
+        pickup_route_title: "Выберите маршрут и точку посадки",
+        selected_stop_lbl: "Выбранная точка и время выезда:",
         pay_section_title: "Выберите способ оплаты",
         pay_arrival_title: "Оплата при получении (Pay on Arrival)",
-        pay_arrival_desc: "Оплата наличными или картой гиду в день тура при выезде из отеля без предоплаты.",
+        pay_arrival_desc: "Оплата наличными или картой гиду в день тура без предоплаты.",
         pay_Arrival_badge: "Без предоплаты · 0%",
         pay_visa_title: "Оплата картой Visa / Mastercard",
         pay_visa_desc: "Онлайн-оплата банковской картой (платёжный шлюз в режиме Placeholder).",
@@ -134,12 +139,68 @@ export const UI_EXTRAs = {
         conf_email_ok: "✓ Подтверждение отправлено на ваш email",
         conf_new_btn: "Закрыть",
         err_invalid_email: "Пожалуйста, введите корректный email для получения подтверждения",
-        time_slot_label: "Время тура",
-        time_morning: "Утром (AM)",
-        time_evening: "Вечером (Закат / PM)",
-        sum_time: "Время:"
+        sum_time: "Маршрут и выезд:"
     }
 };
+
+function getPrimarySelectedTrip() {
+    const activeTrips = SAFARI_TRIPS.filter(t => t.active !== false);
+    const list = activeTrips.length ? activeTrips : SAFARI_TRIPS;
+    return list.find(t => state.booking.selectedIds.includes(t.id)) || list[0];
+}
+
+export function resolveSelectedStopDetails(lang = state.lang) {
+    const trip = getPrimarySelectedTrip();
+    const routes = getTripRoutes(trip);
+    let route = routes.find(r => r.id === state.booking.pickupRoute);
+    let stop = route?.stops?.find(s => s.station === state.booking.pickupStation);
+
+    if (!stop) {
+        for (const r of routes) {
+            const match = (r.stops || []).find(s => s.station === state.booking.pickupStation);
+            if (match) {
+                route = r;
+                stop = match;
+                break;
+            }
+        }
+    }
+    if (!stop) {
+        route = routes[0];
+        stop = route?.stops?.[0] || { station: "hadaba", timeAr: "04:00 ص", timeEn: "04:00 AM" };
+    }
+
+    state.booking.pickupRoute = route.id;
+    state.booking.pickupStation = stop.station;
+    const clock = getStopClock(stop, lang);
+    state.booking.pickupTime = clock;
+    state.booking.tripTime = (trip?.slotType === "morning" || trip?.category === "sunrise" || trip?.category === "morning")
+        ? "morning"
+        : "evening";
+
+    const stationLabel = getStationLabel(stop.station, lang);
+    const routeLabel = getRouteLabel(route, lang);
+    const tourTitle = getTripTitle(trip, lang);
+
+    return {
+        trip,
+        route,
+        stop,
+        clock,
+        stationLabel,
+        routeLabel,
+        pointSummary: `${stationLabel} (${routeLabel}) — ${clock}`,
+        fullDisplay: `${tourTitle} · ${clock} — ${stationLabel} (${routeLabel})`
+    };
+}
+
+export function selectPickupStop(routeId, stationKey) {
+    saveCurrentStepInputs();
+    state.booking.pickupRoute = routeId;
+    state.booking.pickupStation = stationKey;
+    resolveSelectedStopDetails();
+    renderBookingStep();
+}
 
 export function findActivePromo(rawCode) {
     const clean = String(rawCode || "").trim().toUpperCase();
@@ -169,12 +230,27 @@ export function openBookingWithTrip(id) {
     if (t) {
         state.booking.selectedIds = [t.id];
     }
+    resolveSelectedStopDetails();
     state.booking.lastConfirmation = null;
     state.booking.step = 2;
     openBookingModal(id);
 }
 
+export function openBookingWithStop(tripId, routeId, stationKey) {
+    const t = SAFARI_TRIPS.find(x => x.id === tripId);
+    if (t) {
+        state.booking.selectedIds = [t.id];
+    }
+    if (routeId) state.booking.pickupRoute = routeId;
+    if (stationKey) state.booking.pickupStation = stationKey;
+    resolveSelectedStopDetails();
+    state.booking.lastConfirmation = null;
+    state.booking.step = 2;
+    openBookingModal(tripId);
+}
+
 export function openBookingModal(trackedTripId = null) {
+    resolveSelectedStopDetails();
     state.booking.lastConfirmation = null;
     document.getElementById("booking-modal")?.classList.remove("hidden");
     renderBookingStep();
@@ -195,6 +271,7 @@ export function toggleBookingTrip(id) {
     } else {
         a.push(id);
     }
+    resolveSelectedStopDetails();
     renderBookingStep();
 }
 
@@ -285,6 +362,7 @@ export async function submitBookingOrder() {
 
     const u = UI_EXTRAs[state.lang] || UI_EXTRAs.en;
     const t = BOOKING_I18N[state.lang] || BOOKING_I18N.en;
+    const stopInfo = resolveSelectedStopDetails(state.lang);
 
     b.isSubmitting = true;
     renderBookingStep();
@@ -297,6 +375,9 @@ export async function submitBookingOrder() {
     const totalFormatted = fmtPrice(totalUsd);
     const today = new Date().toISOString().split("T")[0];
     const last4 = b.cardNumber ? b.cardNumber.replace(/\D/g, "").slice(-4) : "";
+    const hotelCombined = b.pickupHotel
+        ? `${stopInfo.stationLabel} — ${b.pickupHotel}`
+        : stopInfo.stationLabel;
 
     const payload = {
         ref,
@@ -310,10 +391,14 @@ export async function submitBookingOrder() {
         children: b.children,
         vehicleOpt: b.vehicleOpt,
         vehicleDisplay,
-        pickupHotel: b.pickupHotel || "Sharm El Sheikh",
+        pickupRoute: stopInfo.route.id,
+        pickupStation: stopInfo.stop.station,
+        pickupTime: stopInfo.clock,
+        pickupPointDisplay: stopInfo.pointSummary,
+        pickupHotel: hotelCombined,
         tripDate: b.tripDate || today,
         tripTime: b.tripTime || "morning",
-        tripTimeDisplay: b.tripTime === "evening" ? u.time_evening : u.time_morning,
+        tripTimeDisplay: stopInfo.pointSummary,
         paymentMethod: b.paymentMethod,
         cardMask: last4 ? `**** ${last4}` : "Visa Placeholder",
         promoCode: b.promoCode,
@@ -339,9 +424,11 @@ export async function submitBookingOrder() {
 
 export function renderBookingStep() {
     const b = state.booking;
-    const t = BOOKING_I18N[state.lang] || BOOKING_I18N.en;
-    const u = UI_EXTRAs[state.lang] || UI_EXTRAs.en;
-    const stepTitles = STEP_TITLES_I18N[state.lang] || STEP_TITLES_I18N.en;
+    const lang = state.lang || "ar";
+    const t = BOOKING_I18N[lang] || BOOKING_I18N.en;
+    const u = UI_EXTRAs[lang] || UI_EXTRAs.en;
+    const rules = MOSA_RULES[lang] || MOSA_RULES.en;
+    const stepTitles = STEP_TITLES_I18N[lang] || STEP_TITLES_I18N.en;
 
     const lbl = document.getElementById("booking-step-label");
     if (lbl) lbl.textContent = b.lastConfirmation ? u.conf_title : stepTitles[b.step - 1];
@@ -349,7 +436,6 @@ export function renderBookingStep() {
     const tot = document.getElementById("booking-total-display");
     if (tot) tot.textContent = fmtPrice(calcBookingTotal());
 
-    // Interactive step pills bar
     const bars = document.getElementById("booking-progress-bars");
     if (bars) {
         bars.innerHTML = u.step_pills
@@ -359,7 +445,7 @@ export function renderBookingStep() {
                 const isCurrent = !b.lastConfirmation && n === b.step;
                 return `<div class="flex flex-col gap-1">
                     <div class="h-1.5 rounded-full transition-all duration-300 ${isDone ? 'bg-sea' : isCurrent ? 'bg-champagne' : 'bg-carbon-900/15 dark:bg-white/10'}"></div>
-                    <span class="hidden sm:block text-[10px] font-extrabold truncate ${isCurrent ? 'text-champagne-dark dark:text-champagne' : isDone ? 'text-sea' : 'opacity-45'}">${pillLabel}</span>
+                    <span class="hidden sm:block text-[10px] font-extrabold truncate ${isCurrent ? 'text-champagne-dark dark:text-champagne' : isDone ? 'text-sea' : 'opacity-45'}">${esc(pillLabel)}</span>
                 </div>`;
             })
             .join("");
@@ -371,7 +457,6 @@ export function renderBookingStep() {
     const body = document.getElementById("booking-body");
     if (!body) return;
 
-    // If booking was just confirmed, show the rich confirmation screen inside the modal
     if (b.lastConfirmation) {
         const c = b.lastConfirmation;
         if (prevBtn) prevBtn.classList.add("hidden");
@@ -386,43 +471,48 @@ export function renderBookingStep() {
             </div>
             <div>
                 <span class="inline-block px-3 py-1 rounded-full bg-champagne/20 text-champagne-dark dark:text-champagne text-xs font-black tracking-wider">${esc(c.ref)}</span>
-                <h4 class="text-xl font-black mt-2">${u.conf_title}</h4>
+                <h4 class="text-xl font-black mt-2">${esc(u.conf_title)}</h4>
             </div>
 
             <div class="p-3 rounded-xl bg-champagne/15 border border-champagne/35 text-champagne-dark dark:text-champagne font-bold text-xs flex items-center justify-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-champagne shrink-0"></span>
-                <span>${u.conf_email_ok} (${esc(c.email)})</span>
+                <span>${esc(u.conf_email_ok)} (${esc(c.email)})</span>
             </div>
 
             <div class="p-4 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 text-start text-xs sm:text-sm space-y-2">
                 <div class="flex justify-between gap-2 border-b border-carbon-900/10 dark:border-white/10 pb-2">
-                    <span class="opacity-70">${t.sum_tours}</span>
+                    <span class="opacity-70">${esc(t.sum_tours)}</span>
                     <span class="font-black text-end">${esc(c.selectedTours)}</span>
                 </div>
                 <div class="flex justify-between gap-2">
-                    <span class="opacity-70">${t.full_name.replace(" *", "")}:</span>
+                    <span class="opacity-70">${esc(t.full_name.replace(" *", ""))}:</span>
                     <span class="font-bold">${esc(c.name)} (${esc(c.phone)})</span>
                 </div>
                 <div class="flex justify-between gap-2">
-                    <span class="opacity-70">${t.sum_guests}</span>
-                    <span class="font-bold">${c.adults} ${t.adults_lbl}${c.children ? ` · ${c.children} ${t.children_lbl}` : ""}</span>
+                    <span class="opacity-70">${esc(t.sum_guests)}</span>
+                    <span class="font-bold">${c.adults} ${esc(t.adults_lbl)}${c.children ? ` · ${c.children} ${esc(t.children_lbl)}` : ""}</span>
                 </div>
                 <div class="flex justify-between gap-2">
-                    <span class="opacity-70">${t.sum_hotel}</span>
+                    <span class="opacity-70">${esc(t.sum_hotel)}</span>
                     <span class="font-bold">${esc(c.pickupHotel)} (${esc(c.tripDate)})</span>
                 </div>
                 <div class="flex justify-between gap-2">
-                    <span class="opacity-70">${u.sum_time}</span>
-                    <span class="font-bold">${esc(c.tripTimeDisplay)}</span>
+                    <span class="opacity-70">${esc(u.sum_time)}</span>
+                    <span class="font-black text-champagne-dark dark:text-champagne">${esc(c.pickupPointDisplay || c.tripTimeDisplay)}</span>
                 </div>
                 <div class="flex justify-between gap-2">
-                    <span class="opacity-70">${t.sum_payment}</span>
-                    <span class="font-black ${c.paymentMethod === 'visa' ? 'text-champagne-dark dark:text-champagne' : 'text-sea'}">${c.paymentMethod === 'visa' ? u.pay_visa_title : u.pay_arrival_title}</span>
+                    <span class="opacity-70">${esc(t.sum_payment)}</span>
+                    <span class="font-black ${c.paymentMethod === 'visa' ? 'text-champagne-dark dark:text-champagne' : 'text-sea'}">${c.paymentMethod === 'visa' ? esc(u.pay_visa_title) : esc(u.pay_arrival_title)}</span>
                 </div>
                 <div class="flex justify-between gap-2 pt-2 border-t border-carbon-900/10 dark:border-white/10 text-base">
-                    <span class="font-black">${I18N[state.lang].bk_est_total}:</span>
+                    <span class="font-black">${esc(I18N[lang].bk_est_total)}:</span>
                     <span class="font-black text-champagne-dark dark:text-champagne">${esc(c.totalFormatted)}</span>
                 </div>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-champagne/40 text-start text-[11px] font-bold space-y-1">
+                <div class="font-black text-champagne-dark dark:text-champagne">${esc(rules.title)}</div>
+                ${rules.items.map(line => `<div>• ${esc(line)}</div>`).join("")}
             </div>
         </div>`;
         return;
@@ -433,44 +523,45 @@ export function renderBookingStep() {
         nextBtn.disabled = b.isSubmitting;
         nextBtn.textContent = b.isSubmitting
             ? u.sending_booking
-            : (b.step === 5 ? I18N[state.lang].bk_confirm : I18N[state.lang].bk_next);
+            : (b.step === 5 ? I18N[lang].bk_confirm : I18N[lang].bk_next);
     }
 
     if (b.step === 1) {
         body.innerHTML = `<div class="grid grid-cols-1 gap-2.5">${SAFARI_TRIPS.filter(trip => trip.active !== false).map(trip => {
             const checked = b.selectedIds.includes(trip.id);
+            const firstClock = getStopClock(getTripRoutes(trip)[0]?.stops?.[0], lang);
             return `<label class="flex items-center justify-between gap-3 p-3 rounded-2xl border cursor-pointer transition-all ${checked ? 'border-champagne bg-champagne/10 shadow-md' : 'border-carbon-900/10 dark:border-white/10 hover:border-champagne/50'}">
                 <div class="flex items-center gap-3 min-w-0">
-                    <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleBookingTrip('${trip.id}')" class="accent-champagne w-4 h-4 shrink-0" />
-                    <img src="${trip.img}" alt="${getTripTitle(trip)}" class="w-12 h-12 rounded-xl object-cover shrink-0 border border-white/10" />
+                    <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleBookingTrip('${esc(trip.id)}')" class="accent-champagne w-4 h-4 shrink-0" />
+                    <img src="${esc(trip.img)}" alt="${esc(getTripTitle(trip))}" class="w-12 h-12 rounded-xl object-cover shrink-0 border border-white/10" />
                     <div class="min-w-0">
-                        <div class="text-xs sm:text-sm font-black line-clamp-2 sm:truncate">${getTripTitle(trip)}</div>
-                        <div class="text-[11px] opacity-65 mt-0.5">${getTripDuration(trip)} · ${trip.vehicle} · ★ ${trip.rating}</div>
+                        <div class="text-xs sm:text-sm font-black line-clamp-2 sm:truncate">${esc(getTripTitle(trip))}</div>
+                        <div class="text-[11px] opacity-65 mt-0.5">${firstClock ? `🕒 ${esc(firstClock)} · ` : ""}${esc(getTripDuration(trip))} · ${esc(trip.vehicle)} · ★ ${trip.rating}</div>
                     </div>
                 </div>
                 <div class="text-end shrink-0">
                     <span class="block font-black text-sm text-champagne-dark dark:text-champagne">${fmtPrice(trip.adultPrice)}</span>
-                    <span class="block text-[10px] opacity-60">${I18N[state.lang].from_label} ${fmtPrice(trip.fromPrice)}</span>
+                    <span class="block text-[10px] opacity-60">${esc(I18N[lang].from_label)} ${fmtPrice(trip.fromPrice)}</span>
                 </div>
             </label>`;
         }).join("")}</div>`;
     } else if (b.step === 2) {
         body.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-xs font-extrabold mb-1.5">${t.full_name}</label>
+                <label class="block text-xs font-extrabold mb-1.5">${esc(t.full_name)}</label>
                 <input id="bk-name" type="text" value="${esc(b.name)}" oninput="state.booking.name=this.value" onchange="state.booking.name=this.value" required placeholder="Mohamed..." class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
             </div>
             <div>
-                <label class="block text-xs font-extrabold mb-1.5">${t.whatsapp}</label>
+                <label class="block text-xs font-extrabold mb-1.5">${esc(t.whatsapp)}</label>
                 <input id="bk-phone" type="tel" value="${esc(b.phone)}" oninput="state.booking.phone=this.value" onchange="state.booking.phone=this.value" required placeholder="+20 10..." class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
             </div>
             <div class="sm:col-span-2">
-                <label class="block text-xs font-extrabold mb-1.5 text-champagne-dark dark:text-champagne">${u.email_req}</label>
+                <label class="block text-xs font-extrabold mb-1.5 text-champagne-dark dark:text-champagne">${esc(u.email_req)}</label>
                 <input id="bk-email" type="email" value="${esc(b.email)}" oninput="state.booking.email=this.value" onchange="state.booking.email=this.value" required placeholder="name@example.com" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-champagne/40 text-sm focus:border-champagne focus:outline-none" />
-                <span class="block text-[11px] opacity-65 mt-1">${u.email_hint}</span>
+                <span class="block text-[11px] opacity-65 mt-1">${esc(u.email_hint)}</span>
             </div>
             <div class="sm:col-span-2">
-                <label class="block text-xs font-extrabold mb-1.5">${t.nationality}</label>
+                <label class="block text-xs font-extrabold mb-1.5">${esc(t.nationality)}</label>
                 <input id="bk-nat" type="text" value="${esc(b.nationality)}" oninput="state.booking.nationality=this.value" onchange="state.booking.nationality=this.value" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
             </div>
         </div>`;
@@ -483,7 +574,7 @@ export function renderBookingStep() {
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div class="p-4 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 flex items-center justify-between">
                     <div>
-                        <div class="text-xs font-extrabold">${t.adults}</div>
+                        <div class="text-xs font-extrabold">${esc(t.adults)}</div>
                         <div class="text-[11px] opacity-60">12+</div>
                     </div>
                     <div class="flex items-center gap-3">
@@ -494,7 +585,7 @@ export function renderBookingStep() {
                 </div>
                 <div class="p-4 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 flex items-center justify-between">
                     <div>
-                        <div class="text-xs font-extrabold">${t.children}</div>
+                        <div class="text-xs font-extrabold">${esc(t.children)}</div>
                         <div class="text-[11px] text-sea font-bold">6–11 (50% OFF)</div>
                     </div>
                     <div class="flex items-center gap-3">
@@ -505,15 +596,15 @@ export function renderBookingStep() {
                 </div>
             </div>
 
-            ${isGroup ? `<div class="p-3 rounded-xl bg-sea/15 border border-sea/30 text-sea text-xs font-extrabold">${u.group_disc_badge}</div>` : ""}
+            ${isGroup ? `<div class="p-3 rounded-xl bg-sea/15 border border-sea/30 text-sea text-xs font-extrabold">${esc(u.group_disc_badge)}</div>` : ""}
 
             <div>
-                <label class="block text-xs font-extrabold mb-2">${t.vehicle_type}</label>
+                <label class="block text-xs font-extrabold mb-2">${esc(t.vehicle_type)}</label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     ${vehicleKeys.map(v => {
                         const active = b.vehicleOpt === v;
                         return `<button type="button" onclick="state.booking.vehicleOpt='${v}'; renderBookingStep();" class="p-3.5 rounded-xl border text-start transition ${active ? 'border-champagne bg-champagne/15 font-black' : 'border-carbon-900/10 dark:border-white/10 hover:border-champagne/40'}">
-                            <div class="text-xs sm:text-sm font-black">${t.vehicles[v]}</div>
+                            <div class="text-xs sm:text-sm font-black">${esc(t.vehicles[v])}</div>
                         </button>`;
                     }).join("")}
                 </div>
@@ -522,11 +613,6 @@ export function renderBookingStep() {
     } else if (b.step === 4) {
         const today = new Date().toISOString().split("T")[0];
         const cfg = state.platformConfig?.settings || {};
-        const allowMorning = cfg.enableMorningSlot !== false;
-        const allowEvening = cfg.enableEveningSlot !== false;
-        if (!allowMorning && allowEvening) b.tripTime = "evening";
-        if (allowMorning && !allowEvening) b.tripTime = "morning";
-
         const allowArrival = cfg.enablePayArrival !== false;
         const allowVisa = cfg.enablePayVisa !== false;
         if (!allowArrival && allowVisa) b.paymentMethod = "visa";
@@ -535,90 +621,112 @@ export function renderBookingStep() {
         const isArrival = b.paymentMethod === "arrival";
         const isVisa = b.paymentMethod === "visa";
 
+        const stopInfo = resolveSelectedStopDetails(lang);
+        const routes = getTripRoutes(stopInfo.trip);
+
         body.innerHTML = `<div class="space-y-4">
+            <!-- Dynamic Route & Exact Pickup Station Selector -->
+            <div class="space-y-2.5">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <label class="block text-xs font-extrabold">${esc(u.pickup_route_title)}</label>
+                    <span class="text-[11px] font-black text-champagne-dark dark:text-champagne">${esc(getTripTitle(stopInfo.trip, lang))}</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    ${routes.map(route => `
+                        <div class="p-3 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 space-y-2">
+                            <div class="text-xs font-black text-champagne-dark dark:text-champagne border-b border-carbon-900/10 dark:border-white/10 pb-1.5">${esc(getRouteLabel(route, lang))}</div>
+                            <div class="space-y-1.5">
+                                ${(route.stops || []).map(st => {
+                                    const active = stopInfo.route.id === route.id && stopInfo.stop.station === st.station;
+                                    return `<button type="button" data-pickup-stop="${esc(route.id)}:${esc(st.station)}"
+                                        onclick="selectPickupStop('${esc(route.id)}', '${esc(st.station)}')"
+                                        class="w-full px-3 py-2 rounded-xl border text-xs font-bold flex items-center justify-between gap-2 transition ${active ? 'border-champagne bg-champagne text-carbon-950 font-black shadow-md' : 'border-carbon-900/10 dark:border-white/10 bg-white dark:bg-carbon-800 hover:border-champagne/60'}">
+                                        <span>${st.emoji || "🕒"} <span class="font-mono">${esc(getStopClock(st, lang))}</span></span>
+                                        <span>${esc(getStationLabel(st.station, lang))}</span>
+                                    </button>`;
+                                }).join("")}
+                            </div>
+                        </div>
+                    `).join("")}
+                </div>
+                <div class="px-3 py-2 rounded-xl bg-sea/15 border border-sea/30 text-sea text-[11px] font-black flex items-center justify-between gap-2">
+                    <span>${esc(u.selected_stop_lbl)}</span>
+                    <span>${esc(stopInfo.pointSummary)}</span>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                    <label class="block text-xs font-extrabold mb-1.5">${t.pickup_hotel}</label>
-                    <input id="bk-hotel" type="text" value="${esc(b.pickupHotel)}" oninput="state.booking.pickupHotel=this.value" onchange="state.booking.pickupHotel=this.value" placeholder="${t.hotel_placeholder}" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
+                    <label class="block text-xs font-extrabold mb-1.5">${esc(t.pickup_hotel)}</label>
+                    <input id="bk-hotel" type="text" value="${esc(b.pickupHotel)}" oninput="state.booking.pickupHotel=this.value" onchange="state.booking.pickupHotel=this.value" placeholder="${esc(t.hotel_placeholder)}" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
                 </div>
                 <div>
-                    <label class="block text-xs font-extrabold mb-1.5">${t.trip_date}</label>
+                    <label class="block text-xs font-extrabold mb-1.5">${esc(t.trip_date)}</label>
                     <input id="bk-date" type="date" min="${today}" value="${esc(b.tripDate || today)}" oninput="state.booking.tripDate=this.value" onchange="state.booking.tripDate=this.value" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
                 </div>
             </div>
 
-            <div>
-                <label class="block text-xs font-extrabold mb-2">${u.time_slot_label}</label>
-                <div class="grid ${allowMorning && allowEvening ? 'grid-cols-2' : 'grid-cols-1'} gap-3">
-                    ${allowMorning ? `<button type="button" onclick="selectTripTime('morning')" class="p-3 rounded-xl border-2 text-start transition-all flex items-center gap-2.5 ${b.tripTime !== 'evening' ? 'border-champagne bg-champagne/15 shadow-sm' : 'border-carbon-900/10 dark:border-white/10 hover:border-champagne/40'}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-champagne-dark dark:text-champagne shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-                        <span class="text-xs sm:text-sm font-black leading-snug">${u.time_morning}</span>
-                    </button>` : ""}
-                    ${allowEvening ? `<button type="button" onclick="selectTripTime('evening')" class="p-3 rounded-xl border-2 text-start transition-all flex items-center gap-2.5 ${b.tripTime === 'evening' ? 'border-champagne bg-champagne/15 shadow-sm' : 'border-carbon-900/10 dark:border-white/10 hover:border-champagne/40'}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-copper shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-                        <span class="text-xs sm:text-sm font-black leading-snug">${u.time_evening}</span>
-                    </button>` : ""}
-                </div>
+            <!-- Official Operational Rules (تعليمات هامة) -->
+            <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-champagne/40 space-y-1 text-xs">
+                <div class="font-black text-champagne-dark dark:text-champagne">${esc(rules.title)}</div>
+                ${rules.items.map(line => `<div class="font-bold opacity-90">• ${esc(line)}</div>`).join("")}
             </div>
 
             <div>
-                <label class="block text-xs font-extrabold mb-2">${u.pay_section_title}</label>
+                <label class="block text-xs font-extrabold mb-2">${esc(u.pay_section_title)}</label>
                 <div class="grid grid-cols-1 ${allowArrival && allowVisa ? 'sm:grid-cols-2' : ''} gap-3">
-                    ${allowArrival ? `<!-- Option 1: Pay on Arrival -->
+                    ${allowArrival ? `
                     <button type="button" onclick="selectPaymentMethod('arrival')" class="p-4 rounded-2xl border-2 text-start transition-all relative ${isArrival ? 'border-sea bg-sea/10 shadow-lg' : 'border-carbon-900/10 dark:border-white/10 hover:border-sea/50'}">
                         <div class="flex items-center justify-between gap-2 mb-1.5">
-                            <span class="px-2 py-0.5 rounded-md bg-sea/20 text-sea text-[10px] font-black">${u.pay_Arrival_badge}</span>
+                            <span class="px-2 py-0.5 rounded-md bg-sea/20 text-sea text-[10px] font-black">${esc(u.pay_Arrival_badge)}</span>
                             <span class="w-4 h-4 rounded-full border-2 flex items-center justify-center ${isArrival ? 'border-sea bg-sea text-carbon-950' : 'border-white/30'}">${isArrival ? '✓' : ''}</span>
                         </div>
-                        <div class="font-black text-sm text-sea">${u.pay_arrival_title}</div>
-                        <div class="text-[11px] opacity-75 mt-1 leading-relaxed">${u.pay_arrival_desc}</div>
+                        <div class="font-black text-sm text-sea">${esc(u.pay_arrival_title)}</div>
+                        <div class="text-[11px] opacity-75 mt-1 leading-relaxed">${esc(u.pay_arrival_desc)}</div>
                     </button>` : ""}
 
-                    ${allowVisa ? `<!-- Option 2: Pay by Visa (Gateway Placeholder) -->
+                    ${allowVisa ? `
                     <button type="button" onclick="selectPaymentMethod('visa')" class="p-4 rounded-2xl border-2 text-start transition-all relative ${isVisa ? 'border-champagne bg-champagne/10 shadow-lg' : 'border-carbon-900/10 dark:border-white/10 hover:border-champagne/50'}">
                         <div class="flex items-center justify-between gap-2 mb-1.5">
-                            <span class="px-2 py-0.5 rounded-md bg-champagne/20 text-champagne-dark dark:text-champagne text-[10px] font-black">${u.pay_visa_badge}</span>
+                            <span class="px-2 py-0.5 rounded-md bg-champagne/20 text-champagne-dark dark:text-champagne text-[10px] font-black">${esc(u.pay_visa_badge)}</span>
                             <span class="w-4 h-4 rounded-full border-2 flex items-center justify-center ${isVisa ? 'border-champagne bg-champagne text-carbon-950' : 'border-white/30'}">${isVisa ? '✓' : ''}</span>
                         </div>
-                        <div class="font-black text-sm text-champagne-dark dark:text-champagne">${u.pay_visa_title}</div>
-                        <div class="text-[11px] opacity-75 mt-1 leading-relaxed">${u.pay_visa_desc}</div>
+                        <div class="font-black text-sm text-champagne-dark dark:text-champagne">${esc(u.pay_visa_title)}</div>
+                        <div class="text-[11px] opacity-75 mt-1 leading-relaxed">${esc(u.pay_visa_desc)}</div>
                     </button>` : ""}
                 </div>
             </div>
 
             ${isVisa ? `
-            <!-- Interactive Visa Payment Gateway Placeholder Box (Ready for direct API hook) -->
             <div id="visa-gateway-placeholder" data-gateway-status="placeholder-ready" class="p-4 rounded-2xl bg-gradient-to-br from-carbon-900 to-carbon-950 text-white border border-champagne/40 space-y-3.5 shadow-xl">
                 <div class="flex items-center justify-between gap-2 border-b border-white/10 pb-2.5">
                     <div class="flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-champagne" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
-                        <span class="text-xs font-black text-champagne">${u.visa_box_header}</span>
+                        <span class="text-xs font-black text-champagne">${esc(u.visa_box_header)}</span>
                     </div>
                     <div class="flex items-center gap-1.5 text-[10px] font-black">
                         <span class="px-2 py-0.5 rounded bg-blue-600 text-white">VISA</span>
                         <span class="px-2 py-0.5 rounded bg-amber-600 text-white">MC</span>
                     </div>
                 </div>
-
                 <div class="p-2.5 rounded-xl bg-champagne/10 border border-champagne/30 text-[11px] text-[#EDD29B] leading-relaxed">
-                    ${u.visa_box_notice}
+                    ${esc(u.visa_box_notice)}
                 </div>
-
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div class="sm:col-span-2">
-                        <label class="block text-[11px] font-bold text-[#B5B0A8] mb-1">${u.card_holder}</label>
+                        <label class="block text-[11px] font-bold text-[#B5B0A8] mb-1">${esc(u.card_holder)}</label>
                         <input id="bk-card-holder" type="text" value="${esc(b.cardHolder || b.name)}" placeholder="MOHAMED SALEM" class="w-full px-3 py-2 rounded-lg bg-carbon-800 border border-white/15 text-xs font-bold uppercase tracking-wider text-white focus:border-champagne focus:outline-none" />
                     </div>
                     <div class="sm:col-span-2">
-                        <label class="block text-[11px] font-bold text-[#B5B0A8] mb-1">${u.card_number}</label>
+                        <label class="block text-[11px] font-bold text-[#B5B0A8] mb-1">${esc(u.card_number)}</label>
                         <input id="bk-card-number" type="text" inputmode="numeric" maxlength="19" value="${esc(b.cardNumber)}" oninput="formatCardNumberInput(this)" placeholder="4532 •••• •••• ••••" class="w-full px-3 py-2 rounded-lg bg-carbon-800 border border-white/15 text-xs font-mono tracking-widest text-white focus:border-champagne focus:outline-none" />
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold text-[#B5B0A8] mb-1">${u.card_expiry}</label>
+                        <label class="block text-[11px] font-bold text-[#B5B0A8] mb-1">${esc(u.card_expiry)}</label>
                         <input id="bk-card-expiry" type="text" inputmode="numeric" maxlength="5" value="${esc(b.cardExpiry)}" oninput="formatCardExpiryInput(this)" placeholder="08/28" class="w-full px-3 py-2 rounded-lg bg-carbon-800 border border-white/15 text-xs font-mono text-white focus:border-champagne focus:outline-none" />
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold text-[#B5B0A8] mb-1">${u.card_cvv}</label>
+                        <label class="block text-[11px] font-bold text-[#B5B0A8] mb-1">${esc(u.card_cvv)}</label>
                         <input id="bk-card-cvv" type="password" inputmode="numeric" maxlength="4" value="${esc(b.cardCvv)}" placeholder="•••" class="w-full px-3 py-2 rounded-lg bg-carbon-800 border border-white/15 text-xs font-mono text-white focus:border-champagne focus:outline-none" />
                     </div>
                 </div>
@@ -629,15 +737,17 @@ export function renderBookingStep() {
         const ch = SAFARI_TRIPS.filter(trip => b.selectedIds.includes(trip.id));
         const vehicleDisplay = t.vehicles[b.vehicleOpt] || b.vehicleOpt;
         const promoMatch = findActivePromo(b.promoCode);
+        const stopInfo = resolveSelectedStopDetails(lang);
+        const hotelDisplay = b.pickupHotel ? `${stopInfo.stationLabel} — ${b.pickupHotel}` : stopInfo.stationLabel;
 
         body.innerHTML = `<div class="space-y-3.5">
             <div class="p-4 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 text-xs sm:text-sm space-y-2.5">
                 <div class="flex justify-between gap-3 border-b border-carbon-900/10 dark:border-white/10 pb-2">
-                    <span class="opacity-70 font-bold">${t.sum_tours}</span>
+                    <span class="opacity-70 font-bold">${esc(t.sum_tours)}</span>
                     <span class="font-black text-end">${esc(ch.map(c => getTripTitle(c)).join(" + "))}</span>
                 </div>
                 <div class="flex justify-between gap-3">
-                    <span class="opacity-70 font-bold">${t.full_name.replace(" *", "")}:</span>
+                    <span class="opacity-70 font-bold">${esc(t.full_name.replace(" *", ""))}:</span>
                     <span class="font-bold">${esc(b.name)} · ${esc(b.phone)}</span>
                 </div>
                 <div class="flex justify-between gap-3">
@@ -645,32 +755,32 @@ export function renderBookingStep() {
                     <span class="font-bold text-champagne-dark dark:text-champagne">${esc(b.email)}</span>
                 </div>
                 <div class="flex justify-between gap-3">
-                    <span class="opacity-70 font-bold">${t.sum_guests}</span>
-                    <span class="font-bold">${b.adults} ${t.adults_lbl}${b.children ? ` · ${b.children} ${t.children_lbl}` : ""}</span>
+                    <span class="opacity-70 font-bold">${esc(t.sum_guests)}</span>
+                    <span class="font-bold">${b.adults} ${esc(t.adults_lbl)}${b.children ? ` · ${b.children} ${esc(t.children_lbl)}` : ""}</span>
                 </div>
                 <div class="flex justify-between gap-3">
-                    <span class="opacity-70 font-bold">${t.sum_vehicle}</span>
+                    <span class="opacity-70 font-bold">${esc(t.sum_vehicle)}</span>
                     <span class="font-bold">${esc(vehicleDisplay)}</span>
                 </div>
                 <div class="flex justify-between gap-3">
-                    <span class="opacity-70 font-bold">${t.sum_hotel}</span>
-                    <span class="font-bold">${esc(b.pickupHotel || "Sharm El Sheikh")} ${b.tripDate ? `(${esc(b.tripDate)})` : ""}</span>
+                    <span class="opacity-70 font-bold">${esc(t.sum_hotel)}</span>
+                    <span class="font-bold">${esc(hotelDisplay)} ${b.tripDate ? `(${esc(b.tripDate)})` : ""}</span>
                 </div>
                 <div class="flex justify-between gap-3">
-                    <span class="opacity-70 font-bold">${u.sum_time}</span>
-                    <span class="font-bold">${esc(b.tripTime === "evening" ? u.time_evening : u.time_morning)}</span>
+                    <span class="opacity-70 font-bold">${esc(u.sum_time)}</span>
+                    <span class="font-black text-champagne-dark dark:text-champagne">${esc(stopInfo.pointSummary)}</span>
                 </div>
                 <div class="flex justify-between gap-3 pt-2 border-t border-carbon-900/10 dark:border-white/10">
-                    <span class="opacity-70 font-bold">${t.sum_payment}</span>
-                    <span class="font-black ${b.paymentMethod === 'visa' ? 'text-champagne-dark dark:text-champagne' : 'text-sea'}">${b.paymentMethod === 'visa' ? u.pay_visa_title : u.pay_arrival_title}</span>
+                    <span class="opacity-70 font-bold">${esc(t.sum_payment)}</span>
+                    <span class="font-black ${b.paymentMethod === 'visa' ? 'text-champagne-dark dark:text-champagne' : 'text-sea'}">${b.paymentMethod === 'visa' ? esc(u.pay_visa_title) : esc(u.pay_arrival_title)}</span>
                 </div>
             </div>
 
             ${promoMatch ? `<div class="p-2.5 rounded-xl bg-sea/15 border border-sea/30 text-sea text-xs font-extrabold">✓ ${esc(promoMatch.code)} (-${promoMatch.discount}% OFF)</div>` : ""}
 
             <div class="flex gap-2">
-                <input id="bk-promo" type="text" value="${esc(b.promoCode)}" placeholder="${t.promo_placeholder}" class="flex-1 px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm font-bold uppercase focus:border-champagne focus:outline-none" />
-                <button type="button" onclick="applyPromoCode()" class="px-4 py-2.5 rounded-xl bg-champagne hover:bg-champagne-light text-carbon-950 text-xs font-black transition">${t.promo_apply}</button>
+                <input id="bk-promo" type="text" value="${esc(b.promoCode)}" placeholder="${esc(t.promo_placeholder)}" class="flex-1 px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm font-bold uppercase focus:border-champagne focus:outline-none" />
+                <button type="button" onclick="applyPromoCode()" class="px-4 py-2.5 rounded-xl bg-champagne hover:bg-champagne-light text-carbon-950 text-xs font-black transition">${esc(t.promo_apply)}</button>
             </div>
         </div>`;
     }

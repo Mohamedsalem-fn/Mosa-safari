@@ -6,260 +6,342 @@
  * -------------------------------------------------------------------------------
  */
 
+export const PICKUP_STATIONS = {
+    hadaba: { ar: "الهضبة", en: "Al-Hadaba", it: "Hadaba", ru: "Хадаба" },
+    naama: { ar: "خليج نعمة", en: "Naama Bay", it: "Naama Bay", ru: "Наама-Бей" },
+    conference: { ar: "قاعة المؤتمرات", en: "Conference Center", it: "Centro Congressi", ru: "Конференц-центр" },
+    airport: { ar: "خلف المطار", en: "Behind Airport", it: "Zona Aeroporto", ru: "За аэропортом" },
+    gharqana: { ar: "الغرقانة", en: "Al-Gharqana", it: "Al-Gharqana", ru: "Эль-Гаркана" }
+};
+
+export const MOSA_RULES = {
+    ar: {
+        title: "📌 تعليمات هامة",
+        items: [
+            "يرجى التواجد في نقطة الاستلام قبل موعد التحرك بـ 10 دقائق.",
+            "في حال التأخير، تتحمل الشركة حق تعديل أو إلغاء الحجز وفقًا لجدول التشغيل.",
+            "نتمنى لكم رحلة ممتعة مع شركة موسى سفاري."
+        ]
+    },
+    en: {
+        title: "📌 Important Pickup Instructions",
+        items: [
+            "Please be present at your pickup point 10 minutes before departure time.",
+            "In case of delay, the company reserves the right to reschedule or cancel the booking according to the operating timetable.",
+            "We wish you a wonderful trip with Mosa Safari."
+        ]
+    },
+    it: {
+        title: "📌 Istruzioni Importanti per il Ritiro",
+        items: [
+            "Si prega di presentarsi al punto di ritiro 10 minuti prima dell'orario di partenza.",
+            "In caso di ritardo, l'azienda si riserva il diritto di modificare o annullare la prenotazione in base al programma operativo.",
+            "Vi auguriamo un piacevole viaggio con Mosa Safari."
+        ]
+    },
+    ru: {
+        title: "📌 Важные правила посадки",
+        items: [
+            "Пожалуйста, будьте на месте посадки за 10 минут до времени отправления.",
+            "В случае опоздания компания оставляет за собой право изменить или отменить бронь согласно графику движения.",
+            "Желаем вам приятного путешествия с компанией Mosa Safari."
+        ]
+    }
+};
+
 export const HERO_SLIDES = [
     {
-        img: "assets/images/hero-atv-sunset.jpg",
+        img: "assets/images/safari-sunrise.jpg",
         tag: {
-            ar: "شرم الشيخ · جبال الصدى",
-            en: "Sharm El Sheikh · Echo Mountains",
-            it: "Sharm El Sheikh · Montagne dell'Eco",
-            ru: "Шарм-эль-Шейх · Горы Эхо"
+            ar: "شرم الشيخ · تحرك من 04:00 ص",
+            en: "Sharm El Sheikh · Departs 04:00 AM",
+            it: "Sharm El Sheikh · Partenza 04:00 AM",
+            ru: "Шарм-эль-Шейх · Выезд 04:00"
         },
         title: {
-            ar: "مغامرات البيتش باجي والغروب",
-            en: "Quad ATV & Sunset Adventures",
-            it: "Avventure Quad ATV & Tramonto",
-            ru: "Приключения на квадроциклах и закат"
+            ar: "🌅 رحلة الشروق — جبال سيناء الذهبية",
+            en: "🌅 Sunrise Safari — Dawn Desert Trails",
+            it: "🌅 Safari all'Alba — Prime Luci nel Deserto",
+            ru: "🌅 Рассветное сафари — Встреча рассвета"
         }
     },
     {
-        img: "assets/images/safari-nabq-buggy.jpg",
+        img: "assets/images/safari-morning.jpg",
         tag: {
-            ar: "محمية نبق · شرم الشيخ",
-            en: "Nabq Reserve · Sharm El Sheikh",
-            it: "Riserva di Nabq · Sharm El Sheikh",
-            ru: "Заповедник Набк · Шарм-эль-Шейх"
+            ar: "شرم الشيخ · تحرك من 08:00 ص",
+            en: "Sharm El Sheikh · Departs 08:00 AM",
+            it: "Sharm El Sheikh · Partenza 08:00 AM",
+            ru: "Шарм-эль-Шейх · Выезд 08:00"
         },
         title: {
-            ar: "سفاري الدفع الرباعي والباجي",
-            en: "4x4 Off-Road & Dune Buggy Safari",
-            it: "Safari 4x4 & Dune Buggy",
-            ru: "Сафари 4x4 и багги по дюнам"
+            ar: "☀️ الرحلة الصباحية — بيتش باجي وباجي صحراوي",
+            en: "☀️ Morning Safari — ATV Quad & Dune Buggy",
+            it: "☀️ Safari del Mattino — Quad ATV & Buggy",
+            ru: "☀️ Утреннее сафари — Квадроциклы и Багги"
         }
     },
     {
-        img: "assets/images/safari-night-stars.jpg",
+        img: "assets/images/safari-standard.jpg",
         tag: {
-            ar: "القرية البدوية · سيناء",
-            en: "Bedouin Camp · South Sinai",
-            it: "Campo Beduino · Sinai del Sud",
-            ru: "Бедуинский лагерь · Южный Синай"
+            ar: "شرم الشيخ · تحرك من 14:15",
+            en: "Sharm El Sheikh · Departs 14:15",
+            it: "Sharm El Sheikh · Partenza 14:15",
+            ru: "Шарм-эль-Шейх · Выезд 14:15"
         },
         title: {
-            ar: "سفاري ليلية ومراقبة النجوم",
-            en: "Night Safari & Stargazing Experience",
-            it: "Safari Notturno & Osservazione Stelle",
-            ru: "Ночное сафари и наблюдение за звёздами"
+            ar: "🌄 الرحلات العادية — مغامرة الظهيرة الكلاسيكية",
+            en: "🌄 Standard Afternoon Safari — Echo Mountains",
+            it: "🌄 Safari Pomeridiano — Montagne dell'Eco",
+            ru: "🌄 Дневное сафари — Классический маршрут"
         }
     },
     {
-        img: "assets/images/safari-canyon-dahab.jpg",
+        img: "assets/images/safari-dinner.jpg",
         tag: {
-            ar: "دهب والوادي الملون",
-            en: "Colored Canyon & Dahab",
-            it: "Canyon Colorato & Dahab",
-            ru: "Цветной каньон и Дахаб"
+            ar: "شرم الشيخ · تحرك من 15:30",
+            en: "Sharm El Sheikh · Departs 15:30",
+            it: "Sharm El Sheikh · Partenza 15:30",
+            ru: "Шарм-эль-Шейх · Выезд 15:30"
         },
         title: {
-            ar: "الوادي الملون والثقب الأزرق",
-            en: "Colored Canyon & Blue Hole Expedition",
-            it: "Spedizione Canyon Colorato & Blue Hole",
-            ru: "Экспедиция в Цветной каньон и Голубую дыру"
+            ar: "🌙 رحلة العشاء — القرية البدوية والنجوم",
+            en: "🌙 Dinner Safari — Bedouin BBQ Camp & Show",
+            it: "🌙 Safari con Cena — Campo Beduino & Spettacolo",
+            ru: "🌙 Ужин-сафари — Бедуинский лагерь и шоу"
         }
     }
 ];
 
 export const SAFARI_TRIPS = [
     {
-        id: "sharm-sunrise-atv",
-        category: "atv",
+        id: "mosa-sunrise",
+        category: "sunrise",
+        slotType: "morning",
+        icon: "🌅",
         city: "Sharm El Sheikh",
         cityAr: "شرم الشيخ",
-        titleEn: "Sharm El Sheikh: Sunrise ATV Quad Adventure & Camel Trek",
-        titleAr: "شرم الشيخ: مغامرة شروق الشمس بالبيتش باجي وركوب الجمال",
-        titleIt: "Sharm El Sheikh: Avventura all'Alba in Quad ATV e Cammello",
-        titleRu: "Шарм-эль-Шейх: Рассвет на квадроциклах ATV и прогулка на верблюдах",
-        fromPrice: 10.13,
-        adultPrice: 20.26,
-        duration: "4 ساعات",
-        durationEn: "4 hours",
-        durationIt: "4 ore",
-        durationRu: "4 часа",
-        rating: 4.3,
-        badge: "شروق الشمس · خصم 20%",
-        vehicle: "ATV Quad + Camel",
-        img: "assets/images/hero-atv-sunset.jpg",
-        descAr: "انطلق مع خيوط الفجر الأولى في صحراء شرم الشيخ بقيادة البيتش باجي وجولة جمال أصيلة مع الشاي البدوي.",
-        descEn: "Ride across Sharm El Sheikh's golden desert at dawn on an automatic ATV Quad, combined with an authentic camel trek and Bedouin tea.",
-        descIt: "Parti all'alba nel deserto di Sharm El Sheikh in Quad ATV automatico, con passeggiata in cammello e tè beduino nel canyon.",
-        descRu: "Встретьте рассвет в пустыне Шарм-эль-Шейха на квадроцикле ATV с прогулкой на верблюдах и традиционным бедуинским чаем."
-    },
-    {
-        id: "sharm-night-5in1",
-        category: "night",
-        city: "Sharm El Sheikh",
-        cityAr: "شرم الشيخ",
-        titleEn: "Sharm El Sheikh Night: 5-in-1 ATV Safari & Stargazing Experience",
-        titleAr: "سفاري شرم الشيخ الليلية: تجربة 5 في 1 ومراقبة النجوم",
-        titleIt: "Sharm Notte: Safari 5-in-1 in Quad ATV e Osservazione Stelle",
-        titleRu: "Ночной Шарм: Сафари 5-в-1 на квадроциклах и звёздное небо",
-        fromPrice: 22.93,
-        adultPrice: 27.14,
-        duration: "6 ساعات",
-        durationEn: "6 hours",
-        durationIt: "6 ore",
-        durationRu: "6 часов",
-        rating: 4.3,
-        badge: "5 في 1 · نجوم",
-        vehicle: "ATV Quad + Stargazing",
-        img: "assets/images/safari-night-stars.jpg",
-        descAr: "رحلة مسائية متكاملة تشمل البيتش باجي، ركوب الجمال، العشاء البدوي المشوي، عرض شرقي، ورصد النجوم بالتلسكوب.",
-        descEn: "Complete evening expedition featuring ATV quad riding, camel trek, BBQ Bedouin dinner, live folkloric show, and telescope stargazing.",
-        descIt: "Esperienza serale completa: guida Quad ATV, cammello, cena beduina BBQ, spettacolo orientale e osservazione delle stelle al telescopio.",
-        descRu: "Полный вечерний тур: квадроциклы ATV, верблюды, бедуинский ужин-барбекю, восточное шоу и наблюдение за звёздами в телескоп."
-    },
-    {
-        id: "sharm-sunset-echo",
-        category: "atv",
-        city: "Sharm El Sheikh",
-        cityAr: "شرم الشيخ",
-        titleEn: "Sharm El Sheikh: Sunset ATV Quad Safari in the Echo Mountains",
-        titleAr: "شرم الشيخ: سفاري الغروب بالبيتش باجي في جبال الصدى",
-        titleIt: "Sharm El Sheikh: Safari al Tramonto in Quad nelle Montagne dell'Eco",
-        titleRu: "Шарм-эль-Шейх: Сафари на закате на квадроциклах в Горах Эхо",
-        fromPrice: 12.42,
-        adultPrice: 24.84,
+        titleAr: "🌅 رحلة الشروق — شرم الشيخ",
+        titleEn: "🌅 Sunrise Safari — Sharm El Sheikh",
+        titleIt: "🌅 Safari all'Alba — Sharm El Sheikh",
+        titleRu: "🌅 Рассветное сафари — Шарм-эль-Шейх",
+        fromPrice: 12.00,
+        adultPrice: 20.00,
         duration: "3 ساعات",
         durationEn: "3 hours",
         durationIt: "3 ore",
         durationRu: "3 часа",
-        rating: 4.5,
-        badge: "الأكثر مبيعاً",
-        vehicle: "ATV Quad",
-        img: "assets/images/hero-atv-sunset.jpg",
-        descAr: "استمتع بساعة الغروب الذهبية وسط جبال الصدى الشهيرة في شرم الشيخ مع توقف لالتقاط الصور والشاي البدوي.",
-        descEn: "Experience the golden hour across Sharm El Sheikh's iconic Echo Mountains with panoramic photo stops and Bedouin hospitality.",
-        descIt: "Vivi l'ora d'oro del tramonto tra le famose Montagne dell'Eco a Sharm El Sheikh con soste fotografiche e tè beduino.",
-        descRu: "Насладитесь золотым закатом среди знаменитых Гор Эхо в Шарм-эль-Шейхе с фото-остановками и бедуинским чаем."
+        rating: 4.9,
+        badge: "رحلة الشروق",
+        vehicle: "ATV Quad + Camel + Bedouin Tea",
+        img: "assets/images/safari-sunrise.jpg",
+        descAr: "عِش سحر شروق الشمس بين جبال سيناء مع قيادة البيتش باجي وركوب الجمال والشاي البدوي، مع تحرك دقيق عبر مسارين يومياً من كافة مناطق شرم الشيخ.",
+        descEn: "Witness the magic of Sinai sunrise across Echo Mountains on an automatic ATV Quad with camel trek and Bedouin tea via 2 scheduled pickup routes.",
+        descIt: "Vivi la magia dell'alba tra le montagne del Sinai in Quad ATV con cammello e tè beduino, con partenza puntuale su 2 percorsi dedicati.",
+        descRu: "Встретьте рассвет в горах Синая на квадроциклах ATV с прогулкой на верблюдах и бедуинским чаем. Два чётких маршрута трансфера.",
+        routes: [
+            {
+                id: "route1",
+                label: { ar: "المسار الأول", en: "Route 1", it: "Percorso 1", ru: "Маршрут 1" },
+                stops: [
+                    { station: "hadaba", timeAr: "04:00 ص", timeEn: "04:00 AM", emoji: "🕓" },
+                    { station: "naama", timeAr: "04:15 ص", timeEn: "04:15 AM", emoji: "🕟" },
+                    { station: "conference", timeAr: "04:30 ص", timeEn: "04:30 AM", emoji: "🕠" }
+                ]
+            },
+            {
+                id: "route2",
+                label: { ar: "المسار الثاني", en: "Route 2", it: "Percorso 2", ru: "Маршрут 2" },
+                stops: [
+                    { station: "airport", timeAr: "04:00 ص", timeEn: "04:00 AM", emoji: "🕓" },
+                    { station: "gharqana", timeAr: "04:30 ص", timeEn: "04:30 AM", emoji: "🕟" }
+                ]
+            }
+        ],
+        active: true
     },
     {
-        id: "sharm-canyon-bluehole",
-        category: "canyon",
+        id: "mosa-morning",
+        category: "morning",
+        slotType: "morning",
+        icon: "☀️",
         city: "Sharm El Sheikh",
         cityAr: "شرم الشيخ",
-        titleEn: "From Sharm: Full-Day Adventure – Colored Canyon, Blue Hole & Dahab",
-        titleAr: "من شرم الشيخ: يوم كامل إلى الوادي الملون، البلو هول، ودهب",
-        titleIt: "Da Sharm: Giornata Intera – Canyon Colorato, Blue Hole e Dahab",
-        titleRu: "Из Шарма: Весь день – Цветной каньон, Голубая дыра и Дахаб",
-        fromPrice: 20.60,
-        adultPrice: 29.43,
-        duration: "10 ساعات",
-        durationEn: "10 hours",
-        durationIt: "10 ore",
-        durationRu: "10 часов",
-        rating: 4.3,
-        badge: "يوم كامل",
-        vehicle: "4x4 Jeep + Snorkeling",
-        img: "assets/images/safari-canyon-dahab.jpg",
-        descAr: "مغامرة تجمع بين صخور الوادي الملون الساحرة، السنوركلينج في البلو هول، وجولة تسوق في مدينة دهب.",
-        descEn: "Full-day 4x4 Jeep adventure combining hiking through the Colored Canyon, snorkeling at Dahab's Blue Hole, seaside lunch, and bazaar tour.",
-        descIt: "Avventura 4x4 di un giorno intero tra le rocce del Canyon Colorato, snorkeling al Blue Hole di Dahab, pranzo sul mare e shopping.",
-        descRu: "Джип-сафари 4x4 на весь день: прогулка по Цветному каньону, снорклинг в Голубой дыре, обед у моря и прогулка по Дахабу."
-    },
-    {
-        id: "sharm-double-thrill",
-        category: "atv",
-        city: "Sharm El Sheikh",
-        cityAr: "شرم الشيخ",
-        titleEn: "Sharm El Sheikh: Double Thrill – ATV Quad & Dune Buggy Desert Safari",
-        titleAr: "شرم الشيخ: الإثارة المزدوجة – بيتش باجي ATV وباجي صحراوي",
-        titleIt: "Sharm El Sheikh: Doppia Emozione – Safari in Quad ATV e Dune Buggy",
-        titleRu: "Шарм-эль-Шейх: Двойной драйв – квадроцикл ATV и багги по дюнам",
-        fromPrice: 23.81,
-        adultPrice: 34.01,
+        titleAr: "☀️ الرحلة الصباحية — شرم الشيخ",
+        titleEn: "☀️ Morning Safari — Sharm El Sheikh",
+        titleIt: "☀️ Safari del Mattino — Sharm El Sheikh",
+        titleRu: "☀️ Утреннее сафари — Шарм-эль-Шейх",
+        fromPrice: 11.00,
+        adultPrice: 18.00,
         duration: "3 ساعات",
         durationEn: "3 hours",
         durationIt: "3 ore",
         durationRu: "3 часа",
         rating: 4.8,
-        badge: "تقييم 4.8★",
-        vehicle: "ATV + Dune Buggy",
-        img: "assets/images/safari-nabq-buggy.jpg",
-        descAr: "جرّب قيادة الدراجة الرباعية وعربة الباجي السريعة في مسارات صحراوية مفتوحة بأعلى معايير الأمان.",
-        descEn: "Double the adrenaline by driving both an automatic ATV Quad and a high-performance Dune Buggy across open desert trails.",
-        descIt: "Raddoppia l'adrenalina guidando sia un Quad ATV che un potente Dune Buggy su piste desertiche aperte in totale sicurezza.",
-        descRu: "Удвойте адреналин: управляйте квадроциклом ATV и скоростным багги по открытым пустынным трассам Синая."
+        badge: "الرحلة الصباحية",
+        vehicle: "ATV Quad + Dune Buggy",
+        img: "assets/images/safari-morning.jpg",
+        descAr: "جولة صباحية منعشة في قلب صحراء شرم الشيخ بقيادة البيتش باجي والباجي الصحراوي مع توقف في الخيمة البدوية، وتنطلق الساعة 08:00 صباحاً على مسارين.",
+        descEn: "Fresh 8 AM desert expedition riding ATV Quads and Dune Buggies across open South Sinai trails with a Bedouin camp stop across 2 scheduled pickup routes.",
+        descIt: "Escursione mattutina dalle 08:00 tra le piste del deserto in Quad ATV e Dune Buggy con sosta alla tenda beduina su 2 percorsi organizzati.",
+        descRu: "Бодрящее утреннее сафари с 08:00 по открытым трассам Синая на квадроциклах и багги с остановкой у бедуинов по 2 маршрутам сбора.",
+        routes: [
+            {
+                id: "route1",
+                label: { ar: "المسار الأول", en: "Route 1", it: "Percorso 1", ru: "Маршрут 1" },
+                stops: [
+                    { station: "hadaba", timeAr: "08:00 ص", timeEn: "08:00 AM", emoji: "🕗" },
+                    { station: "naama", timeAr: "08:30 ص", timeEn: "08:30 AM", emoji: "🕣" },
+                    { station: "airport", timeAr: "08:40 ص", timeEn: "08:40 AM", emoji: "🕣" }
+                ]
+            },
+            {
+                id: "route2",
+                label: { ar: "المسار الثاني", en: "Route 2", it: "Percorso 2", ru: "Маршрут 2" },
+                stops: [
+                    { station: "airport", timeAr: "08:00 ص", timeEn: "08:00 AM", emoji: "🕗" },
+                    { station: "gharqana", timeAr: "08:30 ص", timeEn: "08:30 AM", emoji: "🕣" }
+                ]
+            }
+        ],
+        active: true
     },
     {
-        id: "sharm-nabq-premium",
-        category: "nabq",
+        id: "mosa-standard",
+        category: "standard",
+        slotType: "evening",
+        icon: "🌄",
         city: "Sharm El Sheikh",
         cityAr: "شرم الشيخ",
-        titleEn: "Sharm El Sheikh: Nabq Protected Area Premium Safari – Mangroves & Trails",
-        titleAr: "شرم الشيخ: سفاري محمية نبق الطبيعية الفاخرة",
-        titleIt: "Sharm El Sheikh: Safari Premium nella Riserva di Nabq – Mangrovie",
-        titleRu: "Шарм-эль-Шейх: Премиум-сафари в заповеднике Набк – Мангры и дюны",
-        fromPrice: 26.18,
-        adultPrice: 52.36,
-        duration: "3–4 ساعات",
-        durationEn: "3–4 hours",
-        durationIt: "3–4 ore",
-        durationRu: "3–4 часа",
-        rating: 4.3,
-        badge: "محمية نبق",
-        vehicle: "4x4 + Buggy + Moto",
-        img: "assets/images/safari-nabq-buggy.jpg",
-        descAr: "استكشف غابات المانجروف والتنوع البيئي الفريد في محمية نبق الطبيعية شاملة تذاكر الدخول والتصاريح.",
-        descEn: "Explore coastal mangrove forests and untouched dunes inside Nabq Protected Area, including all entry permits and multi-vehicle trails.",
-        descIt: "Esplora le foreste di mangrovie e la natura incontaminata della Riserva di Nabq, inclusi biglietti d'ingresso e permessi ufficiali.",
-        descRu: "Исследуйте мангровые рощи и дикие дюны заповедника Набк, включая все входные билеты и разрешения."
-    },
-    {
-        id: "sharm-nabq-secrets",
-        category: "nabq",
-        city: "Sharm El Sheikh",
-        cityAr: "شرم الشيخ",
-        titleEn: "Sharm El Sheikh: Nabq Protected Area Premium Safari – Desert Secrets",
-        titleAr: "شرم الشيخ: سفاري محمية نبق – أسرار الصحراء (Desert Secrets)",
-        titleIt: "Sharm El Sheikh: Riserva di Nabq Safari VIP – Segreti del Deserto",
-        titleRu: "Шарм-эль-Шейх: VIP-сафари в заповеднике Набк – Тайны пустыни",
-        fromPrice: 27.71,
-        adultPrice: 55.42,
-        duration: "3–4 ساعات",
-        durationEn: "3–4 hours",
-        durationIt: "3–4 ore",
-        durationRu: "3–4 часа",
-        rating: 4.5,
-        badge: "VIP نبق",
-        vehicle: "Golf Off-road + Double Moto",
-        img: "assets/images/safari-nabq-buggy.jpg",
-        descAr: "جولة خاصة في محمية نبق تشمل تصاريح الدخول، عربات أوف رود، وقيادة الموتو سفاري لمدة 40 دقيقة.",
-        descEn: "VIP expedition inside Nabq Reserve including official permits, custom off-road vehicles, and a 40-minute double moto safari ride.",
-        descIt: "Tour esclusivo nella Riserva di Nabq con permessi inclusi, veicoli off-road e 40 minuti di guida Moto Safari.",
-        descRu: "Эксклюзивный тур по заповеднику Набк с разрешениями, внедорожниками и 40-минутным заездом на мото-сафари."
-    },
-    {
-        id: "sharm-nabq-seafood",
-        category: "nabq",
-        city: "Sharm El Sheikh",
-        cityAr: "شرم الشيخ",
-        titleEn: "Sharm El Sheikh: Nabq Protected Area Premium Safari & Seafood Dusk",
-        titleAr: "شرم الشيخ: سفاري محمية نبق حتى الغسق مع عشاء مأكولات بحرية",
-        titleIt: "Sharm El Sheikh: Safari Riserva di Nabq al Tramonto con Cena di Pesce",
-        titleRu: "Шарм-эль-Шейх: Сафари в заповеднике Набк на закате и ужин из морепродуктов",
-        fromPrice: 27.71,
-        adultPrice: 55.42,
-        duration: "3–4 ساعات",
-        durationEn: "3–4 hours",
-        durationIt: "3–4 ore",
-        durationRu: "3–4 часа",
+        titleAr: "🌄 الرحلات العادية — شرم الشيخ",
+        titleEn: "🌄 Standard Afternoon Safari — Sharm El Sheikh",
+        titleIt: "🌄 Safari Classico Pomeridiano — Sharm El Sheikh",
+        titleRu: "🌄 Дневное классическое сафари — Шарм-эль-Шейх",
+        fromPrice: 10.00,
+        adultPrice: 17.00,
+        duration: "2.5–3 ساعات",
+        durationEn: "2.5–3 hours",
+        durationIt: "2,5–3 ore",
+        durationRu: "2.5–3 часа",
         rating: 4.8,
-        badge: "غسق + سي فود",
-        vehicle: "4x4 + Sunset + Seafood",
-        img: "assets/images/safari-canyon-dahab.jpg",
-        descAr: "تجربة استثنائية تجمع بين مغامرة الصحراء في محمية نبق وعشاء مأكولات بحرية طازجة على ساحل البحر الأحمر.",
-        descEn: "Signature twilight expedition combining off-road desert trails in Nabq Reserve with a fresh Red Sea seafood dinner by the shore.",
-        descIt: "Esperienza esclusiva che unisce l'avventura nel deserto della Riserva di Nabq a una cena di pesce fresco sulla costa del Mar Rosso.",
-        descRu: "Уникальное сочетание пустынного сафари в заповеднике Набк на закате и свежего ужина из морепродуктов на берегу Красного моря."
+        badge: "الرحلات العادية",
+        vehicle: "ATV Quad + Echo Mountains",
+        img: "assets/images/safari-standard.jpg",
+        descAr: "رحلة السفاري الكلاسيكية بعد الظهر وسط جبال الصدى ووديان شرم الشيخ مع الشاي البدوي وتوقيت مثالي قبل الغروب بدءاً من الساعة 14:15.",
+        descEn: "Classic afternoon desert safari starting at 14:15 through the Echo Mountains canyon with scenic photo stops and Bedouin tea hospitality.",
+        descIt: "Il safari classico pomeridiano con partenza alle 14:15 nelle Montagne dell'Eco, soste panoramiche e ospitalità beduina.",
+        descRu: "Классическое дневное сафари с выездом в 14:15 через каньон Гор Эхо с фото-паузами и бедуинским чаем.",
+        routes: [
+            {
+                id: "route1",
+                label: { ar: "المسار الأول", en: "Route 1", it: "Percorso 1", ru: "Маршрут 1" },
+                stops: [
+                    { station: "hadaba", timeAr: "14:15", timeEn: "14:15", emoji: "🕒" },
+                    { station: "naama", timeAr: "14:15", timeEn: "14:15", emoji: "🕞" },
+                    { station: "conference", timeAr: "14:30", timeEn: "14:30", emoji: "🕒" }
+                ]
+            },
+            {
+                id: "route2",
+                label: { ar: "المسار الثاني", en: "Route 2", it: "Percorso 2", ru: "Маршрут 2" },
+                stops: [
+                    { station: "airport", timeAr: "14:15", timeEn: "14:15", emoji: "🕒" },
+                    { station: "gharqana", timeAr: "14:30", timeEn: "14:30", emoji: "🕞" }
+                ]
+            }
+        ],
+        active: true
+    },
+    {
+        id: "mosa-dinner",
+        category: "dinner",
+        slotType: "evening",
+        icon: "🌙",
+        city: "Sharm El Sheikh",
+        cityAr: "شرم الشيخ",
+        titleAr: "🌙 رحلة العشاء — السهرة البدوية والغروب",
+        titleEn: "🌙 Dinner Safari — Sunset, Bedouin BBQ & Show",
+        titleIt: "🌙 Safari con Cena — Tramonto, BBQ Beduino & Show",
+        titleRu: "🌙 Ужин-сафари — Закат, ужин у бедуинов и шоу",
+        fromPrice: 18.00,
+        adultPrice: 28.00,
+        duration: "5 ساعات",
+        durationEn: "5 hours",
+        durationIt: "5 ore",
+        durationRu: "5 часов",
+        rating: 4.9,
+        badge: "رحلة العشاء",
+        vehicle: "ATV Quad + Camel + BBQ Dinner & Show",
+        img: "assets/images/safari-dinner.jpg",
+        descAr: "التجربة المسائية المتكاملة في شرم الشيخ: بيتش باجي عند الغروب، ركوب الجمال، عشاء بدوي فاخر مشوي، وعروض فنية تحت النجوم مع مسارين مخصصين للعشاء.",
+        descEn: "Complete evening desert experience starting at 15:30: sunset ATV Quad riding, camel trek, open-buffet Bedouin BBQ dinner, and live desert show under the stars.",
+        descIt: "Esperienza serale completa dalle 15:30: Quad ATV al tramonto, cammello, cena BBQ beduina e spettacolo folcloristico sotto le stelle.",
+        descRu: "Полная вечерняя программа с 15:30: квадроциклы на закате, верблюды, бедуинский ужин-барбекю и восточное шоу под звёздами.",
+        routes: [
+            {
+                id: "route1",
+                label: { ar: "المسار الأول", en: "Route 1", it: "Percorso 1", ru: "Маршрут 1" },
+                stops: [
+                    { station: "hadaba", timeAr: "15:30", timeEn: "15:30", emoji: "🕔" },
+                    { station: "naama", timeAr: "15:45", timeEn: "15:45", emoji: "🕠" },
+                    { station: "conference", timeAr: "16:00", timeEn: "16:00", emoji: "🕠" }
+                ]
+            },
+            {
+                id: "route2",
+                label: { ar: "المسار الثاني (العشاء)", en: "Route 2 (Dinner)", it: "Percorso 2 (Cena)", ru: "Маршрут 2 (Ужин)" },
+                stops: [
+                    { station: "airport", timeAr: "16:00", timeEn: "16:00", emoji: "🕔" },
+                    { station: "gharqana", timeAr: "16:15", timeEn: "16:15", emoji: "🕠" }
+                ]
+            }
+        ],
+        active: true
     }
 ];
+
+const DEFAULT_TRIPS_SNAPSHOT = SAFARI_TRIPS.map(t => ({
+    id: t.id,
+    category: t.category,
+    slotType: t.slotType,
+    routes: t.routes
+}));
+
+/**
+ * Resolve localized pickup station display label.
+ * @param {string} stationKey
+ * @param {string} [lang="ar"]
+ * @returns {string}
+ */
+export function getStationLabel(stationKey, lang = "ar") {
+    const entry = PICKUP_STATIONS[stationKey];
+    if (!entry) return String(stationKey || "");
+    return entry[lang] || entry.en || entry.ar;
+}
+
+/**
+ * Resolve structured pickup routes for a trip (with safe fallback to built-in catalog).
+ * @param {object} trip
+ * @returns {Array}
+ */
+export function getTripRoutes(trip) {
+    if (trip && Array.isArray(trip.routes) && trip.routes.length) {
+        return trip.routes;
+    }
+    if (trip) {
+        const match = DEFAULT_TRIPS_SNAPSHOT.find(x => x.id === trip.id || x.category === trip.category);
+        if (match) return match.routes;
+    }
+    return DEFAULT_TRIPS_SNAPSHOT[0].routes;
+}
+
+/**
+ * Format route label in active language.
+ * @param {object} route
+ * @param {string} [lang="ar"]
+ * @returns {string}
+ */
+export function getRouteLabel(route, lang = "ar") {
+    if (!route) return "";
+    if (typeof route.label === "string") return route.label;
+    return route.label?.[lang] || route.label?.en || route.label?.ar || route.id || "";
+}

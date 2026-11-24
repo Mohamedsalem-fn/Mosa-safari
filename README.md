@@ -47,39 +47,39 @@ Mosa-safari/
     │   └── admin.css                 # Luxury executive dashboard glassmorphism & Chart.js styling
     ├── images/
     │   ├── logo.jpg                  # Brand logo
-    │   ├── hero-atv-sunset.jpg       # Hero & ATV Quad sunset photography
-    │   ├── safari-nabq-buggy.jpg     # Nabq Reserve & Dune Buggy photography
-    │   ├── safari-night-stars.jpg    # Night safari & stargazing photography
-    │   └── safari-canyon-dahab.jpg   # Colored Canyon & Dahab photography
+    │   ├── safari-sunrise.jpg        # Sunrise Safari (04:00 AM) photography
+    │   ├── safari-morning.jpg        # Morning Safari (08:00 AM) photography
+    │   ├── safari-standard.jpg       # Standard Afternoon Safari (14:15) photography
+    │   └── safari-dinner.jpg         # Dinner Safari & Bedouin Show (15:30+) photography
     └── js/
         ├── main.js                   # Application entry point, live KV config sync & tracking beacon
         ├── admin.js                  # Executive Admin Dashboard logic (KPIs, CRM, Tours, Promos, Settings)
         ├── cinematic.js              # Anime.js v4 motion layer, 3D card tilt & magnetic controls
         ├── state.js                  # Reactive app state, live exchange rate fetcher, storage helpers
         ├── data/
-        │   ├── trips.js              # HERO_SLIDES & SAFARI_TRIPS catalog (4 languages: ar, en, it, ru)
+        │   ├── trips.js              # HERO_SLIDES, PICKUP_STATIONS, MOSA_RULES & 4 Official SAFARI_TRIPS
         │   └── i18n.js               # Complete translations for Arabic, English, Italian, Russian
         └── modules/
             ├── ui.js                 # Particles canvas, scroll reveal, counters, toasts, language switching
-            ├── trips.js              # Dynamic trip grid, category filtering, live price table & comparison
-            ├── booking.js            # Upgraded 5-step booking UI, Pay on Arrival + Visa placeholder gateway
-            ├── notifications.js      # Green API WhatsApp owner alerts & Resend customer email dispatch
-            ├── mobile-app.js         # Dedicated luxury native-app mobile shell (< 640px)
-            └── ai-assistant.js       # MOSA AI 2.0 interactive concierge (NLU, 3-step Matcher, Live Quote Builder & voice)
+            ├── trips.js              # Dynamic 4-tour grid, pickup timetable matrix, price table & comparison
+            ├── booking.js            # Upgraded 5-step booking UI, Route 1/2 station picker, Pay on Arrival + Visa placeholder
+            ├── notifications.js      # Green API WhatsApp owner alerts & customer email voucher (with pickup & 10-min rule)
+            ├── mobile-app.js         # Dedicated luxury native-app mobile shell (< 640px) with pickup routes
+            └── ai-assistant.js       # MOSA AI 2.0 interactive concierge (NLU station lookup, 3-step Matcher, Quote Builder & voice)
 ```
 
 ---
 
 ## Key Features
 
-- **Full 4-Language Support (`ar`, `en`, `it`, `ru`):** Clean Arabic-first default HTML with zero flash of unstyled/wrong-language text, full RTL/LTR switching, and complete translations across all 8 trip titles, descriptions, FAQs, booking steps, and AI quick chips.
-- **Smart Safari Category Filtering:** Filter the 8 Sharm El Sheikh tours by adventure type (`ATV & Buggy`, `Nabq Reserve`, `Night & Stars`, `Canyon & Dahab`) from either the hero search console or the filter bar.
-- **Live Real-Time Multi-Currency Pricing (`USD`, `EGP`, `EUR`):** Automatically fetches today's live `USD -> EGP` and `USD -> EUR` exchange rates from multi-CDN currency APIs (`open.er-api.com` and `@fawazahmed0/currency-api`) with local caching and offline fallback, dynamically converting all trip cards, the 8-tour price table, comparison modal, booking totals, and MOSA AI concierge quotes.
-- **Streamlined 5-Step Interactive Booking Modal:** Direct tour selection, traveler details validation, guest count & localized vehicle type, hotel pickup & preferred tour date, promo code validation (`MOSA20` for 20% off + automatic 10% group discount for 5+ guests), and instant WhatsApp booking handoff.
+- **Full 4-Language Support (`ar`, `en`, `it`, `ru`):** Clean Arabic-first default HTML with full RTL/LTR switching and complete translations across all 4 official Mosa Safari programs, 2-route pickup stops (`Al-Hadaba`, `Naama Bay`, `Conference Center`, `Behind Airport`, `Al-Gharqana`), FAQs, operational rules, booking steps, and AI quick chips.
+- **Official Mosa Safari 2-Route Timetable & 10-Minute Policy:** Structured departure schedules (`Sunrise 04:00 AM`, `Morning 08:00 AM`, `Standard 14:15`, `Dinner 15:30–16:15`) with interactive 1-click pickup station selection and embedded `تعليمات هامة` arrival instructions across desktop, mobile shell, booking checkout, emails, and MOSA AI.
+- **Live Real-Time Multi-Currency Pricing (`USD`, `EGP`, `EUR`):** Automatically fetches live `USD -> EGP` and `USD -> EUR` exchange rates from multi-CDN currency APIs with local caching, dynamically converting all 4 tour cards, the price table, comparison modal, booking totals, and MOSA AI quotes.
+- **Streamlined 5-Step Interactive Booking Modal:** Direct tour selection, traveler details validation, guest count & localized vehicle type, dynamic Route 1 / Route 2 pickup station & clock picker + hotel field, promo code validation (`MOSA20` for 20% off + automatic 10% group discount for 5+ guests), and instant WhatsApp & email confirmation.
 - **Anime.js v4 Cinematic Motion Layer (`assets/js/cinematic.js`):** Staggered hero and card entrances, 3D interactive card tilt, magnetic header buttons, and scroll-reactive floating glass navigation.
-- **Isolated Hardened Admin Worker (`mosa-safari-admin`) & Cloudflare KV Persistence:** Physically separated from the public storefront Worker (`mosa-safari` serves zero admin routes or secrets). Protected by a dedicated `ADMIN_JWT_SECRET`, `__Host-mosa_admin_session` `HttpOnly` + `Secure` + `SameSite=Strict` cookies, strict `X-CSRF-Token` & `Origin` checks, KV-backed IP brute-force rate limiting (5 fails / 15m), server-side session revocation (`jti`), strict CSP (no inline scripts), HSTS, `X-Frame-Options: DENY`, and `noindex` headers. Features real-time Chart.js analytics, Bookings CRM with UTF-8 CSV export, **Personal Google Gmail (App Password SMTP / Apps Script) customer email connection UI**, live Tours/Promos/Settings sync via `MOSA_KV`, Customers LTV directory, and Audit Log.
-- **MOSA AI 2.0 Smart Concierge (`assets/js/modules/ai-assistant.js`):** Luxury Sinai concierge widget (Desktop floating glass panel + Mobile bottom sheet) featuring a 4-language NLU entity extractor (party size, morning/evening slot, budget in USD/EGP/EUR, promo detection) with persistent session memory, interactive tour & side-by-side comparison cards inside chat, a **3-Step Safari Matcher Quiz**, a **Live Instant Quote & Discount Calculator**, Web Speech API voice input, and 1-click pre-filled booking modal launch.
-- **Multilingual SEO & Google Rich Results (`ar`, `en`, `it`, `ru`):** Comprehensive 4-language SEO metadata with dynamic `?lang=` URL routing (`hreflang` + canonical/Open Graph synchronization in `ui.js`), unified JSON-LD `@graph` schemas (`WebSite`, `TravelAgency`/`LocalBusiness`, dual-typed `Product` + `TouristTrip` `ItemList` for all 8 tours with USD offers & star ratings, 6-question `FAQPage`, `BreadcrumbList`), crawlable pre-rendered price rows, `robots.txt`, and `hreflang`/Image XML `sitemap.xml`.
+- **Isolated Hardened Admin Worker (`mosa-safari-admin`) & Cloudflare KV Persistence:** Physically separated from the public storefront Worker (`mosa-safari` serves zero admin routes or secrets). Protected by a dedicated `ADMIN_JWT_SECRET`, `__Host-mosa_admin_session` `HttpOnly` + `Secure` + `SameSite=Strict` cookies, strict `X-CSRF-Token` & `Origin` checks, KV-backed IP brute-force rate limiting (5 fails / 15m), server-side session revocation (`jti`), strict CSP (no inline scripts), HSTS, `X-Frame-Options: DENY`, and `noindex` headers. Features real-time Chart.js analytics, Bookings CRM with route/pickup time tracking and UTF-8 CSV export, **Personal Google Gmail (App Password SMTP / Apps Script) customer email connection UI**, live Tours/Promos/Settings sync via `MOSA_KV`, Customers LTV directory, and Audit Log.
+- **MOSA AI 2.0 Smart Concierge (`assets/js/modules/ai-assistant.js`):** Luxury Sinai concierge widget (Desktop floating glass panel + Mobile bottom sheet) featuring 4-language NLU entity extraction (party size, pickup station clock lookup, time slot, budget in USD/EGP/EUR, promo detection) with persistent session memory, interactive tour & comparison cards, a **3-Step Safari Matcher Quiz**, a **Live Instant Quote & Discount Calculator**, Web Speech API voice input, and 1-click station-prefilled booking launch.
+- **Multilingual SEO & Google Rich Results (`ar`, `en`, `it`, `ru`):** Comprehensive 4-language SEO metadata with dynamic `?lang=` URL routing, unified JSON-LD `@graph` schemas (`WebSite`, `TravelAgency`/`LocalBusiness`, dual-typed `Product` + `TouristTrip` `ItemList` for all 4 official tours, `FAQPage`, `BreadcrumbList`), crawlable pre-rendered price rows, `robots.txt`, and `hreflang`/Image XML `sitemap.xml`.
 
 ---
 

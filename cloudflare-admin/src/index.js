@@ -580,7 +580,7 @@ async function handleAdminRoute(request, env, url) {
         const idx = arr.findIndex(b => b.ref === ref);
         if (idx === -1) return jsonResponse({ ok: false, error: "Booking not found" }, 404);
 
-        const allowed = ["status", "adminNotes", "tripDate", "tripTime", "tripTimeDisplay", "pickupHotel", "totalUsd", "totalFormatted", "paymentMethod", "name", "phone", "email", "adults", "children", "vehicleOpt", "vehicleDisplay"];
+        const allowed = ["status", "adminNotes", "tripDate", "tripTime", "tripTimeDisplay", "pickupRoute", "pickupStation", "pickupTime", "pickupPointDisplay", "pickupHotel", "totalUsd", "totalFormatted", "paymentMethod", "name", "phone", "email", "adults", "children", "vehicleOpt", "vehicleDisplay"];
         for (const k of allowed) {
             if (patch[k] !== undefined) arr[idx][k] = patch[k];
         }
@@ -605,7 +605,7 @@ async function handleAdminRoute(request, env, url) {
         const body = await request.json();
         if (body.trips === null && env.MOSA_KV) {
             await env.MOSA_KV.delete(KV_KEYS.TRIPS);
-            await appendAudit(env, "TRIPS_RESET", "Reset catalog to built-in 8 default safari tours");
+            await appendAudit(env, "TRIPS_RESET", "Reset catalog to built-in 4 official safari tours");
             return jsonResponse({ ok: true, trips: null });
         }
         if (!Array.isArray(body.trips)) return jsonResponse({ ok: false, error: "Expected trips array" }, 400);
