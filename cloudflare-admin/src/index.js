@@ -6,6 +6,14 @@
  * -------------------------------------------------------------------------------
  */
 
+import {
+    getMailConfig,
+    saveMailConfig,
+    clearMailConfig,
+    sanitizeMailConfigForClient,
+    dispatchPlatformEmail
+} from "../../cloudflare/src/mail.js";
+
 const KV_KEYS = {
     BOOKINGS: "mosa:bookings",
     TRIPS: "mosa:trips",
@@ -315,38 +323,6 @@ async function sendOwnerWhatsApp(env, text, ownerPhonesStr) {
     return { ok: sentCount > 0, sentCount };
 }
 
-async function sendResendEmail(env, { to, subject, html, text }) {
-    const apiKey = env.RESEND_API_KEY || "";
-    if (!apiKey || !to) return { ok: false, reason: "Missing RESEND_API_KEY or recipient" };
-
-    const senders = [
-        env.EMAIL_FROM || "Mosa Safari <bookings@mosasafari.com>",
-        "Mosa Safari <onboarding@resend.dev>"
-    ];
-
-    let lastErr = "Email send failed";
-    for (const fromAddr of senders) {
-        try {
-            const res = await fetch("https://api.resend.com/emails", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${apiKey}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ from: fromAddr, to: [to], subject, html, text })
-            });
-            if (res.ok) {
-                const data = await res.json();
-                return { ok: true, id: data?.id };
-            }
-            lastErr = `HTTP ${res.status}`;
-        } catch (err) {
-            lastErr = err?.message || "Network error";
-        }
-    }
-    return { ok: false, reason: lastErr };
-}
-
 async function handleLogin(request, env, url) {
     if (!verifyOriginHeaders(request, url)) {
         return jsonResponse({ ok: false, error: "Forbidden origin" }, 403);
@@ -448,14 +424,16 @@ async function handleAdminRoute(request, env, url) {
     }
 
     if (url.pathname === "/api/admin/overview" && request.method === "GET") {
-        const [bookings, trips, promos, settings, analytics, auditLog] = await Promise.all([
+        const [bookings, trips, promos, settings, mailRaw, analytics, auditLog] = await Promise.all([
             kvGetJson(env, KV_KEYS.BOOKINGS, []),
             kvGetJson(env, KV_KEYS.TRIPS, null),
             getPromos(env),
             getSettings(env),
+            getMailConfig(env),
             getAnalytics(env),
             kvGetJson(env, KV_KEYS.AUDIT, [])
         ]);
+        const mailConfig = sanitizeMailConfigForClient(mailRaw);
 
         return jsonResponse({
             ok: true,
@@ -463,6 +441,7 @@ async function handleAdminRoute(request, env, url) {
             trips: Array.isArray(trips) ? trips : null,
             promos,
             settings,
+            mailConfig,
             analytics,
             auditLog: Array.isArray(auditLog) ? auditLog : [],
             health: {
@@ -471,6 +450,7 @@ async function handleAdminRoute(request, env, url) {
                 csrfProtected: true,
                 kvBound: Boolean(env.MOSA_KV),
                 greenApiConfigured: Boolean(env.GREEN_API_TOKEN),
+                gmailConfigured: Boolean(mailConfig.connected),
                 resendConfigured: Boolean(env.RESEND_API_KEY),
                 adminSecretSet: Boolean(env.ADMIN_PASSWORD),
                 jwtSecretSet: Boolean(env.ADMIN_JWT_SECRET),
@@ -575,7 +555,7 @@ async function handleAdminRoute(request, env, url) {
                 </ul>
                 <p style="color:#9E9990;font-size:12px;">WhatsApp Support: +201023355550 · mosasafari.com</p>
             </div>`;
-            const res = await sendResendEmail(env, {
+            const res = await dispatchPlatformEmail(env, {
                 to: bk.email,
                 subject: `Mosa Safari Booking Confirmation — Ref ${bk.ref}`,
                 html,
@@ -585,8 +565,8 @@ async function handleAdminRoute(request, env, url) {
                 bk.emailSent = true;
                 await kvPutJson(env, KV_KEYS.BOOKINGS, arr);
             }
-            await appendAudit(env, "BOOKING_RESEND_EMAIL", `Resent email to ${bk.email} for ${ref}: ${res.ok ? "OK" : res.reason}`);
-            return jsonResponse({ ok: res.ok, error: res.reason });
+            await appendAudit(env, "BOOKING_RESEND_EMAIL", `Resent via ${res.provider || "email"} to ${bk.email} for ${ref}: ${res.ok ? "OK" : res.reason}`);
+            return jsonResponse({ ok: res.ok, provider: res.provider || "", error: res.reason });
         }
         return jsonResponse({ ok: false, error: "Invalid target" }, 400);
     }
@@ -660,6 +640,28 @@ async function handleAdminRoute(request, env, url) {
         return jsonResponse({ ok: true, settings: updated });
     }
 
+    if (url.pathname === "/api/admin/mail-config" && request.method === "PUT") {
+        try {
+            const body = await request.json();
+            const updated = await saveMailConfig(env, body?.mailConfig || body || {});
+            const sanitized = sanitizeMailConfigForClient(updated);
+            await appendAudit(
+                env,
+                "MAIL_CONFIG_UPDATE",
+                `Google email ${sanitized.enabled ? "enabled" : "saved disabled"} (${sanitized.provider}: ${sanitized.gmailAddress || "-"})`
+            );
+            return jsonResponse({ ok: true, mailConfig: sanitized });
+        } catch (err) {
+            return jsonResponse({ ok: false, error: err?.message || "Invalid email configuration" }, 400);
+        }
+    }
+
+    if (url.pathname === "/api/admin/mail-config" && request.method === "DELETE") {
+        const blank = await clearMailConfig(env);
+        await appendAudit(env, "MAIL_CONFIG_DISCONNECT", "Disconnected personal Google email credentials");
+        return jsonResponse({ ok: true, mailConfig: sanitizeMailConfigForClient(blank) });
+    }
+
     if (url.pathname === "/api/admin/test-notification" && request.method === "POST") {
         const { target, to } = await request.json();
         const settings = await getSettings(env);
@@ -674,14 +676,18 @@ async function handleAdminRoute(request, env, url) {
         }
         if (target === "email") {
             const recipient = to || "info@mosasafari.com";
-            const res = await sendResendEmail(env, {
+            const res = await dispatchPlatformEmail(env, {
                 to: recipient,
-                subject: "Mosa Safari Admin Dashboard — Email Integration Test",
-                html: `<p>Resend Email API test succeeded at <strong>${new Date().toISOString()}</strong>.</p>`,
-                text: `Resend Email API test succeeded at ${new Date().toISOString()}.`
+                subject: "Mosa Safari — تأكيد ربط البريد الإلكتروني بنجاح",
+                html: `<div style="font-family:Cairo,Arial,sans-serif;direction:rtl;max-width:540px;margin:0 auto;background:#0E1015;color:#F4EFE6;padding:24px;border-radius:16px;border:1px solid rgba(217,179,108,0.35);">
+                    <h2 style="color:#D9B36C;margin:0 0 10px;">تم ربط البريد بنجاح — Mosa Safari</h2>
+                    <p>هذه رسالة اختبار من لوحة التحكم للتأكد من أن إشعارات العملاء تصدر من حسابك بنجاح.</p>
+                    <p style="font-size:12px;color:#2CB5A0;">وقت الاختبار: ${new Date().toISOString()}</p>
+                </div>`,
+                text: `Mosa Safari email integration test succeeded at ${new Date().toISOString()}.`
             });
-            await appendAudit(env, "TEST_EMAIL", res.ok ? `Sent to ${recipient}` : `Failed: ${res.reason}`);
-            return jsonResponse({ ok: res.ok, id: res.id, error: res.reason });
+            await appendAudit(env, "TEST_EMAIL", res.ok ? `Sent via ${res.provider} to ${recipient}` : `Failed (${res.provider}): ${res.reason}`);
+            return jsonResponse({ ok: res.ok, provider: res.provider || "", from: res.from || "", id: res.id || "", error: res.reason });
         }
         return jsonResponse({ ok: false, error: "Invalid target" }, 400);
     }

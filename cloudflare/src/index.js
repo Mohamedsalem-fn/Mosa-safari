@@ -6,6 +6,8 @@
  * -------------------------------------------------------------------------------
  */
 
+import { dispatchPlatformEmail } from "./mail.js";
+
 const KV_KEYS = {
     BOOKINGS: "mosa:bookings",
     TRIPS: "mosa:trips",
@@ -151,36 +153,6 @@ async function sendOwnerWhatsApp(env, text, ownerPhonesStr) {
     return { ok: sentCount > 0, sentCount };
 }
 
-async function sendResendEmail(env, { to, subject, html, text }) {
-    const apiKey = env.RESEND_API_KEY || "";
-    if (!apiKey || !to) return { ok: false, reason: "Missing RESEND_API_KEY or recipient" };
-
-    const senders = [
-        env.EMAIL_FROM || "Mosa Safari <bookings@mosasafari.com>",
-        "Mosa Safari <onboarding@resend.dev>"
-    ];
-
-    for (const fromAddr of senders) {
-        try {
-            const res = await fetch("https://api.resend.com/emails", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${apiKey}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ from: fromAddr, to: [to], subject, html, text })
-            });
-            if (res.ok) {
-                const data = await res.json();
-                return { ok: true, id: data?.id };
-            }
-        } catch {
-            // Try fallback sender
-        }
-    }
-    return { ok: false };
-}
-
 async function handlePublicConfig(env) {
     const [trips, promos, settings] = await Promise.all([
         kvGetJson(env, KV_KEYS.TRIPS, null),
@@ -272,8 +244,8 @@ async function handleNotifyBooking(request, env) {
             if (waRes.ok) whatsappSent = true;
         }
 
-        if (payload && payload.email && settings.emailEnabled !== false && env.RESEND_API_KEY) {
-            const emailRes = await sendResendEmail(env, {
+        if (payload && payload.email && settings.emailEnabled !== false) {
+            const emailRes = await dispatchPlatformEmail(env, {
                 to: payload.email,
                 subject: subject || `Booking Confirmation ${payload.ref}`,
                 html: html || `<pre>${text}</pre>`,

@@ -444,6 +444,8 @@ function mosa_http_post_json(string $url, array $payload, array $headers = [], i
             CURLOPT_POSTFIELDS => $json,
             CURLOPT_HTTPHEADER => $hdrs,
             CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 4,
             CURLOPT_TIMEOUT => $timeout,
             CURLOPT_CONNECTTIMEOUT => 5,
             CURLOPT_SSL_VERIFYPEER => true,
@@ -495,15 +497,299 @@ function mosa_send_whatsapp(array $secrets, string $text, string $ownerPhonesOve
     return ['ok' => $sent > 0, 'sentCount' => $sent, 'reason' => $sent > 0 ? '' : 'Green API send failed'];
 }
 
-function mosa_send_email(array $secrets, string $to, string $subject, string $html, string $text): array
+function mosa_clean_mail_header(string $val): string
+{
+    return trim((string)preg_replace('/[\r\n]+/', ' ', $val));
+}
+
+function mosa_encode_rfc2047(string $text): string
+{
+    $clean = mosa_clean_mail_header($text);
+    if ($clean === '') {
+        return '';
+    }
+    if (preg_match('/^[\x20-\x7E]+$/', $clean) && !preg_match('/[()<>@,;:\\\\"\/\[\]?=]/', $clean)) {
+        return $clean;
+    }
+    return '=?UTF-8?B?' . base64_encode($clean) . '?=';
+}
+
+function mosa_default_mail_config(): array
+{
+    return [
+        'provider' => 'gmail_smtp',
+        'enabled' => false,
+        'gmailAddress' => '',
+        'appPassword' => '',
+        'senderName' => 'Mosa Safari · موسى سفاري',
+        'replyTo' => '',
+        'bccOwner' => true,
+        'fallbackResend' => true,
+        'appsScriptUrl' => '',
+        'scriptSecret' => '',
+        'updatedAt' => ''
+    ];
+}
+
+function mosa_get_mail_config(string $vaultDir): array
+{
+    $base = mosa_default_mail_config();
+    if ($vaultDir === '') {
+        return $base;
+    }
+    $saved = mosa_kv_get($vaultDir, 'mail_config', null);
+    return is_array($saved) ? array_merge($base, $saved) : $base;
+}
+
+function mosa_sanitize_mail_config(array $cfg): array
+{
+    $m = array_merge(mosa_default_mail_config(), $cfg);
+    $pass = (string)($m['appPassword'] ?? '');
+    $hasPass = strlen($pass) >= 8;
+    $hasSecret = trim((string)($m['scriptSecret'] ?? '')) !== '';
+    $gmailOk = filter_var((string)$m['gmailAddress'], FILTER_VALIDATE_EMAIL) !== false;
+    $provider = ($m['provider'] ?? '') === 'google_script' ? 'google_script' : 'gmail_smtp';
+    $connected = !empty($m['enabled']) && $gmailOk && (
+        ($provider === 'google_script' && trim((string)$m['appsScriptUrl']) !== '') ||
+        ($provider !== 'google_script' && $hasPass)
+    );
+
+    return [
+        'provider' => $provider,
+        'enabled' => !empty($m['enabled']),
+        'gmailAddress' => (string)$m['gmailAddress'],
+        'senderName' => (string)($m['senderName'] ?: 'Mosa Safari · موسى سفاري'),
+        'replyTo' => (string)$m['replyTo'],
+        'bccOwner' => ($m['bccOwner'] ?? true) !== false,
+        'fallbackResend' => ($m['fallbackResend'] ?? true) !== false,
+        'appsScriptUrl' => (string)$m['appsScriptUrl'],
+        'hasAppPassword' => $hasPass,
+        'appPasswordMask' => $hasPass ? ('•••• •••• •••• ' . substr($pass, -4)) : '',
+        'hasScriptSecret' => $hasSecret,
+        'connected' => $connected,
+        'updatedAt' => (string)($m['updatedAt'] ?? '')
+    ];
+}
+
+function mosa_save_mail_config(string $vaultDir, array $incoming): array
+{
+    $prev = mosa_get_mail_config($vaultDir);
+    $provider = ($incoming['provider'] ?? '') === 'google_script' ? 'google_script' : 'gmail_smtp';
+    $enabled = ($incoming['enabled'] ?? true) !== false;
+    $gmail = strtolower(mosa_clean_mail_header((string)($incoming['gmailAddress'] ?? $prev['gmailAddress'])));
+    $senderName = mosa_clean_mail_header((string)($incoming['senderName'] ?? $prev['senderName'])) ?: 'Mosa Safari · موسى سفاري';
+    $replyTo = mosa_clean_mail_header((string)($incoming['replyTo'] ?? $prev['replyTo']));
+    $bccOwner = array_key_exists('bccOwner', $incoming) ? !empty($incoming['bccOwner']) : (($prev['bccOwner'] ?? true) !== false);
+    $fallbackResend = array_key_exists('fallbackResend', $incoming) ? !empty($incoming['fallbackResend']) : (($prev['fallbackResend'] ?? true) !== false);
+
+    $rawPass = (string)preg_replace('/\s+/', '', (string)($incoming['appPassword'] ?? ''));
+    $appPassword = $rawPass !== '' ? $rawPass : (string)($prev['appPassword'] ?? '');
+    $appsScriptUrl = mosa_clean_mail_header((string)($incoming['appsScriptUrl'] ?? $prev['appsScriptUrl']));
+    $rawSecret = trim((string)($incoming['scriptSecret'] ?? ''));
+    $scriptSecret = !empty($incoming['clearScriptSecret']) ? '' : ($rawSecret !== '' ? $rawSecret : (string)($prev['scriptSecret'] ?? ''));
+
+    if ($enabled && !filter_var($gmail, FILTER_VALIDATE_EMAIL)) {
+        throw new RuntimeException('يرجى إدخال بريد جوجل صحيح (مثال: name@gmail.com)');
+    }
+    if ($replyTo !== '' && !filter_var($replyTo, FILTER_VALIDATE_EMAIL)) {
+        throw new RuntimeException('عنوان الرد (Reply-To) غير صحيح');
+    }
+    if ($enabled && $provider === 'gmail_smtp' && strlen($appPassword) < 8) {
+        throw new RuntimeException('يرجى إدخال كلمة مرور التطبيقات من جوجل (16 حرفاً)');
+    }
+    if ($enabled && $provider === 'google_script' && !preg_match('#^https://script\.google\.com/macros/s/.+#', $appsScriptUrl)) {
+        throw new RuntimeException('رابط Google Apps Script يجب أن يبدأ بـ https://script.google.com/macros/s/');
+    }
+
+    $next = [
+        'provider' => $provider,
+        'enabled' => $enabled,
+        'gmailAddress' => $gmail,
+        'appPassword' => $appPassword,
+        'senderName' => $senderName,
+        'replyTo' => $replyTo,
+        'bccOwner' => $bccOwner,
+        'fallbackResend' => $fallbackResend,
+        'appsScriptUrl' => $appsScriptUrl,
+        'scriptSecret' => $scriptSecret,
+        'updatedAt' => gmdate('c')
+    ];
+    mosa_kv_put($vaultDir, 'mail_config', $next);
+    return $next;
+}
+
+function mosa_clear_mail_config(string $vaultDir): array
+{
+    $blank = mosa_default_mail_config();
+    $path = mosa_kv_path($vaultDir, 'mail_config');
+    if (is_file($path)) {
+        @unlink($path);
+    }
+    return $blank;
+}
+
+function mosa_smtp_read_reply($fp): array
+{
+    $lines = [];
+    while (($line = fgets($fp, 2048)) !== false) {
+        $clean = rtrim($line, "\r\n");
+        $lines[] = $clean;
+        if (preg_match('/^\d{3}(?: |$)/', $clean)) {
+            return ['code' => (int)substr($clean, 0, 3), 'lines' => $lines, 'raw' => implode("\n", $lines)];
+        }
+    }
+    return ['code' => 0, 'lines' => $lines, 'raw' => implode("\n", $lines)];
+}
+
+function mosa_smtp_cmd($fp, string $cmd, array $expectedCodes): array
+{
+    fwrite($fp, $cmd . "\r\n");
+    $reply = mosa_smtp_read_reply($fp);
+    if (!in_array($reply['code'], $expectedCodes, true)) {
+        $msg = end($reply['lines']) ?: ('SMTP error ' . $reply['code']);
+        if ($reply['code'] === 535) {
+            throw new RuntimeException('فشل توثيق جوجل (535): تأكد من تفعيل التحقق بخطوتين وإدخال كلمة مرور التطبيقات (16 حرفاً)');
+        }
+        throw new RuntimeException($msg);
+    }
+    return $reply;
+}
+
+function mosa_send_gmail_smtp(array $cfg, string $to, string $subject, string $html, string $text): array
+{
+    $user = mosa_clean_mail_header((string)($cfg['gmailAddress'] ?? ''));
+    $pass = (string)preg_replace('/\s+/', '', (string)($cfg['appPassword'] ?? ''));
+    $safeTo = mosa_clean_mail_header($to);
+    if (!filter_var($user, FILTER_VALIDATE_EMAIL) || $pass === '') {
+        return ['ok' => false, 'provider' => 'gmail_smtp', 'reason' => 'Missing Gmail credentials'];
+    }
+    if (!filter_var($safeTo, FILTER_VALIDATE_EMAIL)) {
+        return ['ok' => false, 'provider' => 'gmail_smtp', 'reason' => 'Invalid recipient email'];
+    }
+
+    $ctx = stream_context_create([
+        'ssl' => [
+            'verify_peer' => true,
+            'verify_peer_name' => true,
+            'peer_name' => 'smtp.gmail.com'
+        ]
+    ]);
+    $fp = @stream_socket_client('ssl://smtp.gmail.com:465', $errno, $errstr, 12, STREAM_CLIENT_CONNECT, $ctx);
+    if (!$fp) {
+        return ['ok' => false, 'provider' => 'gmail_smtp', 'reason' => "Gmail SMTP connect failed: {$errstr} ({$errno})"];
+    }
+    stream_set_timeout($fp, 12);
+
+    try {
+        $greet = mosa_smtp_read_reply($fp);
+        if ($greet['code'] !== 220) {
+            throw new RuntimeException($greet['raw'] ?: 'Gmail SMTP greeting rejected');
+        }
+        mosa_smtp_cmd($fp, 'EHLO mosasafari.com', [250]);
+        $authToken = base64_encode("\0{$user}\0{$pass}");
+        mosa_smtp_cmd($fp, "AUTH PLAIN {$authToken}", [235]);
+        mosa_smtp_cmd($fp, "MAIL FROM:<{$user}>", [250]);
+        mosa_smtp_cmd($fp, "RCPT TO:<{$safeTo}>", [250, 251]);
+        if (($cfg['bccOwner'] ?? true) !== false && strcasecmp($user, $safeTo) !== 0) {
+            mosa_smtp_cmd($fp, "RCPT TO:<{$user}>", [250, 251]);
+        }
+        mosa_smtp_cmd($fp, 'DATA', [354]);
+
+        $boundary = 'mosa_alt_' . bin2hex(random_bytes(8));
+        $senderName = mosa_clean_mail_header((string)($cfg['senderName'] ?? 'Mosa Safari'));
+        $replyTo = mosa_clean_mail_header((string)($cfg['replyTo'] ?? '')) ?: $user;
+        $headers = [
+            'From: ' . mosa_encode_rfc2047($senderName) . " <{$user}>",
+            "To: <{$safeTo}>",
+            "Reply-To: <{$replyTo}>",
+            'Subject: ' . mosa_encode_rfc2047($subject),
+            'Date: ' . gmdate('D, d M Y H:i:s +0000'),
+            'Message-ID: <' . bin2hex(random_bytes(8)) . '@mosasafari.com>',
+            'MIME-Version: 1.0',
+            "Content-Type: multipart/alternative; boundary=\"{$boundary}\""
+        ];
+
+        $plainB64 = rtrim(chunk_split(base64_encode($text !== '' ? $text : $subject), 76, "\r\n"));
+        $htmlB64 = rtrim(chunk_split(base64_encode($html !== '' ? $html : ('<pre>' . htmlspecialchars($text, ENT_QUOTES, 'UTF-8') . '</pre>')), 76, "\r\n"));
+
+        $mime = implode("\r\n", $headers) . "\r\n\r\n"
+            . "--{$boundary}\r\n"
+            . "Content-Type: text/plain; charset=\"UTF-8\"\r\nContent-Transfer-Encoding: base64\r\n\r\n"
+            . "{$plainB64}\r\n"
+            . "--{$boundary}\r\n"
+            . "Content-Type: text/html; charset=\"UTF-8\"\r\nContent-Transfer-Encoding: base64\r\n\r\n"
+            . "{$htmlB64}\r\n"
+            . "--{$boundary}--";
+
+        $stuffed = preg_replace('/^\./m', '..', str_replace(["\r\n", "\r"], "\n", $mime));
+        $stuffed = str_replace("\n", "\r\n", (string)$stuffed);
+        fwrite($fp, $stuffed . "\r\n.\r\n");
+        $dataReply = mosa_smtp_read_reply($fp);
+        if ($dataReply['code'] !== 250) {
+            throw new RuntimeException($dataReply['raw'] ?: 'SMTP DATA rejected');
+        }
+        @fwrite($fp, "QUIT\r\n");
+        @fclose($fp);
+        return ['ok' => true, 'provider' => 'gmail_smtp', 'from' => $user, 'id' => $dataReply['lines'][0] ?? 'gmail-ok'];
+    } catch (Throwable $e) {
+        @fclose($fp);
+        return ['ok' => false, 'provider' => 'gmail_smtp', 'reason' => $e->getMessage()];
+    }
+}
+
+function mosa_send_google_script(array $cfg, string $to, string $subject, string $html, string $text): array
+{
+    $hook = mosa_clean_mail_header((string)($cfg['appsScriptUrl'] ?? ''));
+    if ($hook === '') {
+        return ['ok' => false, 'provider' => 'google_script', 'reason' => 'Missing Apps Script URL'];
+    }
+    $res = mosa_http_post_json($hook, [
+        'secret' => (string)($cfg['scriptSecret'] ?? ''),
+        'to' => mosa_clean_mail_header($to),
+        'subject' => $subject,
+        'html' => $html,
+        'text' => $text,
+        'senderName' => (string)($cfg['senderName'] ?? 'Mosa Safari'),
+        'replyTo' => (string)($cfg['replyTo'] ?: ($cfg['gmailAddress'] ?? ''))
+    ], [], 12);
+    $decoded = json_decode((string)$res['body'], true);
+    if ($res['ok'] && (!is_array($decoded) || ($decoded['ok'] ?? true) !== false)) {
+        return ['ok' => true, 'provider' => 'google_script', 'from' => (string)($cfg['gmailAddress'] ?? 'google-script'), 'id' => $decoded['id'] ?? 'script-ok'];
+    }
+    return ['ok' => false, 'provider' => 'google_script', 'reason' => is_array($decoded) && !empty($decoded['error']) ? (string)$decoded['error'] : ('Apps Script HTTP ' . $res['status'])];
+}
+
+function mosa_send_email(array $secrets, string $to, string $subject, string $html, string $text, string $vaultDir = ''): array
 {
     if ($to === '' || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
         return ['ok' => false, 'reason' => 'Invalid recipient email'];
     }
 
+    $cfg = $vaultDir !== '' ? mosa_get_mail_config($vaultDir) : mosa_default_mail_config();
+    $primaryErr = '';
+    if (!empty($cfg['enabled']) && !empty($cfg['gmailAddress'])) {
+        if (($cfg['provider'] ?? '') === 'google_script' && trim((string)$cfg['appsScriptUrl']) !== '') {
+            $gs = mosa_send_google_script($cfg, $to, $subject, $html, $text);
+            if ($gs['ok']) {
+                return $gs;
+            }
+            $primaryErr = (string)($gs['reason'] ?? 'Google Script error');
+        } elseif (!empty($cfg['appPassword'])) {
+            $smtp = mosa_send_gmail_smtp($cfg, $to, $subject, $html, $text);
+            if ($smtp['ok']) {
+                return $smtp;
+            }
+            $primaryErr = (string)($smtp['reason'] ?? 'Gmail SMTP error');
+        }
+    }
+
+    if (!empty($cfg['enabled']) && ($cfg['fallbackResend'] ?? true) === false) {
+        return ['ok' => false, 'provider' => (string)($cfg['provider'] ?? 'gmail_smtp'), 'reason' => $primaryErr ?: 'Google email credentials incomplete'];
+    }
+
     $apiKey = trim((string)($secrets['RESEND_API_KEY'] ?? ''));
     $defaultFrom = (string)($secrets['EMAIL_FROM'] ?? 'Mosa Safari <bookings@mosasafari.com>');
-    $lastErr = 'Missing RESEND_API_KEY';
+    $lastErr = $primaryErr ?: 'Missing RESEND_API_KEY';
 
     if ($apiKey !== '') {
         foreach ([$defaultFrom, 'Mosa Safari <onboarding@resend.dev>'] as $fromAddr) {
@@ -514,7 +800,7 @@ function mosa_send_email(array $secrets, string $to, string $subject, string $ht
             );
             if ($res['ok']) {
                 $decoded = json_decode($res['body'], true);
-                return ['ok' => true, 'id' => $decoded['id'] ?? 'resend-ok'];
+                return ['ok' => true, 'provider' => 'resend', 'from' => $fromAddr, 'id' => $decoded['id'] ?? 'resend-ok'];
             }
             $lastErr = 'Resend HTTP ' . $res['status'];
         }
@@ -522,15 +808,16 @@ function mosa_send_email(array $secrets, string $to, string $subject, string $ht
 
     // Native Hostinger PHP mail() fallback (skip in local cli-server so dev tests stay clean)
     if (php_sapi_name() !== 'cli-server' && function_exists('mail')) {
+        $replyTo = mosa_clean_mail_header((string)($cfg['replyTo'] ?: ($cfg['gmailAddress'] ?: 'info@mosasafari.com')));
         $headers = [
             'MIME-Version: 1.0',
             'Content-Type: text/html; charset=UTF-8',
             'From: ' . $defaultFrom,
-            'Reply-To: info@mosasafari.com'
+            'Reply-To: ' . $replyTo
         ];
         if (@mail($to, '=?UTF-8?B?' . base64_encode($subject) . '?=', $html ?: nl2br($text), implode("\r\n", $headers))) {
-            return ['ok' => true, 'id' => 'php-mail-fallback'];
+            return ['ok' => true, 'provider' => 'php_mail', 'from' => $defaultFrom, 'id' => 'php-mail-fallback'];
         }
     }
-    return ['ok' => false, 'reason' => $lastErr];
+    return ['ok' => false, 'provider' => (string)($cfg['provider'] ?? 'resend'), 'reason' => $primaryErr ?: $lastErr];
 }

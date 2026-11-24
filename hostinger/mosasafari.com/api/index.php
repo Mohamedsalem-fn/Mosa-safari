@@ -152,7 +152,7 @@ if (($path === '/api/notify-booking' || $path === '/.netlify/functions/notify-bo
         $subject = (string)($body['subject'] ?? "Mosa Safari Booking Confirmation — {$ref}");
         $text = (string)($body['text'] ?? '');
         $html = (string)($body['html'] ?? nl2br(htmlspecialchars($text, ENT_QUOTES, 'UTF-8')));
-        $emRes = mosa_send_email($secrets, (string)$payload['email'], $subject, $html, $text);
+        $emRes = mosa_send_email($secrets, (string)$payload['email'], $subject, $html, $text, $vaultDir);
         if ($emRes['ok']) {
             $emailSent = true;
         }

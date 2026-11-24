@@ -28,6 +28,7 @@ const AT = {
         nav_promos: "أكواد الخصم",
         nav_customers: "قاعدة العملاء",
         nav_analytics: "التحليلات المتقدمة",
+        nav_email: "ربط بريد جوجل",
         nav_settings: "إعدادات المنصة",
         nav_audit: "النظام وسجل النشاط",
         open_site: "فتح الموقع المباشر",
@@ -68,6 +69,7 @@ const AT = {
         nav_promos: "Promo Codes",
         nav_customers: "Customers",
         nav_analytics: "Deep Analytics",
+        nav_email: "Google Email (Gmail)",
         nav_settings: "Platform Settings",
         nav_audit: "System & Audit Log",
         open_site: "Open Live Site",
@@ -113,6 +115,21 @@ const adminState = {
         trips: null,
         promos: [],
         settings: {},
+        mailConfig: {
+            provider: "gmail_smtp",
+            enabled: false,
+            gmailAddress: "",
+            senderName: "Mosa Safari · موسى سفاري",
+            replyTo: "",
+            bccOwner: true,
+            fallbackResend: true,
+            appsScriptUrl: "",
+            hasAppPassword: false,
+            appPasswordMask: "",
+            hasScriptSecret: false,
+            connected: false,
+            updatedAt: ""
+        },
         analytics: {
             totalViews: 0,
             uniqueSessions: 0,
@@ -237,9 +254,19 @@ function updateNavBadges() {
     const pEl = document.getElementById("nav-badge-pending");
     const tEl = document.getElementById("nav-badge-tours");
     const prEl = document.getElementById("nav-badge-promos");
+    const emEl = document.getElementById("nav-badge-email");
     if (pEl) pEl.textContent = String(pendingCount);
     if (tEl) tEl.textContent = String(tripsCount);
     if (prEl) prEl.textContent = String(promosCount);
+    if (emEl) {
+        const mc = adminState.overview.mailConfig || {};
+        const connected = Boolean(mc.connected);
+        const isAr = adminState.lang === "ar";
+        emEl.textContent = connected ? (isAr ? "متصل ✓" : "Connected") : (isAr ? "غير مربوط" : "Setup");
+        emEl.className = connected
+            ? "px-2 py-0.5 rounded-full bg-sea/20 text-sea text-[10px] font-black"
+            : "px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-black";
+    }
 }
 
 function computeStats() {
@@ -1127,11 +1154,348 @@ function renderAnalyticsTab(root) {
     }
 }
 
+function buildAppsScriptSnippet() {
+    return `function doPost(e) {
+  var d = JSON.parse(e.postData.contents || "{}");
+  var SECRET = ""; // ضع نفس الرمز السري هنا إذا أردت حماية إضافية
+  if (SECRET && d.secret !== SECRET) {
+    return ContentService.createTextOutput(JSON.stringify({ ok: false, error: "Forbidden" }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  MailApp.sendEmail({
+    to: d.to,
+    subject: d.subject || "Mosa Safari",
+    body: d.text || "",
+    htmlBody: d.html || d.text || "",
+    name: d.senderName || "Mosa Safari",
+    replyTo: d.replyTo || Session.getEffectiveUser().getEmail()
+  });
+  return ContentService.createTextOutput(JSON.stringify({ ok: true, id: "gas-" + Date.now() }))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+}
+
+function renderEmailTab(root) {
+    const isAr = adminState.lang === "ar";
+    const mc = adminState.overview.mailConfig || {};
+    const provider = mc.provider === "google_script" ? "google_script" : "gmail_smtp";
+    const connected = Boolean(mc.connected);
+    const previewAddr = mc.gmailAddress || "yourname@gmail.com";
+    const previewSender = mc.senderName || "Mosa Safari · موسى سفاري";
+
+    root.innerHTML = `
+        <div class="space-y-5">
+            <!-- Hero Connection Status Card -->
+            <div class="rounded-3xl p-5 sm:p-6 bg-gradient-to-br from-carbon-950 via-carbon-900 to-carbon-950 text-white border ${connected ? "border-sea/40" : "border-champagne/30"} shadow-xl flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-start gap-3.5 min-w-0">
+                    <div class="w-12 h-12 rounded-2xl ${connected ? "bg-sea/20 border-sea/40 text-sea" : "bg-champagne/15 border-champagne/35 text-champagne"} border flex items-center justify-center text-2xl shrink-0">
+                        ${connected ? "✅" : "📧"}
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h2 class="text-base sm:text-lg font-black">${isAr ? "إشعارات العملاء عبر حساب جوجل الشخصي (Gmail)" : "Customer Emails via Personal Google Account (Gmail)"}</h2>
+                            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black ${connected ? "bg-sea text-carbon-950" : "bg-amber-500/20 text-amber-300 border border-amber-400/30"}">
+                                ${connected ? (isAr ? "متصل ويعمل الآن ✓" : "Connected & Live ✓") : (isAr ? "في انتظار الربط" : "Setup Required")}
+                            </span>
+                        </div>
+                        <p class="text-xs text-[#B5B0A8] mt-1 leading-relaxed">
+                            ${connected
+                                ? (isAr
+                                    ? `تصدر تأكيدات حجز العملاء تلقائياً من بريدك: <strong class="text-champagne">${esc(previewSender)} &lt;${esc(mc.gmailAddress)}&gt;</strong>`
+                                    : `Booking confirmations are sent from: <strong class="text-champagne">${esc(previewSender)} &lt;${esc(mc.gmailAddress)}&gt;</strong>`)
+                                : (isAr
+                                    ? "اربط بريدك الشخصي على Gmail لتخرج جميع تذاكر تأكيد الحجز مباشرة باسمك وإيميلك بدون اشتراكات خارجية."
+                                    : "Connect your personal Gmail account so booking tickets are dispatched directly from your Google inbox.")}
+                        </p>
+                        ${mc.hasAppPassword ? `<div class="mt-2 inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-[11px] font-mono text-champagne">🔐 App Password: ${esc(mc.appPasswordMask)}</div>` : ""}
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 shrink-0">
+                    <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer"
+                        class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-xs font-black transition">🔑 ${isAr ? "إنشاء App Password من جوجل ↗" : "Google App Passwords ↗"}</a>
+                    ${(mc.gmailAddress || mc.hasAppPassword || mc.appsScriptUrl)
+                        ? `<button id="gmail-disconnect-btn" type="button" class="px-3.5 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/30 border border-rose-500/30 text-rose-300 text-xs font-black transition">${isAr ? "إلغاء الربط" : "Disconnect"}</button>`
+                        : ""}
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-5">
+                <!-- Left 7 cols: Google Email Connection Form -->
+                <form id="admin-gmail-form" class="xl:col-span-7 rounded-3xl p-5 bg-white dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 space-y-4">
+                    <div class="flex items-center justify-between gap-2 border-b border-carbon-900/10 dark:border-white/10 pb-3">
+                        <div>
+                            <h3 class="text-sm sm:text-base font-black">${isAr ? "بيانات الربط وإعدادات المرسل" : "Google Connection & Sender Profile"}</h3>
+                            <p class="text-[11px] opacity-65">${isAr ? "يُحفظ المفتاح مشفراً داخل خزنة الخادم المعزولة ولا يظهر في الموقع العام إطلاقاً" : "Stored server-side inside isolated Vault/KV and never exposed publicly"}</p>
+                        </div>
+                    </div>
+
+                    <!-- Provider Mode Switcher -->
+                    <div>
+                        <label class="block text-xs font-extrabold mb-2">${isAr ? "طريقة الربط مع جوجل" : "Google Connection Method"}</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <button type="button" data-gmail-mode="gmail_smtp"
+                                class="p-3 rounded-2xl border-2 text-start transition ${provider === "gmail_smtp" ? "border-champagne bg-champagne/10 shadow-sm" : "border-carbon-900/10 dark:border-white/10 hover:border-champagne/40"}">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="text-xs font-black text-champagne-dark dark:text-champagne">${isAr ? "Gmail SMTP المباشر" : "Direct Gmail SMTP"}</span>
+                                    <span class="px-2 py-0.5 rounded bg-sea/20 text-sea text-[10px] font-black">${isAr ? "موصى به" : "Recommended"}</span>
+                                </div>
+                                <div class="text-[11px] opacity-70 mt-1">${isAr ? "اتصال مشفر عبر smtp.gmail.com باستخدام كلمة مرور التطبيقات (16 حرفاً)" : "Encrypted TLS on smtp.gmail.com using 16-char Google App Password"}</div>
+                            </button>
+                            <button type="button" data-gmail-mode="google_script"
+                                class="p-3 rounded-2xl border-2 text-start transition ${provider === "google_script" ? "border-champagne bg-champagne/10 shadow-sm" : "border-carbon-900/10 dark:border-white/10 hover:border-champagne/40"}">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="text-xs font-black">${isAr ? "Google Apps Script" : "Google Apps Script"}</span>
+                                    <span class="px-2 py-0.5 rounded bg-carbon-900/10 dark:bg-white/10 text-[10px] font-black">HTTPS</span>
+                                </div>
+                                <div class="text-[11px] opacity-70 mt-1">${isAr ? "بديل سحابي عبر Google Web App إذا كان السيرفر يحظر منافذ SMTP" : "Cloud HTTPS webhook option when SMTP ports are restricted"}</div>
+                            </button>
+                        </div>
+                        <input id="gm-provider" type="hidden" value="${esc(provider)}">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+                        <div>
+                            <label class="block font-extrabold mb-1">${isAr ? "إيميل جوجل الخاص بك *" : "Your Google Email *"}</label>
+                            <input id="gm-address" type="email" dir="ltr" required value="${esc(mc.gmailAddress || "")}" placeholder="yourname@gmail.com"
+                                class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-800 border border-carbon-900/15 dark:border-white/15 font-mono font-bold focus:border-champagne focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-extrabold mb-1">${isAr ? "اسم المرسل الظاهر للعميل" : "Display Sender Name"}</label>
+                            <input id="gm-sender" type="text" value="${esc(previewSender)}" placeholder="Mosa Safari · موسى سفاري"
+                                class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-800 border border-carbon-900/15 dark:border-white/15 font-bold focus:border-champagne focus:outline-none">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block font-extrabold mb-1">${isAr ? "بريد استلام ردود العملاء (Reply-To — اختياري)" : "Reply-To Address (Optional)"}</label>
+                            <input id="gm-reply" type="email" dir="ltr" value="${esc(mc.replyTo || "")}" placeholder="${isAr ? "اتركه فارغاً لاستخدام نفس إيميل جوجل" : "Leave empty to use same Gmail address"}"
+                                class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-800 border border-carbon-900/15 dark:border-white/15 font-mono font-bold focus:border-champagne focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Mode A: Gmail App Password -->
+                    <div id="gm-smtp-fields" class="${provider === "google_script" ? "hidden" : ""} p-4 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-800 border border-champagne/25 space-y-2.5">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <label class="text-xs font-black text-champagne-dark dark:text-champagne">${isAr ? "كلمة مرور التطبيقات من جوجل (Google App Password) *" : "Google App Password (16 chars) *"}</label>
+                            ${mc.hasAppPassword ? `<span class="text-[11px] font-black text-sea">✓ ${isAr ? "محفوظة بالخزنة" : "Stored in Vault"} (${esc(mc.appPasswordMask)})</span>` : ""}
+                        </div>
+                        <div class="relative">
+                            <input id="gm-app-pass" type="password" dir="ltr" autocomplete="new-password"
+                                placeholder="${mc.hasAppPassword ? (isAr ? "اتركه فارغاً للإبقاء على كلمة المرور الحالية، أو اكتب الجديدة" : "Leave blank to keep existing password") : "xxxx xxxx xxxx xxxx"}"
+                                class="w-full px-3.5 py-2.5 pe-16 rounded-xl bg-white dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-mono text-xs font-bold focus:border-champagne focus:outline-none">
+                            <button id="gm-toggle-pass" type="button" class="absolute inset-y-0 end-2 px-2 text-[11px] font-black opacity-70 hover:opacity-100">${isAr ? "عرض" : "Show"}</button>
+                        </div>
+                        <p class="text-[11px] opacity-70 leading-relaxed">${isAr ? "لا تستخدم كلمة سر جيميل العادية — أنشئ كلمة مرور تطبيقات (16 حرفاً) من إعدادات أمان جوجل وسيقوم النظام بإزالة المسافات تلقائياً." : "Do not use your normal Gmail login password. Generate a 16-character App Password in Google Account Security."}</p>
+                    </div>
+
+                    <!-- Mode B: Google Apps Script Relay -->
+                    <div id="gm-script-fields" class="${provider === "google_script" ? "" : "hidden"} p-4 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-800 border border-champagne/25 space-y-3">
+                        <div>
+                            <label class="block text-xs font-extrabold mb-1">${isAr ? "رابط نشر Google Apps Script Web App *" : "Google Apps Script Web App URL *"}</label>
+                            <input id="gm-script-url" type="url" dir="ltr" value="${esc(mc.appsScriptUrl || "")}" placeholder="https://script.google.com/macros/s/.../exec"
+                                class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-mono text-xs font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-extrabold mb-1">${isAr ? "رمز أمان Webhook (اختياري)" : "Optional Webhook Secret"}</label>
+                            <input id="gm-script-secret" type="password" dir="ltr" placeholder="${mc.hasScriptSecret ? (isAr ? "محفوظ — اتركه فارغاً للإبقاء عليه" : "Stored — leave blank to keep") : "Optional shared secret"}"
+                                class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-mono text-xs font-bold">
+                        </div>
+                        <div class="p-3 rounded-xl bg-white dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 space-y-2">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-[11px] font-black">${isAr ? "كود Apps Script الجاهز (انسخه في script.google.com):" : "Ready-to-paste Apps Script code:"}</span>
+                                <button id="gm-copy-script" type="button" class="px-2.5 py-1 rounded-lg bg-champagne/20 text-champagne-dark dark:text-champagne text-[11px] font-black">📋 ${isAr ? "نسخ الكود" : "Copy Code"}</button>
+                            </div>
+                            <pre class="text-[10px] font-mono overflow-x-auto opacity-80 leading-relaxed" dir="ltr">${esc(buildAppsScriptSnippet())}</pre>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Switches -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs font-extrabold">
+                        <label class="flex items-center gap-2 p-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-800 cursor-pointer"><input id="gm-enabled" type="checkbox" ${mc.enabled ? "checked" : ""} class="accent-sea"> ${isAr ? "تفعيل الإرسال من جوجل" : "Enable Google Mail"}</label>
+                        <label class="flex items-center gap-2 p-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-800 cursor-pointer"><input id="gm-bcc" type="checkbox" ${mc.bccOwner !== false ? "checked" : ""} class="accent-champagne"> ${isAr ? "نسخة لبريدي الشخصي" : "Copy Owner (BCC)"}</label>
+                        <label class="flex items-center gap-2 p-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-800 cursor-pointer"><input id="gm-fallback" type="checkbox" ${mc.fallbackResend !== false ? "checked" : ""} class="accent-champagne"> ${isAr ? "تفعيل الاحتياطي عند التعذر" : "Resend Fallback"}</label>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-carbon-900/10 dark:border-white/10">
+                        <div class="text-[11px] opacity-70">
+                            ${mc.updatedAt ? `${isAr ? "آخر تحديث:" : "Updated:"} ${new Date(mc.updatedAt).toLocaleString()}` : ""}
+                        </div>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-champagne hover:bg-champagne-light text-carbon-950 text-xs font-black shadow-lg shadow-champagne/25 transition">
+                            ${isAr ? "حفظ وربط حساب جوجل ✓" : "Save & Connect Google Account ✓"}
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Right 5 cols: Guide + Live Inbox Preview + Instant Test -->
+                <div class="xl:col-span-5 space-y-5">
+                    <!-- Instant Test Card -->
+                    <div class="rounded-3xl p-5 bg-white dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 space-y-3.5">
+                        <h3 class="text-sm font-black">${isAr ? "اختبار الإرسال الفوري لبريدك" : "Send Live Test Confirmation"}</h3>
+                        <p class="text-[11px] opacity-70 leading-relaxed">${isAr ? "بعد حفظ إعداداتك، أرسل رسالة اختبارية لأي بريد للتأكد من وصول إشعارات الحجز مباشرة من حساب جوجل." : "After saving, dispatch a live test email to verify delivery straight from your Google account."}</p>
+                        <div class="flex flex-wrap gap-2">
+                            <input id="gm-test-to" type="email" dir="ltr" value="${esc(mc.gmailAddress || "")}" placeholder="customer-test@gmail.com"
+                                class="flex-1 min-w-[180px] px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-800 border border-carbon-900/15 dark:border-white/15 font-mono text-xs font-bold">
+                            <button id="gm-test-btn" type="button" class="px-4 py-2 rounded-xl bg-sea hover:bg-sea-dark text-carbon-950 text-xs font-black transition">📧 ${isAr ? "إرسال تجربة الآن" : "Send Test"}</button>
+                        </div>
+                        <div id="gm-test-result" class="hidden p-3 rounded-xl text-xs font-bold leading-relaxed"></div>
+                    </div>
+
+                    <!-- Live Client Inbox Preview -->
+                    <div class="rounded-3xl p-5 bg-white dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 space-y-3">
+                        <div class="text-xs font-black">${isAr ? "معاينة شكل الرسالة في بريد العميل (Gmail)" : "Customer Inbox Appearance Preview"}</div>
+                        <div class="p-3.5 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 space-y-1.5 text-xs">
+                            <div class="flex items-center justify-between gap-2">
+                                <span id="gm-prev-sender" class="font-black text-champagne-dark dark:text-champagne truncate">${esc(previewSender)}</span>
+                                <span class="text-[10px] opacity-60">10:30 AM</span>
+                            </div>
+                            <div id="gm-prev-email" class="text-[11px] font-mono opacity-75 truncate" dir="ltr">&lt;${esc(previewAddr)}&gt;</div>
+                            <div class="font-bold text-[11.5px] pt-1">${isAr ? "تأكيد حجزك في موسى سفاري شرم الشيخ — رقم MOSA-849210" : "Your Mosa Safari Booking Confirmation — Ref MOSA-849210"}</div>
+                        </div>
+                    </div>
+
+                    <!-- Quick 3-Step Guide -->
+                    <div class="rounded-3xl p-5 bg-white dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 space-y-3">
+                        <h3 class="text-sm font-black">${isAr ? "خطوات الحصول على Google App Password في 30 ثانية" : "How to Get a Google App Password in 30s"}</h3>
+                        <ol class="space-y-2 text-xs leading-relaxed list-decimal list-inside opacity-85">
+                            <li>${isAr ? 'تأكد من تفعيل <strong>التحقق بخطوتين (2-Step Verification)</strong> في حساب جوجل الخاص بك.' : 'Ensure <strong>2-Step Verification</strong> is enabled in your Google Account.'}</li>
+                            <li>${isAr ? 'افتح صفحة <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" class="text-champagne underline font-black">كلمات مرور التطبيقات (App Passwords)</a> واختر اسماً مثل <strong>Mosa Safari</strong>.' : 'Open <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" class="text-champagne underline font-black">Google App Passwords</a> and create a password named <strong>Mosa Safari</strong>.'}</li>
+                            <li>${isAr ? 'انسخ الكود المكوّن من 16 حرفاً والصقه في الحقل واضغط <strong>حفظ وربط حساب جوجل</strong> ثم <strong>إرسال تجربة</strong>.' : 'Copy the generated 16-character code, paste it here, click <strong>Save & Connect</strong>, and send a test email.'}</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Live inbox preview update
+    const addrIn = document.getElementById("gm-address");
+    const sndIn = document.getElementById("gm-sender");
+    addrIn?.addEventListener("input", () => {
+        const el = document.getElementById("gm-prev-email");
+        if (el) el.textContent = `<${addrIn.value.trim() || "yourname@gmail.com"}>`;
+    });
+    sndIn?.addEventListener("input", () => {
+        const el = document.getElementById("gm-prev-sender");
+        if (el) el.textContent = sndIn.value.trim() || "Mosa Safari · موسى سفاري";
+    });
+
+    // Mode toggle inside form
+    root.querySelectorAll("[data-gmail-mode]").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const nextMode = btn.dataset.gmailMode;
+            const hid = document.getElementById("gm-provider");
+            if (hid) hid.value = nextMode;
+            root.querySelectorAll("[data-gmail-mode]").forEach(b => {
+                const active = b.dataset.gmailMode === nextMode;
+                b.className = `p-3 rounded-2xl border-2 text-start transition ${active ? "border-champagne bg-champagne/10 shadow-sm" : "border-carbon-900/10 dark:border-white/10 hover:border-champagne/40"}`;
+            });
+            document.getElementById("gm-smtp-fields")?.classList.toggle("hidden", nextMode === "google_script");
+            document.getElementById("gm-script-fields")?.classList.toggle("hidden", nextMode !== "google_script");
+        });
+    });
+
+    document.getElementById("gm-toggle-pass")?.addEventListener("click", () => {
+        const p = document.getElementById("gm-app-pass");
+        if (p) p.type = p.type === "password" ? "text" : "password";
+    });
+
+    document.getElementById("gm-copy-script")?.addEventListener("click", () => {
+        const code = buildAppsScriptSnippet();
+        navigator.clipboard?.writeText(code).catch(() => {});
+        showAdminToast(isAr ? "تم نسخ كود Google Apps Script ✓" : "Apps Script copied ✓");
+    });
+
+    document.getElementById("gmail-disconnect-btn")?.addEventListener("click", async () => {
+        try {
+            const res = await apiFetch("/api/admin/mail-config", { method: "DELETE" });
+            adminState.overview.mailConfig = res.mailConfig;
+            if (adminState.overview.health) adminState.overview.health.gmailConfigured = false;
+            updateNavBadges();
+            renderEmailTab(root);
+            showAdminToast(isAr ? "تم فصل بريد جوجل وحذف بيانات الدخول من الخزنة" : "Google account disconnected");
+        } catch (err) {
+            showAdminToast(err.message, "err");
+        }
+    });
+
+    document.getElementById("admin-gmail-form")?.addEventListener("submit", async e => {
+        e.preventDefault();
+        const payload = {
+            provider: document.getElementById("gm-provider").value,
+            enabled: document.getElementById("gm-enabled").checked,
+            gmailAddress: document.getElementById("gm-address").value.trim(),
+            senderName: document.getElementById("gm-sender").value.trim() || "Mosa Safari · موسى سفاري",
+            replyTo: document.getElementById("gm-reply").value.trim(),
+            appPassword: document.getElementById("gm-app-pass")?.value || "",
+            appsScriptUrl: document.getElementById("gm-script-url")?.value.trim() || "",
+            scriptSecret: document.getElementById("gm-script-secret")?.value.trim() || "",
+            bccOwner: document.getElementById("gm-bcc").checked,
+            fallbackResend: document.getElementById("gm-fallback").checked
+        };
+        try {
+            const res = await apiFetch("/api/admin/mail-config", {
+                method: "PUT",
+                body: JSON.stringify({ mailConfig: payload })
+            });
+            adminState.overview.mailConfig = res.mailConfig;
+            if (adminState.overview.health) adminState.overview.health.gmailConfigured = Boolean(res.mailConfig?.connected);
+            updateNavBadges();
+            renderEmailTab(root);
+            showAdminToast(isAr ? "تم حفظ وربط حساب جوجل بنجاح ✓" : "Google account saved & connected ✓");
+        } catch (err) {
+            showAdminToast(err.message, "err");
+        }
+    });
+
+    document.getElementById("gm-test-btn")?.addEventListener("click", async () => {
+        const to = document.getElementById("gm-test-to").value.trim() || document.getElementById("gm-address").value.trim() || "info@mosasafari.com";
+        const box = document.getElementById("gm-test-result");
+        const btn = document.getElementById("gm-test-btn");
+        if (btn) btn.disabled = true;
+        if (box) {
+            box.className = "p-3 rounded-xl bg-champagne/10 border border-champagne/30 text-xs font-bold";
+            box.textContent = isAr ? "جاري الاتصال بخادم جوجل وإرسال رسالة الاختبار..." : "Connecting & dispatching test email...";
+        }
+        try {
+            const res = await apiFetch("/api/admin/test-notification", {
+                method: "POST",
+                body: JSON.stringify({ target: "email", to })
+            });
+            if (box) {
+                box.className = res.ok
+                    ? "p-3 rounded-xl bg-sea/15 border border-sea/35 text-sea text-xs font-bold"
+                    : "p-3 rounded-xl bg-rose-500/15 border border-rose-500/35 text-rose-500 text-xs font-bold";
+                box.textContent = res.ok
+                    ? (isAr ? `✓ تم الإرسال بنجاح إلى ${to} عبر (${res.provider || "email"}) من ${res.from || ""}` : `✓ Sent to ${to} via ${res.provider || "email"}`)
+                    : (res.error || "Email dispatch failed");
+            }
+            showAdminToast(res.ok ? (isAr ? `تم إرسال إيميل تجريبي إلى ${to} ✓` : `Sent to ${to} ✓`) : (res.error || "Failed"), res.ok ? "ok" : "err");
+        } catch (err) {
+            if (box) {
+                box.className = "p-3 rounded-xl bg-rose-500/15 border border-rose-500/35 text-rose-500 text-xs font-bold";
+                box.textContent = err.message;
+            }
+            showAdminToast(err.message, "err");
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+    });
+}
+
 function renderSettingsTab(root) {
     const isAr = adminState.lang === "ar";
     const st = adminState.overview.settings || {};
+    const mc = adminState.overview.mailConfig || {};
 
     root.innerHTML = `
+        <div class="mb-5 rounded-3xl p-4 bg-white dark:bg-carbon-900 border ${mc.connected ? "border-sea/35" : "border-champagne/35"} flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+                <span class="text-xl">📧</span>
+                <div class="text-xs min-w-0">
+                    <div class="font-black">${isAr ? "إشعارات العملاء ببريدك الشخصي من جوجل (Gmail)" : "Customer Emails via Personal Google Account"}</div>
+                    <div class="opacity-75 truncate">${mc.connected ? `${isAr ? "متصل الآن:" : "Connected:"} ${esc(mc.gmailAddress)}` : (isAr ? "اربط إيميلك على جوجل لإرسال التذاكر مباشرة باسمك" : "Connect your personal Gmail account in the dedicated tab")}</div>
+                </div>
+            </div>
+            <button id="go-email-tab-btn" type="button" class="px-4 py-2 rounded-xl bg-champagne hover:bg-champagne-light text-carbon-950 text-xs font-black transition">${isAr ? "فتح إعدادات ربط جوجل ←" : "Configure Google Email →"}</button>
+        </div>
         <form id="admin-settings-form" class="space-y-5">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 <div class="rounded-3xl p-5 bg-white dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 space-y-4">
@@ -1220,6 +1584,8 @@ function renderSettingsTab(root) {
         </form>
     `;
 
+    document.getElementById("go-email-tab-btn")?.addEventListener("click", () => switchTab("email"));
+
     document.getElementById("admin-password-form")?.addEventListener("submit", async e => {
         e.preventDefault();
         const currentPassword = document.getElementById("pw-current").value;
@@ -1307,7 +1673,8 @@ function renderAuditTab(root) {
                 ${healthCard(isAr ? "مفتاح التوقيع المنفصل (JWT Secret)" : "JWT Signing Secret", h.jwtSecretSet)}
                 ${healthCard(isAr ? "خزنة البيانات المعزولة (Vault/KV)" : "Isolated Data Vault / KV", h.kvBound)}
                 ${healthCard("Green API WhatsApp Secret", h.greenApiConfigured)}
-                ${healthCard("Resend Email API Secret", h.resendConfigured)}
+                ${healthCard(isAr ? "ربط بريد جوجل الشخصي (Gmail)" : "Google Gmail Connected", h.gmailConfigured)}
+                ${healthCard("Resend Email API Fallback", h.resendConfigured)}
             </div>
 
             <div class="rounded-3xl p-5 bg-white dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10">
@@ -1642,6 +2009,7 @@ function renderActiveTab() {
     else if (adminState.activeTab === "promos") renderPromosTab(root);
     else if (adminState.activeTab === "customers") renderCustomersTab(root);
     else if (adminState.activeTab === "analytics") renderAnalyticsTab(root);
+    else if (adminState.activeTab === "email") renderEmailTab(root);
     else if (adminState.activeTab === "settings") renderSettingsTab(root);
     else if (adminState.activeTab === "audit") renderAuditTab(root);
 }

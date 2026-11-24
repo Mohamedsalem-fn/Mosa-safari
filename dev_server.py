@@ -8,8 +8,11 @@
 
 import json
 import os
+import smtplib
 import urllib.request
 import urllib.error
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 
@@ -95,9 +98,26 @@ class MosaDevHandler(SimpleHTTPRequestHandler):
                         continue
 
             resend_key = os.environ.get("RESEND_API_KEY", "")
+            gmail_user = os.environ.get("GMAIL_ADDRESS", "").strip()
+            gmail_pass = os.environ.get("GMAIL_APP_PASSWORD", "").replace(" ", "").strip()
             to_email = payload.get("email", "")
 
-            if resend_key and to_email:
+            if gmail_user and gmail_pass and to_email:
+                try:
+                    msg = MIMEMultipart("alternative")
+                    msg["Subject"] = subject
+                    msg["From"] = f"Mosa Safari <{gmail_user}>"
+                    msg["To"] = to_email
+                    msg.attach(MIMEText(text or subject, "plain", "utf-8"))
+                    msg.attach(MIMEText(html or text, "html", "utf-8"))
+                    with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=12) as srv:
+                        srv.login(gmail_user, gmail_pass)
+                        srv.sendmail(gmail_user, [to_email], msg.as_string())
+                    email_sent = True
+                except Exception:
+                    pass
+
+            if not email_sent and resend_key and to_email:
                 senders = [
                     os.environ.get("EMAIL_FROM", "Mosa Safari <bookings@mosasafari.com>"),
                     "Mosa Safari <onboarding@resend.dev>"

@@ -228,6 +228,7 @@ if ($path === '/api/admin/overview' && $method === 'GET') {
     $trips = mosa_kv_get($vaultDir, 'trips', null);
     $promos = mosa_get_promos($vaultDir);
     $settings = mosa_get_settings($vaultDir, $secrets);
+    $mailConfig = mosa_sanitize_mail_config(mosa_get_mail_config($vaultDir));
     $analytics = mosa_get_analytics($vaultDir);
     $audit = mosa_kv_get($vaultDir, 'audit', []);
 
@@ -237,6 +238,7 @@ if ($path === '/api/admin/overview' && $method === 'GET') {
         'trips' => is_array($trips) ? $trips : null,
         'promos' => $promos,
         'settings' => $settings,
+        'mailConfig' => $mailConfig,
         'analytics' => $analytics,
         'auditLog' => is_array($audit) ? $audit : [],
         'health' => [
@@ -245,6 +247,7 @@ if ($path === '/api/admin/overview' && $method === 'GET') {
             'csrfProtected' => true,
             'kvBound' => is_dir($vaultDir) && is_writable($vaultDir),
             'greenApiConfigured' => !empty($secrets['GREEN_API_TOKEN']),
+            'gmailConfigured' => !empty($mailConfig['connected']),
             'resendConfigured' => !empty($secrets['RESEND_API_KEY']),
             'adminSecretSet' => !empty($secrets['ADMIN_PASSWORD_HASH']),
             'jwtSecretSet' => !empty($secrets['ADMIN_JWT_SECRET']),
@@ -375,7 +378,8 @@ if (preg_match('#^/api/admin/bookings/([^/]+)/resend$#', $path, $m) && $method =
             (string)$bk['email'],
             "Mosa Safari Booking Confirmation — Ref {$bk['ref']}",
             $html,
-            "Mosa Safari Confirmation {$bk['ref']} - {$bk['selectedTours']} - {$bk['totalFormatted']}"
+            "Mosa Safari Confirmation {$bk['ref']} - {$bk['selectedTours']} - {$bk['totalFormatted']}",
+            $vaultDir
         );
         if ($res['ok']) {
             mosa_kv_mutate($vaultDir, 'bookings', [], function ($arr) use ($ref) {
@@ -387,8 +391,8 @@ if (preg_match('#^/api/admin/bookings/([^/]+)/resend$#', $path, $m) && $method =
                 return $arr;
             });
         }
-        mosa_append_audit($vaultDir, 'BOOKING_RESEND_EMAIL', "Resent email to {$bk['email']} for {$ref}");
-        mosa_send_json(['ok' => $res['ok'], 'error' => $res['reason'] ?? '']);
+        mosa_append_audit($vaultDir, 'BOOKING_RESEND_EMAIL', "Resent via " . ($res['provider'] ?? 'email') . " to {$bk['email']} for {$ref}");
+        mosa_send_json(['ok' => $res['ok'], 'provider' => $res['provider'] ?? '', 'error' => $res['reason'] ?? '']);
     }
 
     mosa_send_json(['ok' => false, 'error' => 'Invalid target'], 400);
@@ -502,6 +506,30 @@ if ($path === '/api/admin/settings' && $method === 'PUT') {
     mosa_send_json(['ok' => true, 'settings' => $updated]);
 }
 
+// 11b. PUT / DELETE /api/admin/mail-config (Personal Google Gmail SMTP / Apps Script Connection)
+if ($path === '/api/admin/mail-config') {
+    if ($method === 'PUT') {
+        $body = mosa_read_json_body(65536);
+        if (!is_array($body)) {
+            mosa_send_json(['ok' => false, 'error' => 'Invalid JSON'], 400);
+        }
+        try {
+            $incoming = is_array($body['mailConfig'] ?? null) ? $body['mailConfig'] : $body;
+            $updated = mosa_save_mail_config($vaultDir, $incoming);
+            $sanitized = mosa_sanitize_mail_config($updated);
+            mosa_append_audit($vaultDir, 'MAIL_CONFIG_UPDATE', 'Google email ' . ($sanitized['enabled'] ? 'enabled' : 'disabled') . " ({$sanitized['provider']}: {$sanitized['gmailAddress']})");
+            mosa_send_json(['ok' => true, 'mailConfig' => $sanitized]);
+        } catch (Throwable $e) {
+            mosa_send_json(['ok' => false, 'error' => $e->getMessage()], 400);
+        }
+    }
+    if ($method === 'DELETE') {
+        $blank = mosa_clear_mail_config($vaultDir);
+        mosa_append_audit($vaultDir, 'MAIL_CONFIG_DISCONNECT', 'Disconnected personal Google email credentials');
+        mosa_send_json(['ok' => true, 'mailConfig' => mosa_sanitize_mail_config($blank)]);
+    }
+}
+
 // 12. POST /api/admin/test-notification
 if ($path === '/api/admin/test-notification' && $method === 'POST') {
     $body = mosa_read_json_body(16384);
@@ -525,11 +553,12 @@ if ($path === '/api/admin/test-notification' && $method === 'POST') {
             $secrets,
             $recipient,
             'Mosa Safari (eria.mosasafari.com) — Email Integration Test',
-            '<p>Hostinger Admin Dashboard email integration succeeded at <strong>' . gmdate('c') . '</strong>.</p>',
-            'Hostinger Admin Dashboard email test succeeded at ' . gmdate('c')
+            '<div style="font-family:Cairo,Arial,sans-serif;direction:rtl;max-width:540px;margin:0 auto;background:#0E1015;color:#F4EFE6;padding:24px;border-radius:16px;border:1px solid rgba(217,179,108,0.35);"><h2 style="color:#D9B36C;">تم ربط البريد بنجاح — Mosa Safari</h2><p>هذه رسالة اختبار من لوحة التحكم للتأكد من أن إشعارات العملاء تصدر من حسابك بنجاح.</p><p style="font-size:12px;color:#2CB5A0;">' . gmdate('c') . '</p></div>',
+            'Mosa Safari email integration test succeeded at ' . gmdate('c'),
+            $vaultDir
         );
-        mosa_append_audit($vaultDir, 'TEST_EMAIL', $res['ok'] ? "Sent to {$recipient}" : ('Failed: ' . ($res['reason'] ?? '')));
-        mosa_send_json(['ok' => $res['ok'], 'id' => $res['id'] ?? '', 'error' => $res['reason'] ?? '']);
+        mosa_append_audit($vaultDir, 'TEST_EMAIL', $res['ok'] ? "Sent via " . ($res['provider'] ?? 'email') . " to {$recipient}" : ('Failed: ' . ($res['reason'] ?? '')));
+        mosa_send_json(['ok' => $res['ok'], 'provider' => $res['provider'] ?? '', 'from' => $res['from'] ?? '', 'id' => $res['id'] ?? '', 'error' => $res['reason'] ?? '']);
     }
 
     mosa_send_json(['ok' => false, 'error' => 'Invalid target'], 400);
