@@ -13,6 +13,15 @@ import { getTripTitle, getTripDuration } from "./trips.js";
 import { showToast } from "./ui.js";
 import { dispatchBookingNotifications } from "./notifications.js";
 
+function esc(val) {
+    return String(val ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
 export const UI_EXTRAs = {
     ar: {
         step_pills: ["1. الرحلات", "2. المسافر", "3. الضيوف", "4. الفندق والدفع", "5. التأكيد"],
@@ -376,23 +385,23 @@ export function renderBookingStep() {
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
             </div>
             <div>
-                <span class="inline-block px-3 py-1 rounded-full bg-champagne/20 text-champagne-dark dark:text-champagne text-xs font-black tracking-wider">${c.ref}</span>
+                <span class="inline-block px-3 py-1 rounded-full bg-champagne/20 text-champagne-dark dark:text-champagne text-xs font-black tracking-wider">${esc(c.ref)}</span>
                 <h4 class="text-xl font-black mt-2">${u.conf_title}</h4>
             </div>
 
             <div class="p-3 rounded-xl bg-champagne/15 border border-champagne/35 text-champagne-dark dark:text-champagne font-bold text-xs flex items-center justify-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-champagne shrink-0"></span>
-                <span>${u.conf_email_ok} (${c.email})</span>
+                <span>${u.conf_email_ok} (${esc(c.email)})</span>
             </div>
 
             <div class="p-4 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 text-start text-xs sm:text-sm space-y-2">
                 <div class="flex justify-between gap-2 border-b border-carbon-900/10 dark:border-white/10 pb-2">
                     <span class="opacity-70">${t.sum_tours}</span>
-                    <span class="font-black text-end">${c.selectedTours}</span>
+                    <span class="font-black text-end">${esc(c.selectedTours)}</span>
                 </div>
                 <div class="flex justify-between gap-2">
                     <span class="opacity-70">${t.full_name.replace(" *", "")}:</span>
-                    <span class="font-bold">${c.name} (${c.phone})</span>
+                    <span class="font-bold">${esc(c.name)} (${esc(c.phone)})</span>
                 </div>
                 <div class="flex justify-between gap-2">
                     <span class="opacity-70">${t.sum_guests}</span>
@@ -400,11 +409,11 @@ export function renderBookingStep() {
                 </div>
                 <div class="flex justify-between gap-2">
                     <span class="opacity-70">${t.sum_hotel}</span>
-                    <span class="font-bold">${c.pickupHotel} (${c.tripDate})</span>
+                    <span class="font-bold">${esc(c.pickupHotel)} (${esc(c.tripDate)})</span>
                 </div>
                 <div class="flex justify-between gap-2">
                     <span class="opacity-70">${u.sum_time}</span>
-                    <span class="font-bold">${c.tripTimeDisplay}</span>
+                    <span class="font-bold">${esc(c.tripTimeDisplay)}</span>
                 </div>
                 <div class="flex justify-between gap-2">
                     <span class="opacity-70">${t.sum_payment}</span>
@@ -412,7 +421,7 @@ export function renderBookingStep() {
                 </div>
                 <div class="flex justify-between gap-2 pt-2 border-t border-carbon-900/10 dark:border-white/10 text-base">
                     <span class="font-black">${I18N[state.lang].bk_est_total}:</span>
-                    <span class="font-black text-champagne-dark dark:text-champagne">${c.totalFormatted}</span>
+                    <span class="font-black text-champagne-dark dark:text-champagne">${esc(c.totalFormatted)}</span>
                 </div>
             </div>
         </div>`;
@@ -449,20 +458,20 @@ export function renderBookingStep() {
         body.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
                 <label class="block text-xs font-extrabold mb-1.5">${t.full_name}</label>
-                <input id="bk-name" type="text" value="${b.name}" oninput="state.booking.name=this.value" onchange="state.booking.name=this.value" required placeholder="Mohamed..." class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
+                <input id="bk-name" type="text" value="${esc(b.name)}" oninput="state.booking.name=this.value" onchange="state.booking.name=this.value" required placeholder="Mohamed..." class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
             </div>
             <div>
                 <label class="block text-xs font-extrabold mb-1.5">${t.whatsapp}</label>
-                <input id="bk-phone" type="tel" value="${b.phone}" oninput="state.booking.phone=this.value" onchange="state.booking.phone=this.value" required placeholder="+20 10..." class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
+                <input id="bk-phone" type="tel" value="${esc(b.phone)}" oninput="state.booking.phone=this.value" onchange="state.booking.phone=this.value" required placeholder="+20 10..." class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
             </div>
             <div class="sm:col-span-2">
                 <label class="block text-xs font-extrabold mb-1.5 text-champagne-dark dark:text-champagne">${u.email_req}</label>
-                <input id="bk-email" type="email" value="${b.email}" oninput="state.booking.email=this.value" onchange="state.booking.email=this.value" required placeholder="name@example.com" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-champagne/40 text-sm focus:border-champagne focus:outline-none" />
+                <input id="bk-email" type="email" value="${esc(b.email)}" oninput="state.booking.email=this.value" onchange="state.booking.email=this.value" required placeholder="name@example.com" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-champagne/40 text-sm focus:border-champagne focus:outline-none" />
                 <span class="block text-[11px] opacity-65 mt-1">${u.email_hint}</span>
             </div>
             <div class="sm:col-span-2">
                 <label class="block text-xs font-extrabold mb-1.5">${t.nationality}</label>
-                <input id="bk-nat" type="text" value="${b.nationality}" oninput="state.booking.nationality=this.value" onchange="state.booking.nationality=this.value" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
+                <input id="bk-nat" type="text" value="${esc(b.nationality)}" oninput="state.booking.nationality=this.value" onchange="state.booking.nationality=this.value" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
             </div>
         </div>`;
     } else if (b.step === 3) {
@@ -530,11 +539,11 @@ export function renderBookingStep() {
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
                     <label class="block text-xs font-extrabold mb-1.5">${t.pickup_hotel}</label>
-                    <input id="bk-hotel" type="text" value="${b.pickupHotel}" oninput="state.booking.pickupHotel=this.value" onchange="state.booking.pickupHotel=this.value" placeholder="${t.hotel_placeholder}" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
+                    <input id="bk-hotel" type="text" value="${esc(b.pickupHotel)}" oninput="state.booking.pickupHotel=this.value" onchange="state.booking.pickupHotel=this.value" placeholder="${t.hotel_placeholder}" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
                 </div>
                 <div>
                     <label class="block text-xs font-extrabold mb-1.5">${t.trip_date}</label>
-                    <input id="bk-date" type="date" min="${today}" value="${b.tripDate || today}" oninput="state.booking.tripDate=this.value" onchange="state.booking.tripDate=this.value" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
+                    <input id="bk-date" type="date" min="${today}" value="${esc(b.tripDate || today)}" oninput="state.booking.tripDate=this.value" onchange="state.booking.tripDate=this.value" class="w-full px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm focus:border-champagne focus:outline-none" />
                 </div>
             </div>
 
@@ -598,19 +607,19 @@ export function renderBookingStep() {
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div class="sm:col-span-2">
                         <label class="block text-[11px] font-bold text-[#B5B0A8] mb-1">${u.card_holder}</label>
-                        <input id="bk-card-holder" type="text" value="${b.cardHolder || b.name}" placeholder="MOHAMED SALEM" class="w-full px-3 py-2 rounded-lg bg-carbon-800 border border-white/15 text-xs font-bold uppercase tracking-wider text-white focus:border-champagne focus:outline-none" />
+                        <input id="bk-card-holder" type="text" value="${esc(b.cardHolder || b.name)}" placeholder="MOHAMED SALEM" class="w-full px-3 py-2 rounded-lg bg-carbon-800 border border-white/15 text-xs font-bold uppercase tracking-wider text-white focus:border-champagne focus:outline-none" />
                     </div>
                     <div class="sm:col-span-2">
                         <label class="block text-[11px] font-bold text-[#B5B0A8] mb-1">${u.card_number}</label>
-                        <input id="bk-card-number" type="text" inputmode="numeric" maxlength="19" value="${b.cardNumber}" oninput="formatCardNumberInput(this)" placeholder="4532 •••• •••• ••••" class="w-full px-3 py-2 rounded-lg bg-carbon-800 border border-white/15 text-xs font-mono tracking-widest text-white focus:border-champagne focus:outline-none" />
+                        <input id="bk-card-number" type="text" inputmode="numeric" maxlength="19" value="${esc(b.cardNumber)}" oninput="formatCardNumberInput(this)" placeholder="4532 •••• •••• ••••" class="w-full px-3 py-2 rounded-lg bg-carbon-800 border border-white/15 text-xs font-mono tracking-widest text-white focus:border-champagne focus:outline-none" />
                     </div>
                     <div>
                         <label class="block text-[11px] font-bold text-[#B5B0A8] mb-1">${u.card_expiry}</label>
-                        <input id="bk-card-expiry" type="text" inputmode="numeric" maxlength="5" value="${b.cardExpiry}" oninput="formatCardExpiryInput(this)" placeholder="08/28" class="w-full px-3 py-2 rounded-lg bg-carbon-800 border border-white/15 text-xs font-mono text-white focus:border-champagne focus:outline-none" />
+                        <input id="bk-card-expiry" type="text" inputmode="numeric" maxlength="5" value="${esc(b.cardExpiry)}" oninput="formatCardExpiryInput(this)" placeholder="08/28" class="w-full px-3 py-2 rounded-lg bg-carbon-800 border border-white/15 text-xs font-mono text-white focus:border-champagne focus:outline-none" />
                     </div>
                     <div>
                         <label class="block text-[11px] font-bold text-[#B5B0A8] mb-1">${u.card_cvv}</label>
-                        <input id="bk-card-cvv" type="password" inputmode="numeric" maxlength="4" value="${b.cardCvv}" placeholder="•••" class="w-full px-3 py-2 rounded-lg bg-carbon-800 border border-white/15 text-xs font-mono text-white focus:border-champagne focus:outline-none" />
+                        <input id="bk-card-cvv" type="password" inputmode="numeric" maxlength="4" value="${esc(b.cardCvv)}" placeholder="•••" class="w-full px-3 py-2 rounded-lg bg-carbon-800 border border-white/15 text-xs font-mono text-white focus:border-champagne focus:outline-none" />
                     </div>
                 </div>
             </div>
@@ -625,15 +634,15 @@ export function renderBookingStep() {
             <div class="p-4 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 text-xs sm:text-sm space-y-2.5">
                 <div class="flex justify-between gap-3 border-b border-carbon-900/10 dark:border-white/10 pb-2">
                     <span class="opacity-70 font-bold">${t.sum_tours}</span>
-                    <span class="font-black text-end">${ch.map(c => getTripTitle(c)).join(" + ")}</span>
+                    <span class="font-black text-end">${esc(ch.map(c => getTripTitle(c)).join(" + "))}</span>
                 </div>
                 <div class="flex justify-between gap-3">
                     <span class="opacity-70 font-bold">${t.full_name.replace(" *", "")}:</span>
-                    <span class="font-bold">${b.name} · ${b.phone}</span>
+                    <span class="font-bold">${esc(b.name)} · ${esc(b.phone)}</span>
                 </div>
                 <div class="flex justify-between gap-3">
                     <span class="opacity-70 font-bold">Email:</span>
-                    <span class="font-bold text-champagne-dark dark:text-champagne">${b.email}</span>
+                    <span class="font-bold text-champagne-dark dark:text-champagne">${esc(b.email)}</span>
                 </div>
                 <div class="flex justify-between gap-3">
                     <span class="opacity-70 font-bold">${t.sum_guests}</span>
@@ -641,15 +650,15 @@ export function renderBookingStep() {
                 </div>
                 <div class="flex justify-between gap-3">
                     <span class="opacity-70 font-bold">${t.sum_vehicle}</span>
-                    <span class="font-bold">${vehicleDisplay}</span>
+                    <span class="font-bold">${esc(vehicleDisplay)}</span>
                 </div>
                 <div class="flex justify-between gap-3">
                     <span class="opacity-70 font-bold">${t.sum_hotel}</span>
-                    <span class="font-bold">${b.pickupHotel || "Sharm El Sheikh"} ${b.tripDate ? `(${b.tripDate})` : ""}</span>
+                    <span class="font-bold">${esc(b.pickupHotel || "Sharm El Sheikh")} ${b.tripDate ? `(${esc(b.tripDate)})` : ""}</span>
                 </div>
                 <div class="flex justify-between gap-3">
                     <span class="opacity-70 font-bold">${u.sum_time}</span>
-                    <span class="font-bold">${b.tripTime === "evening" ? u.time_evening : u.time_morning}</span>
+                    <span class="font-bold">${esc(b.tripTime === "evening" ? u.time_evening : u.time_morning)}</span>
                 </div>
                 <div class="flex justify-between gap-3 pt-2 border-t border-carbon-900/10 dark:border-white/10">
                     <span class="opacity-70 font-bold">${t.sum_payment}</span>
@@ -657,10 +666,10 @@ export function renderBookingStep() {
                 </div>
             </div>
 
-            ${promoMatch ? `<div class="p-2.5 rounded-xl bg-sea/15 border border-sea/30 text-sea text-xs font-extrabold">✓ ${promoMatch.code} (-${promoMatch.discount}% OFF)</div>` : ""}
+            ${promoMatch ? `<div class="p-2.5 rounded-xl bg-sea/15 border border-sea/30 text-sea text-xs font-extrabold">✓ ${esc(promoMatch.code)} (-${promoMatch.discount}% OFF)</div>` : ""}
 
             <div class="flex gap-2">
-                <input id="bk-promo" type="text" value="${b.promoCode}" placeholder="${t.promo_placeholder}" class="flex-1 px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm font-bold uppercase focus:border-champagne focus:outline-none" />
+                <input id="bk-promo" type="text" value="${esc(b.promoCode)}" placeholder="${t.promo_placeholder}" class="flex-1 px-3.5 py-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 text-sm font-bold uppercase focus:border-champagne focus:outline-none" />
                 <button type="button" onclick="applyPromoCode()" class="px-4 py-2.5 rounded-xl bg-champagne hover:bg-champagne-light text-carbon-950 text-xs font-black transition">${t.promo_apply}</button>
             </div>
         </div>`;

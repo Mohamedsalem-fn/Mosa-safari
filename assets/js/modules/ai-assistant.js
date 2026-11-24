@@ -6,18 +6,33 @@
  * -------------------------------------------------------------------------------
  */
 
+import { SAFARI_TRIPS } from "../data/trips.js";
 import { I18N, AI_GREETINGS } from "../data/i18n.js";
 import { state, fmtPrice } from "../state.js";
 import { openBookingWithTrip } from "./booking.js";
 
+function escHtml(val) {
+    return String(val ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+function liveTripPrice(id, fallbackUsd) {
+    const trip = SAFARI_TRIPS.find(x => x.id === id);
+    return fmtPrice(trip && typeof trip.fromPrice === "number" ? trip.fromPrice : fallbackUsd);
+}
+
 function getAiReplies(lang) {
-    const pSunrise = fmtPrice(10.13);
-    const pEcho = fmtPrice(12.42);
-    const pCanyon = fmtPrice(20.60);
-    const pNight = fmtPrice(22.93);
-    const pDouble = fmtPrice(23.81);
-    const pNabq = fmtPrice(26.18);
-    const pNabqVip = fmtPrice(27.71);
+    const pSunrise = liveTripPrice("sharm-sunrise-atv", 10.13);
+    const pEcho = liveTripPrice("sharm-sunset-echo", 12.42);
+    const pCanyon = liveTripPrice("sharm-canyon-bluehole", 20.60);
+    const pNight = liveTripPrice("sharm-night-5in1", 22.93);
+    const pDouble = liveTripPrice("sharm-double-thrill", 23.81);
+    const pNabq = liveTripPrice("sharm-nabq-premium", 26.18);
+    const pNabqVip = liveTripPrice("sharm-nabq-secrets", 27.71);
 
     const replies = {
         ar: {
@@ -95,7 +110,7 @@ export function appendAiMsg(txt, sender = "bot", tripId = null) {
     b.className = sender === "user"
         ? "max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-ee-sm bg-champagne text-carbon-950 font-bold shadow-sm leading-relaxed"
         : "max-w-[88%] px-3.5 py-2.5 rounded-2xl rounded-es-sm bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 shadow-sm leading-relaxed";
-    b.innerHTML = txt
+    b.innerHTML = escHtml(txt)
         .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
         .replace(/\n/g, "<br>");
 

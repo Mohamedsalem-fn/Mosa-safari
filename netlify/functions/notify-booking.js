@@ -8,7 +8,7 @@
 
 const GREEN_API_URL = process.env.GREEN_API_URL || "https://7107.api.greenapi.com";
 const GREEN_ID_INSTANCE = process.env.GREEN_ID_INSTANCE || "710722810425";
-const GREEN_API_TOKEN = process.env.GREEN_API_TOKEN || "08b08d6124df40739ea205139f5311f67b9ff1f2876b4fb9af";
+const GREEN_API_TOKEN = process.env.GREEN_API_TOKEN || "";
 const OWNER_PHONES = (process.env.OWNER_WHATSAPP_PHONES || "201023355550").split(",");
 const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
 
@@ -55,13 +55,14 @@ exports.handler = async function (event) {
 
     try {
         const body = JSON.parse(event.body || "{}");
-        const { payload, subject, text, html, whatsappAlreadySent } = body;
+        const { payload, ownerMessage, subject, text, html, whatsappAlreadySent } = body;
         let whatsappSent = Boolean(whatsappAlreadySent);
         let emailSent = false;
 
-        // 1. Send Owner WhatsApp via Green API if not already sent by client
-        if (!whatsappSent && payload) {
+        // 1. Send Owner WhatsApp via Green API if configured & not already sent
+        if (!whatsappSent && payload && GREEN_API_TOKEN) {
             const endpoint = `${GREEN_API_URL}/waInstance${GREEN_ID_INSTANCE}/sendMessage/${GREEN_API_TOKEN}`;
+            const waText = ownerMessage || text || `New Booking ${payload.ref} - ${payload.name} (${payload.phone})`;
             for (const rawPhone of OWNER_PHONES) {
                 const digits = String(rawPhone).replace(/\D/g, "");
                 if (!digits) continue;
@@ -70,7 +71,7 @@ exports.handler = async function (event) {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         chatId: `${digits}@c.us`,
-                        message: text || `New Booking ${payload.ref} - ${payload.name} (${payload.phone})`
+                        message: waText
                     })
                 });
                 if (res.ok) whatsappSent = true;

@@ -29,13 +29,26 @@ load_dotenv()
 
 
 class MosaDevHandler(SimpleHTTPRequestHandler):
+    def do_GET(self):
+        if self.path.startswith("/api/public/config"):
+            self.send_json_response(200, {
+                "ok": True,
+                "trips": None,
+                "promos": [{"code": "MOSA20", "discount": 20}],
+                "settings": {}
+            })
+            return
+        super().do_GET()
+
     def do_POST(self):
-        if self.path.startswith("/.netlify/functions/notify-booking"):
+        if self.path.startswith("/api/track"):
+            self.send_json_response(200, {"ok": True})
+        elif self.path.startswith("/.netlify/functions/notify-booking") or self.path.startswith("/api/notify-booking"):
             self.handle_notify_booking()
         else:
-            self.send_Response_json(404, {"ok": False, "error": "Not Found"})
+            self.send_json_response(404, {"ok": False, "error": "Not Found"})
 
-    def send_Response_json(self, status, data):
+    def send_json_response(self, status, data):
         payload = json.dumps(data).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
@@ -51,9 +64,35 @@ class MosaDevHandler(SimpleHTTPRequestHandler):
             payload = body.get("payload") or {}
             subject = body.get("subject") or f"Booking Confirmation {payload.get('ref', '')}"
             text = body.get("text") or ""
+            owner_message = body.get("ownerMessage") or text
             html = body.get("html") or f"<pre>{text}</pre>"
             whatsapp_sent = bool(body.get("whatsappAlreadySent"))
             email_sent = False
+
+            green_url = os.environ.get("GREEN_API_URL", "https://7107.api.greenapi.com").rstrip("/")
+            green_inst = os.environ.get("GREEN_ID_INSTANCE", "710722810425")
+            green_token = os.environ.get("GREEN_API_TOKEN", "")
+            owner_phones = os.environ.get("OWNER_WHATSAPP_PHONES", "201023355550").split(",")
+
+            if not whatsapp_sent and green_token and owner_message:
+                endpoint = f"{green_url}/waInstance{green_inst}/sendMessage/{green_token}"
+                for phone in owner_phones:
+                    digits = "".join(ch for ch in phone if ch.isdigit())
+                    if not digits:
+                        continue
+                    wa_data = json.dumps({"chatId": f"{digits}@c.us", "message": owner_message}).encode("utf-8")
+                    wa_req = urllib.request.Request(
+                        endpoint,
+                        data=wa_data,
+                        headers={"Content-Type": "application/json"},
+                        method="POST"
+                    )
+                    try:
+                        with urllib.request.urlopen(wa_req, timeout=8) as resp:
+                            if 200 <= resp.status < 300:
+                                whatsapp_sent = True
+                    except Exception:
+                        continue
 
             resend_key = os.environ.get("RESEND_API_KEY", "")
             to_email = payload.get("email", "")
@@ -91,13 +130,14 @@ class MosaDevHandler(SimpleHTTPRequestHandler):
                     except Exception:
                         continue
 
-            self.send_Response_json(200, {
+            self.send_json_response(200, {
                 "ok": True,
+                "managed": True,
                 "whatsappSent": whatsapp_sent,
                 "emailSent": email_sent
             })
         except Exception as exc:
-            self.send_Response_json(500, {"ok": False, "error": str(exc)})
+            self.send_json_response(500, {"ok": False, "error": str(exc)})
 
 
 if __name__ == "__main__":

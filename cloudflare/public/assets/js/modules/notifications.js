@@ -15,10 +15,19 @@ export const NOTIFICATION_CONFIG = {
 };
 
 /**
- * Normalize a phone number into Green API chatId format (e.g. "201207823884@c.us")
+ * Normalize a phone number into Green API chatId format (e.g. "201023355550@c.us")
  * @param {string} rawPhone
- * @returns {string|null}201023355550
+ * @returns {string|null}
  */
+function escHtml(val) {
+    return String(val ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
 export function formatWhatsAppChatId(rawPhone) {
     if (!rawPhone) return null;
     let digits = String(rawPhone).replace(/\D/g, "");
@@ -120,30 +129,39 @@ export function buildCustomerConfirmationContent(payload) {
             `• Total Amount: ${payload.totalFormatted}`,
             "",
             "Our Sharm El Sheikh operations team will contact you to confirm your exact hotel pickup time.",
-            "24/7 WhatsApp Support: +201207823884",
+            "24/7 WhatsApp Support: +201023355550",
             "Thank you for choosing Mosa Safari!"
         ].join("\n");
+
+    const safeName = escHtml(payload.name);
+    const safeRef = escHtml(payload.ref);
+    const safeTours = escHtml(payload.selectedTours);
+    const safeDate = escHtml(payload.tripDate);
+    const safeTime = escHtml(payload.tripTimeDisplay || (payload.tripTime === "evening" ? (isAr ? "مساءً" : "Evening (PM)") : (isAr ? "صباحاً" : "Morning (AM)")));
+    const safeVehicle = escHtml(payload.vehicleDisplay);
+    const safeHotel = escHtml(payload.pickupHotel || "-");
+    const safeTotal = escHtml(payload.totalFormatted);
 
     const html = `
     <div style="font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0E1015; color: #F4EFE6; border-radius: 16px; overflow: hidden; border: 1px solid rgba(217,179,108,0.3); direction: ${isAr ? "rtl" : "ltr"};">
       <div style="background: linear-gradient(135deg, #161922, #08090C); padding: 24px; border-bottom: 1px solid rgba(217,179,108,0.2); text-align: center;">
         <div style="color: #D9B36C; font-size: 12px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;">MOSASAFARI.COM · SHARM EL SHEIKH</div>
         <h1 style="margin: 8px 0 4px; font-size: 22px; color: #FFFFFF;">${isAr ? "تم تأكيد حجزك في موسى سفاري" : "Booking Confirmed — Mosa Safari"}</h1>
-        <div style="display: inline-block; margin-top: 6px; padding: 4px 14px; border-radius: 99px; background: rgba(44,181,160,0.18); color: #2CB5A0; font-weight: 800; font-size: 13px;">${payload.ref}</div>
+        <div style="display: inline-block; margin-top: 6px; padding: 4px 14px; border-radius: 99px; background: rgba(44,181,160,0.18); color: #2CB5A0; font-weight: 800; font-size: 13px;">${safeRef}</div>
       </div>
       <div style="padding: 24px; line-height: 1.7; font-size: 14px;">
-        <p style="margin-top: 0;">${isAr ? `مرحباً <strong>${payload.name}</strong>، يسعدنا تأكيد استلام حجزك لرحلة السفاري في شرم الشيخ:` : `Dear <strong>${payload.name}</strong>, we are delighted to confirm your Sharm El Sheikh desert safari booking:`}</p>
+        <p style="margin-top: 0;">${isAr ? `مرحباً <strong>${safeName}</strong>، يسعدنا تأكيد استلام حجزك لرحلة السفاري في شرم الشيخ:` : `Dear <strong>${safeName}</strong>, we are delighted to confirm your Sharm El Sheikh desert safari booking:`}</p>
         <div style="background: #161922; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; margin: 16px 0;">
-          <p style="margin: 6px 0;"><strong>${isAr ? "البرامج:" : "Programs:"}</strong> ${payload.selectedTours}</p>
-          <p style="margin: 6px 0;"><strong>${isAr ? "تاريخ الرحلة:" : "Tour Date:"}</strong> ${payload.tripDate}</p>
-          <p style="margin: 6px 0;"><strong>${isAr ? "ميعاد الرحلة:" : "Time Slot:"}</strong> ${payload.tripTimeDisplay || (payload.tripTime === "evening" ? (isAr ? "مساءً" : "Evening (PM)") : (isAr ? "صباحاً" : "Morning (AM)"))}</p>
-          <p style="margin: 6px 0;"><strong>${isAr ? "عدد الضيوف:" : "Guests:"}</strong> ${payload.adults} ${isAr ? "بالغين" : "Adults"} · ${payload.children} ${isAr ? "أطفال" : "Children"}</p>
-          <p style="margin: 6px 0;"><strong>${isAr ? "نوع المركبة:" : "Vehicle:"}</strong> ${payload.vehicleDisplay}</p>
-          <p style="margin: 6px 0;"><strong>${isAr ? "فندق الاستلام:" : "Pickup Hotel:"}</strong> ${payload.pickupHotel || "-"}</p>
+          <p style="margin: 6px 0;"><strong>${isAr ? "البرامج:" : "Programs:"}</strong> ${safeTours}</p>
+          <p style="margin: 6px 0;"><strong>${isAr ? "تاريخ الرحلة:" : "Tour Date:"}</strong> ${safeDate}</p>
+          <p style="margin: 6px 0;"><strong>${isAr ? "ميعاد الرحلة:" : "Time Slot:"}</strong> ${safeTime}</p>
+          <p style="margin: 6px 0;"><strong>${isAr ? "عدد الضيوف:" : "Guests:"}</strong> ${Number(payload.adults) || 1} ${isAr ? "بالغين" : "Adults"} · ${Number(payload.children) || 0} ${isAr ? "أطفال" : "Children"}</p>
+          <p style="margin: 6px 0;"><strong>${isAr ? "نوع المركبة:" : "Vehicle:"}</strong> ${safeVehicle}</p>
+          <p style="margin: 6px 0;"><strong>${isAr ? "فندق الاستلام:" : "Pickup Hotel:"}</strong> ${safeHotel}</p>
           <p style="margin: 6px 0;"><strong>${isAr ? "طريقة الدفع:" : "Payment Method:"}</strong> ${isAr ? payTextAr : payTextEn}</p>
-          <p style="margin: 10px 0 4px; font-size: 16px; color: #D9B36C;"><strong>${isAr ? "الإجمالي:" : "Total:"} ${payload.totalFormatted}</strong></p>
+          <p style="margin: 10px 0 4px; font-size: 16px; color: #D9B36C;"><strong>${isAr ? "الإجمالي:" : "Total:"} ${safeTotal}</strong></p>
         </div>
-        <p style="font-size: 13px; color: #B5B0A8;">${isAr ? "سيتواصل معك مندوبنا عبر الواتساب لتأكيد موعد التحرك الدقيق من الفندق. لأي استفسار فوري يمكنك مراسلتنا على واتساب: +201207823884" : "Our representative will contact you via WhatsApp with your exact hotel pickup time. For immediate assistance, message us on WhatsApp: +201207823884"}</p>
+        <p style="font-size: 13px; color: #B5B0A8;">${isAr ? "سيتواصل معك مندوبنا عبر الواتساب لتأكيد موعد التحرك الدقيق من الفندق. لأي استفسار فوري يمكنك مراسلتنا على واتساب: +201023355550" : "Our representative will contact you via WhatsApp with your exact hotel pickup time. For immediate assistance, message us on WhatsApp: +201023355550"}</p>
       </div>
     </div>`;
 
