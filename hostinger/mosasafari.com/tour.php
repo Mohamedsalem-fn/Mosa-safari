@@ -32,7 +32,7 @@ $toursMeta = [
         'ru' => ['title' => '🌅 Рассветное сафари Шарм-эль-Шейх (4–5 часов) | Mosa Safari', 'desc' => 'Полная программа 4–5 часов на квадроциклах и верблюдах с выездом от 04:00.']
     ],
     'mosa-morning' => [
-        'img' => 'https://mosasafari.com/assets/images/safari-morning.jpg',
+        'img' => 'https://mosasafari.com/assets/images/real-quad-lineup-wave.jpg',
         'ar' => ['title' => '☀️ الرحلة الصباحية — شرم الشيخ (4–5 ساعات) | موسى سفاري', 'desc' => 'تفاصيل الرحلة الصباحية (4–5 ساعات) بالبيتش باجي والباجي الصحراوي عبر مسارين الساعة 08:00 ص من شرم الشيخ.'],
         'en' => ['title' => '☀️ Morning Safari Sharm El Sheikh (4–5 Hours) | Mosa Safari', 'desc' => 'Full 4–5 hour Morning Safari combining ATV Quads and Dune Buggies with pickups from 08:00 AM across 2 routes.'],
         'it' => ['title' => '☀️ Safari del Mattino Sharm El Sheikh (4–5 Ore) | Mosa Safari', 'desc' => 'Tour completo di 4–5 ore in Quad ATV e Dune Buggy dalle 08:00 AM.'],

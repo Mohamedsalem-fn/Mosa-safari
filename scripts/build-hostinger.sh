@@ -20,6 +20,7 @@ mkdir -p "$SITE_DIR/api/_lib"
 cp index.html tour.html robots.txt sitemap.xml manifest.webmanifest "$SITE_DIR/"
 rm -rf "$SITE_DIR/assets"
 cp -r assets "$SITE_DIR/assets"
+rm -rf "$SITE_DIR/assets/photos"
 rm -f "$SITE_DIR/assets/js/env.local.js" "$SITE_DIR/assets/js/admin.js" "$SITE_DIR/assets/css/admin.css" "$SITE_DIR/assets/css/input.css"
 cp "$ROOT_DIR/hostinger/shared/mosa_core.php" "$SITE_DIR/api/_lib/mosa_core.php"
 

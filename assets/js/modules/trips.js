@@ -8,6 +8,7 @@
 
 import {
     SAFARI_TRIPS,
+    REAL_SAFARI_MOMENTS,
     MOSA_RULES,
     getStationLabel,
     getTripRoutes,
@@ -435,4 +436,122 @@ export function openCompareModal() {
             </tbody>
            </table>`;
     document.getElementById("compare-modal")?.classList.remove("hidden");
+}
+
+let activeMomentsCat = "all";
+let momentLightboxIdx = 0;
+
+function filteredMoments() {
+    if (activeMomentsCat === "all") return REAL_SAFARI_MOMENTS;
+    if (activeMomentsCat === "mosa") {
+        return REAL_SAFARI_MOMENTS.filter(m => m.category === "mosa" || m.verifiedSign);
+    }
+    return REAL_SAFARI_MOMENTS.filter(m => m.category === activeMomentsCat);
+}
+
+export function setMomentsFilter(cat) {
+    activeMomentsCat = cat || "all";
+    document.querySelectorAll("[data-moment-cat]").forEach(btn => {
+        const active = btn.dataset.momentCat === activeMomentsCat;
+        btn.className = active
+            ? "px-3 py-1.5 rounded-xl text-xs font-extrabold bg-champagne text-carbon-950 transition"
+            : "px-3 py-1.5 rounded-xl text-xs font-extrabold border border-transparent hover:border-champagne transition";
+    });
+    renderRealMoments();
+}
+
+export function renderRealMoments() {
+    const grid = document.getElementById("real-moments-grid");
+    if (!grid) return;
+
+    const lang = state.lang || "ar";
+    const L = I18N[lang] || I18N.en;
+    const badgeLbl = L.moments_verified_badge || "✓ Official Mosa Sign";
+    const items = filteredMoments();
+
+    grid.innerHTML = items.map(item => {
+        const globalIdx = REAL_SAFARI_MOMENTS.findIndex(x => x.id === item.id);
+        const title = item.title?.[lang] || item.title?.en || "";
+        const loc = item.location?.[lang] || item.location?.en || "";
+        return `
+            <button type="button" onclick="openMomentLightbox(${globalIdx})"
+                class="break-inside-avoid mb-4 block w-full text-start group relative rounded-3xl overflow-hidden bg-carbon-900 border border-carbon-900/10 dark:border-white/10 shadow-md hover:shadow-2xl hover:border-champagne/60 transition">
+                <img src="${esc(item.src)}" alt="${esc(title)}" loading="lazy"
+                    class="w-full h-auto block group-hover:scale-[1.03] transition duration-500">
+                <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-carbon-950/90 via-carbon-950/15 to-transparent"></div>
+                ${item.verifiedSign ? `
+                    <span class="absolute top-3 start-3 px-2.5 py-1 rounded-full bg-sea text-carbon-950 text-[10px] font-black shadow-md">${esc(badgeLbl)}</span>
+                ` : ""}
+                <div class="absolute bottom-3 inset-x-3 text-white space-y-0.5">
+                    <div class="text-[10.5px] font-extrabold text-champagne">${esc(loc)}</div>
+                    <div class="text-xs sm:text-sm font-black leading-snug line-clamp-2">${esc(title)}</div>
+                </div>
+            </button>
+        `;
+    }).join("");
+}
+
+function updateMomentLightbox() {
+    const lb = document.getElementById("moments-lightbox");
+    if (!lb) return;
+    const item = REAL_SAFARI_MOMENTS[momentLightboxIdx] || REAL_SAFARI_MOMENTS[0];
+    if (!item) return;
+
+    const lang = state.lang || "ar";
+    const L = I18N[lang] || I18N.en;
+    const imgEl = document.getElementById("mlb-img");
+    const badgeEl = document.getElementById("mlb-badge");
+    const locEl = document.getElementById("mlb-loc");
+    const countEl = document.getElementById("mlb-count");
+    const titleEl = document.getElementById("mlb-title");
+    const bookBtn = document.getElementById("mlb-book-btn");
+
+    const title = item.title?.[lang] || item.title?.en || "";
+    const loc = item.location?.[lang] || item.location?.en || "";
+    if (imgEl) {
+        imgEl.src = item.src;
+        imgEl.alt = title;
+    }
+    if (badgeEl) {
+        badgeEl.textContent = L.moments_verified_badge || "✓ Official Mosa Sign";
+        badgeEl.classList.toggle("hidden", !item.verifiedSign);
+    }
+    if (locEl) locEl.textContent = loc;
+    if (countEl) countEl.textContent = `${momentLightboxIdx + 1} / ${REAL_SAFARI_MOMENTS.length}`;
+    if (titleEl) titleEl.textContent = title;
+    if (bookBtn) {
+        bookBtn.textContent = L.moments_book_cta || L.book_now || "Book Now";
+        bookBtn.onclick = () => {
+            closeMomentLightbox();
+            if (typeof window.openBookingWithTrip === "function") {
+                window.openBookingWithTrip(item.tripId || "mosa-sunrise");
+            }
+        };
+    }
+}
+
+export function openMomentLightbox(idx = 0) {
+    const lb = document.getElementById("moments-lightbox");
+    if (!lb) return;
+    momentLightboxIdx = Math.max(0, Math.min(REAL_SAFARI_MOMENTS.length - 1, Number(idx) || 0));
+    updateMomentLightbox();
+    lb.classList.remove("hidden");
+}
+
+export function stepMomentLightbox(delta = 1) {
+    const len = REAL_SAFARI_MOMENTS.length;
+    if (!len) return;
+    momentLightboxIdx = (momentLightboxIdx + Number(delta) + len) % len;
+    updateMomentLightbox();
+}
+
+export function closeMomentLightbox() {
+    document.getElementById("moments-lightbox")?.classList.add("hidden");
+}
+
+if (typeof window !== "undefined") {
+    window.setMomentsFilter = setMomentsFilter;
+    window.openMomentLightbox = openMomentLightbox;
+    window.stepMomentLightbox = stepMomentLightbox;
+    window.closeMomentLightbox = closeMomentLightbox;
 }

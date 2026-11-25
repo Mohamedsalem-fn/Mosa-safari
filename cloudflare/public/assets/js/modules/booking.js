@@ -603,8 +603,16 @@ export function renderBookingStep() {
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     ${vehicleKeys.map(v => {
                         const active = b.vehicleOpt === v;
-                        return `<button type="button" onclick="state.booking.vehicleOpt='${v}'; renderBookingStep();" class="p-3.5 rounded-xl border text-start transition ${active ? 'border-champagne bg-champagne/15 font-black' : 'border-carbon-900/10 dark:border-white/10 hover:border-champagne/40'}">
-                            <div class="text-xs sm:text-sm font-black">${esc(t.vehicles[v])}</div>
+                        const vehThumbs = {
+                            "Single ATV Quad": "/assets/images/real-quad-redsea-coast.jpg",
+                            "Double ATV Quad": "/assets/images/real-quad-family-lagoon.jpg",
+                            "Shared Dune Buggy": "/assets/images/safari-morning-buggy.jpg",
+                            "Private 4x4 Jeep": "/assets/images/real-jeep-convoy-sinai.jpg"
+                        };
+                        const thumb = vehThumbs[v] || "/assets/images/real-quad-redsea-coast.jpg";
+                        return `<button type="button" onclick="state.booking.vehicleOpt='${v}'; renderBookingStep();" class="p-3 rounded-xl border text-start flex items-center gap-3 transition ${active ? 'border-champagne bg-champagne/15 font-black' : 'border-carbon-900/10 dark:border-white/10 hover:border-champagne/40'}">
+                            <img src="${thumb}" alt="${esc(t.vehicles[v])}" class="w-14 h-11 rounded-lg object-cover shrink-0 border border-black/10 dark:border-white/10">
+                            <span class="text-xs sm:text-sm font-black leading-snug">${esc(t.vehicles[v])}</span>
                         </button>`;
                     }).join("")}
                 </div>

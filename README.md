@@ -50,10 +50,11 @@ Mosa-safari/
     │   └── admin.css                 # Luxury executive dashboard glassmorphism & Chart.js styling
     ├── images/
     │   ├── logo.jpg                  # Brand logo
-    │   ├── safari-sunrise*.jpg       # Sunrise Safari 3-photo gallery (dawn, quads convoy, morning camels)
-    │   ├── safari-morning*.jpg       # Morning Safari 3-photo gallery (desert buggy, sunset quad, Bedouin tea)
-    │   ├── safari-standard*.jpg      # Standard Safari 3-photo gallery (afternoon trail, canyon, camel oasis)
-    │   └── safari-dinner*.jpg        # Dinner Safari 3-photo gallery (sunset BBQ, Tanoura show, campfire night)
+    │   ├── real-*.jpg                # 18 curated authentic Sharm & Sinai guest photography assets
+    │   ├── safari-sunrise*.jpg       # Sunrise Safari hybrid gallery assets
+    │   ├── safari-morning*.jpg       # Morning Safari hybrid gallery assets
+    │   ├── safari-standard*.jpg      # Standard Safari hybrid gallery assets
+    │   └── safari-dinner*.jpg        # Dinner Safari hybrid gallery assets
     └── js/
         ├── main.js                   # Application entry point, live KV config sync & tracking beacon
         ├── tour-page.js              # Dedicated tour page renderer (4-5h itinerary, gallery, sticky live quote)
@@ -77,8 +78,8 @@ Mosa-safari/
 ## Key Features
 
 - **Full 4-Language Support (`ar`, `en`, `it`, `ru`):** Clean Arabic-first default HTML with full RTL/LTR switching and complete translations across all 4 official Mosa Safari programs, 2-route pickup stops (`Al-Hadaba`, `Naama Bay`, `Conference Center`, `Behind Airport`, `Al-Gharqana`), FAQs, operational rules, booking steps, and AI quick chips.
-- **Official Mosa Safari 2-Route Timetable (4–5 Hours), Multi-Photo Galleries & Dedicated Tour Pages (`tour.html` / `/tour/<slug>`):** Structured 4–5 hour departure schedules (`Sunrise 04:00 AM`, `Morning 08:00 AM`, `Standard 14:15`, `Dinner 15:30–16:15`) with interactive card gallery switchers, full-screen gallery lightbox, dedicated full-details tour pages (5-step itinerary, inclusions/exclusions, and sticky quote calculator), and embedded `تعليمات هامة` arrival instructions.
-- **Full Tour Studio, Multi-Photo Media Upload & Automatic 4-Language Translation:** From the isolated Admin Command Center (`admin.html`), administrators can customize every tour property (titles, badges, descriptions, highlights, 5-step itineraries, inclusions/exclusions, routes/stops, SEO meta, and multi-photo galleries uploaded directly or chosen from the 12-photo library) in any language (`ar`/`en`/`it`/`ru`) with automatic 1-click/on-save translation across all 4 languages via `POST /api/admin/translate`.
+- **Official Mosa Safari 2-Route Timetable (4–5 Hours), Multi-Photo Galleries & Dedicated Tour Pages (`tour.html` / `/tour/<slug>`):** Structured 4–5 hour departure schedules (`Sunrise 04:00 AM`, `Morning 08:00 AM`, `Standard 14:15`, `Dinner 15:30–16:15`) with interactive 5-photo card gallery switchers, an authentic Real Safari Moments masonry gallery (`#real-moments`) + full-screen lightbox (`#moments-lightbox`), visual vehicle selector thumbnails in booking Step 3, dedicated full-details tour pages, and embedded `تعليمات هامة` arrival instructions.
+- **Full Tour Studio, Multi-Photo Media Upload & Automatic 4-Language Translation:** From the isolated Admin Command Center (`admin.html`), administrators can customize every tour property (titles, badges, descriptions, highlights, 5-step itineraries, inclusions/exclusions, routes/stops, SEO meta, and multi-photo galleries uploaded directly or chosen from the 30-photo built-in library) in any language (`ar`/`en`/`it`/`ru`) with automatic 1-click/on-save translation across all 4 languages via `POST /api/admin/translate`.
 - **Live Real-Time Multi-Currency Pricing (`USD`, `EGP`, `EUR`):** Automatically fetches live `USD -> EGP` and `USD -> EUR` exchange rates from multi-CDN currency APIs with local caching, dynamically converting all 4 tour cards, the price table, comparison modal, booking totals, and MOSA AI quotes.
 - **Streamlined 5-Step Interactive Booking Modal:** Direct tour selection, traveler details validation, guest count & localized vehicle type, dynamic Route 1 / Route 2 pickup station & clock picker + hotel field, promo code validation (`MOSA20` for 20% off + automatic 10% group discount for 5+ guests), and instant WhatsApp & email confirmation.
 - **Anime.js v4 Cinematic Motion Layer (`assets/js/cinematic.js`):** Staggered hero and card entrances, 3D interactive card tilt, magnetic header buttons, and scroll-reactive floating glass navigation.

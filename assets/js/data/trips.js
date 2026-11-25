@@ -66,7 +66,7 @@ export const HERO_SLIDES = [
         }
     },
     {
-        img: "assets/images/safari-morning.jpg",
+        img: "assets/images/real-quad-lineup-wave.jpg",
         tag: {
             ar: "شرم الشيخ · 4–5 ساعات · تحرك 08:00 ص",
             en: "Sharm El Sheikh · 4–5 Hours · Departs 08:00 AM",
@@ -146,6 +146,8 @@ export const SAFARI_TRIPS = [
         img: "assets/images/safari-sunrise.jpg",
         gallery: [
             "assets/images/safari-sunrise.jpg",
+            "assets/images/real-quad-convoy-dawn.jpg",
+            "assets/images/real-quad-stop-mountains.jpg",
             "assets/images/safari-sunrise-quads.jpg",
             "assets/images/safari-sunrise-camels.jpg"
         ],
@@ -258,11 +260,13 @@ export const SAFARI_TRIPS = [
         rating: 4.8,
         badge: "الرحلة الصباحية",
         vehicle: "ATV Quad + Dune Buggy",
-        img: "assets/images/safari-morning.jpg",
+        img: "assets/images/real-quad-lineup-wave.jpg",
         gallery: [
+            "assets/images/real-quad-lineup-wave.jpg",
+            "assets/images/real-quad-family-lagoon.jpg",
+            "assets/images/real-quad-redsea-coast.jpg",
             "assets/images/safari-morning.jpg",
-            "assets/images/safari-morning-buggy.jpg",
-            "assets/images/safari-morning-camp.jpg"
+            "assets/images/safari-morning-buggy.jpg"
         ],
         descAr: "جولة صباحية متكاملة (4–5 ساعات) في قلب صحراء شرم الشيخ بقيادة البيتش باجي والباجي الصحراوي مع توقف في الخيمة البدوية وركوب الجمال، تنطلق الساعة 08:00 ص على مسارين.",
         descEn: "Full 4–5 hour morning desert expedition riding ATV Quads and Dune Buggies across South Sinai trails with Echo Canyon & Bedouin camp stops across 2 scheduled routes.",
@@ -376,8 +380,10 @@ export const SAFARI_TRIPS = [
         img: "assets/images/safari-standard.jpg",
         gallery: [
             "assets/images/safari-standard.jpg",
-            "assets/images/safari-standard-echo.jpg",
-            "assets/images/safari-standard-oasis.jpg"
+            "assets/images/real-canyon-jump-joy.jpg",
+            "assets/images/real-canyon-couple-walk.jpg",
+            "assets/images/real-camel-and-quad.jpg",
+            "assets/images/safari-standard-echo.jpg"
         ],
         descAr: "رحلة السفاري الكلاسيكية بعد الظهر لمدة 4 إلى 5 ساعات وسط جبال الصدى ووديان شرم الشيخ مع الشاي البدوي وركوب الجمال بأفضل قيمة سعرية بدءاً من 14:15.",
         descEn: "Best-value 4–5 hour classic afternoon desert safari starting at 14:15 through Echo Mountains with scenic golden-hour views, camel ride, and Bedouin tea.",
@@ -492,7 +498,9 @@ export const SAFARI_TRIPS = [
         gallery: [
             "assets/images/safari-dinner.jpg",
             "assets/images/safari-dinner-show.jpg",
-            "assets/images/safari-dinner-stars.jpg"
+            "assets/images/real-jeep-group-canyon.jpg",
+            "assets/images/safari-dinner-stars.jpg",
+            "assets/images/real-jeep-convoy-sinai.jpg"
         ],
         descAr: "التجربة المسائية الأكثر طلباً في شرم الشيخ (4–5 ساعات): بيتش باجي عند الغروب، ركوب الجمال، بوفيه عشاء بدوي فاخر مشوي، وعروض فنية وتنورة تحت النجوم مع مسارين للعشاء.",
         descEn: "Our top-rated 4–5 hour sunset desert safari: sunset ATV Quad riding, camel trek, open-buffet Bedouin BBQ dinner, and live Tanoura & fire show under Sinai stars.",
@@ -594,6 +602,24 @@ const DEFAULT_TRIPS_SNAPSHOT = SAFARI_TRIPS.map(t => ({
 }));
 
 export const BUILTIN_GALLERY_LIBRARY = [
+    { value: "assets/images/real-mosa-sign-canyon.jpg", label: "Real Mosa — Verified Mosa Sign in Canyon" },
+    { value: "assets/images/real-mosa-sign-gorge.jpg", label: "Real Mosa — Verified Mosa Gorge Group" },
+    { value: "assets/images/real-quad-lineup-wave.jpg", label: "Real Mosa — 8-Quad Crew Waving" },
+    { value: "assets/images/real-quad-convoy-dawn.jpg", label: "Real Mosa — Dawn Quad Convoy" },
+    { value: "assets/images/real-quad-stop-mountains.jpg", label: "Real Mosa — Quad Riders & Sinai Peaks" },
+    { value: "assets/images/real-quad-family-lagoon.jpg", label: "Real Mosa — Family Quads by Lagoon" },
+    { value: "assets/images/real-quad-redsea-coast.jpg", label: "Real Mosa — Quad on Red Sea Coast" },
+    { value: "assets/images/real-camel-redsea-beach.jpg", label: "Real Mosa — Camel Ride by Red Sea" },
+    { value: "assets/images/real-camels-couple-heart.jpg", label: "Real Mosa — Couple Camel Heart" },
+    { value: "assets/images/real-canyon-couple-walk.jpg", label: "Real Mosa — Couple Walking Canyon" },
+    { value: "assets/images/real-desert-couple-acacia.jpg", label: "Real Mosa — Couple Under Sinai Acacia" },
+    { value: "assets/images/real-canyon-jump-joy.jpg", label: "Real Mosa — Canyon Jump in Sharm" },
+    { value: "assets/images/real-camel-and-quad.jpg", label: "Real Mosa — Camel & Double ATV" },
+    { value: "assets/images/real-kid-quad-30.jpg", label: "Real Mosa — Young Explorer Quad #30" },
+    { value: "assets/images/real-quad-solo-wave.jpg", label: "Real Mosa — Solo ATV Rider Wave" },
+    { value: "assets/images/real-jeep-convoy-sinai.jpg", label: "Real Mosa — 4x4 Jeep Desert Convoy" },
+    { value: "assets/images/real-jeep-group-canyon.jpg", label: "Real Mosa — 4x4 Jeep Group at Canyon" },
+    { value: "assets/images/real-jeep-4x4-single.jpg", label: "Real Mosa — South Sinai 4x4 Land Cruiser" },
     { value: "assets/images/safari-sunrise.jpg", label: "Sunrise 1 — Dawn Silhouette" },
     { value: "assets/images/safari-sunrise-quads.jpg", label: "Sunrise 2 — Quad Convoy Canyon" },
     { value: "assets/images/safari-sunrise-camels.jpg", label: "Sunrise 3 — Morning Camels" },
@@ -606,6 +632,249 @@ export const BUILTIN_GALLERY_LIBRARY = [
     { value: "assets/images/safari-dinner.jpg", label: "Dinner 1 — Sunset BBQ Banquet" },
     { value: "assets/images/safari-dinner-show.jpg", label: "Dinner 2 — Egyptian Tanoura Show" },
     { value: "assets/images/safari-dinner-stars.jpg", label: "Dinner 3 — Bedouin Camp Fire" }
+];
+
+export const REAL_SAFARI_MOMENTS = [
+    {
+        id: "mom-mosa-canyon",
+        src: "assets/images/real-mosa-sign-canyon.jpg",
+        category: "mosa",
+        orientation: "portrait",
+        tripId: "mosa-standard",
+        verifiedSign: true,
+        title: {
+            ar: "توثيق فريق موسى سفاري وسط ممر الوادي الجبلي",
+            en: "Guests holding the official Mosa Safari sign in Sinai Canyon",
+            it: "Ospiti con il cartello ufficiale Mosa Safari nel canyon del Sinai",
+            ru: "Гости с официальной табличкой Mosa Safari в каньоне Синая"
+        },
+        location: {
+            ar: "جبال سيناء · شرم الشيخ",
+            en: "Sinai Mountains · Sharm El Sheikh",
+            it: "Montagne del Sinai · Sharm El Sheikh",
+            ru: "Горы Синая · Шарм-эль-Шейх"
+        }
+    },
+    {
+        id: "mom-quad-lineup",
+        src: "assets/images/real-quad-lineup-wave.jpg",
+        category: "quads",
+        orientation: "landscape",
+        tripId: "mosa-morning",
+        verifiedSign: false,
+        title: {
+            ar: "انطلاق قافلة الـ 8 بيتش باجي مع ضيوف شرم الشيخ",
+            en: "8-Quad Morning Convoy ready to roll across Sharm trails",
+            it: "Convoglio di 8 Quad pronto a partire nel deserto di Sharm",
+            ru: "Утренний конвой из 8 квадроциклов на старте в Шарм-эль-Шейхе"
+        },
+        location: {
+            ar: "الرحلة الصباحية · شرم الشيخ",
+            en: "Morning Safari · Sharm El Sheikh",
+            it: "Safari del Mattino · Sharm El Sheikh",
+            ru: "Утреннее сафари · Шарм-эль-Шейх"
+        }
+    },
+    {
+        id: "mom-camels-heart",
+        src: "assets/images/real-camels-couple-heart.jpg",
+        category: "camels",
+        orientation: "portrait",
+        tripId: "mosa-dinner",
+        verifiedSign: false,
+        title: {
+            ar: "لحظة رومانسية على ظهور الجمال بالزي البدوي",
+            en: "Couple making a heart silhouette atop Bedouin camels",
+            it: "Coppia in kefiah beduina sui cammelli nel deserto",
+            ru: "Романтическая прогулка пары на верблюдах в пустыне"
+        },
+        location: {
+            ar: "القرية البدوية · شرم الشيخ",
+            en: "Bedouin Valley · Sharm El Sheikh",
+            it: "Valle Beduina · Sharm El Sheikh",
+            ru: "Долина бедуинов · Шарм-эль-Шейх"
+        }
+    },
+    {
+        id: "mom-quad-lagoon",
+        src: "assets/images/real-quad-family-lagoon.jpg",
+        category: "quads",
+        orientation: "landscape",
+        tripId: "mosa-morning",
+        verifiedSign: false,
+        title: {
+            ar: "جولة العائلات والأطفال بالبيتش باجي بجوار محمية نبق",
+            en: "Family & kids ATV ride along the coastal mangrove lagoon",
+            it: "Escursione in Quad per famiglie lungo la laguna costiera",
+            ru: "Семейный заезд на квадроциклах вдоль прибрежной лагуны Набк"
+        },
+        location: {
+            ar: "محمية نبق · الغرقانة",
+            en: "Nabq & Al-Gharqana Coast",
+            it: "Nabq & Al-Gharqana",
+            ru: "Набк · Эль-Гаркана"
+        }
+    },
+    {
+        id: "mom-camel-coast",
+        src: "assets/images/real-camel-redsea-beach.jpg",
+        category: "camels",
+        orientation: "square",
+        tripId: "mosa-sunrise",
+        verifiedSign: false,
+        title: {
+            ar: "ركوب الجمال الفعلي بمحاذاة مياه البحر الأحمر الفيروزية",
+            en: "Camel riding beside the turquoise waters of the Red Sea",
+            it: "Passeggiata in cammello lungo il Mar Rosso turchese",
+            ru: "Прогулка на верблюде вдоль бирюзового Красного моря"
+        },
+        location: {
+            ar: "ساحل البحر الأحمر · سيناء",
+            en: "Red Sea Shoreline · South Sinai",
+            it: "Costa del Mar Rosso · Sinai",
+            ru: "Побережье Красного моря · Синай"
+        }
+    },
+    {
+        id: "mom-canyon-walk",
+        src: "assets/images/real-canyon-couple-walk.jpg",
+        category: "canyon",
+        orientation: "square",
+        tripId: "mosa-standard",
+        verifiedSign: false,
+        title: {
+            ar: "المشي وسط الصخور الذهبية في جبال الصدى والوادي",
+            en: "Guided walk between golden Sinai sandstone canyon cliffs",
+            it: "Passeggiata tra le pareti dorate del canyon del Sinai",
+            ru: "Прогулка по золотому каньону гор Южного Синая"
+        },
+        location: {
+            ar: "وادي الصدى · شرم الشيخ",
+            en: "Echo Canyon · Sharm El Sheikh",
+            it: "Canyon dell'Eco · Sharm El Sheikh",
+            ru: "Каньон Эхо · Шарм-эль-Шейх"
+        }
+    },
+    {
+        id: "mom-desert-acacia",
+        src: "assets/images/real-desert-couple-acacia.jpg",
+        category: "canyon",
+        orientation: "portrait",
+        tripId: "mosa-dinner",
+        verifiedSign: false,
+        title: {
+            ar: "استراحة الغروب تحت أشجار السنط الصحراوية العريقة",
+            en: "Golden-hour pause beneath an ancient Sinai acacia tree",
+            it: "Pausa al tramonto sotto un'antica acacia del Sinai",
+            ru: "Закатная фотосессия под древней синайской акацией"
+        },
+        location: {
+            ar: "صحراء شرم الشيخ",
+            en: "Sharm El Sheikh Desert",
+            it: "Deserto di Sharm El Sheikh",
+            ru: "Пустыня Шарм-эль-Шейха"
+        }
+    },
+    {
+        id: "mom-canyon-jump",
+        src: "assets/images/real-canyon-jump-joy.jpg",
+        category: "canyon",
+        orientation: "landscape",
+        tripId: "mosa-standard",
+        verifiedSign: false,
+        title: {
+            ar: "بهجة المغامرة في الهواء وسط جبال شرم الشيخ",
+            en: "Pure desert joy jumping mid-air in Sharm El Sheikh canyons",
+            it: "Pura energia nel cuore dei canyon di Sharm El Sheikh",
+            ru: "Настоящий драйв среди каньонов Шарм-эль-Шейха"
+        },
+        location: {
+            ar: "جبال الصدى · شرم الشيخ",
+            en: "Echo Mountains · Sharm El Sheikh",
+            it: "Montagne dell'Eco · Sharm El Sheikh",
+            ru: "Горы Эхо · Шарм-эль-Шейх"
+        }
+    },
+    {
+        id: "mom-mosa-gorge",
+        src: "assets/images/real-mosa-sign-gorge.jpg",
+        category: "mosa",
+        orientation: "portrait",
+        tripId: "mosa-sunrise",
+        verifiedSign: true,
+        title: {
+            ar: "مجموعة رحلة موسى سفاري خلال استكشاف الممر الصخري",
+            en: "Mosa Safari travelers inside the scenic Sinai desert gorge",
+            it: "Gruppo Mosa Safari tra le gole naturali del Sinai",
+            ru: "Группа Mosa Safari в живописном горном ущелье Синая"
+        },
+        location: {
+            ar: "الوادي الضيق · سيناء",
+            en: "Sinai Gorge Trail",
+            it: "Gola del Sinai",
+            ru: "Горное ущелье · Синай"
+        }
+    },
+    {
+        id: "mom-quad-coast",
+        src: "assets/images/real-quad-redsea-coast.jpg",
+        category: "quads",
+        orientation: "landscape",
+        tripId: "mosa-morning",
+        verifiedSign: false,
+        title: {
+            ar: "وقفة البيتش باجي الحقيقية مباشرة على شاطئ البحر الأحمر",
+            en: "ATV Quad coastal photo stop right by the Red Sea waves",
+            it: "Sosta fotografica in Quad davanti alle onde del Mar Rosso",
+            ru: "Фото-остановка на квадроцикле прямо на берегу Красного моря"
+        },
+        location: {
+            ar: "خليج نبق · البحر الأحمر",
+            en: "Red Sea Coast · Nabq",
+            it: "Costa del Mar Rosso · Nabq",
+            ru: "Берег Красного моря · Набк"
+        }
+    },
+    {
+        id: "mom-kid-quad",
+        src: "assets/images/real-kid-quad-30.jpg",
+        category: "quads",
+        orientation: "square",
+        tripId: "mosa-morning",
+        verifiedSign: false,
+        title: {
+            ar: "أصغر أبطال السفاري بالخوذة والكوفية على باجي رقم 30",
+            en: "Young explorer ready with Bedouin keffiyeh on Quad #30",
+            it: "Piccolo esploratore con kefiah beduina sul Quad #30",
+            ru: "Юный участник сафари в арафатке на квадроцикле №30"
+        },
+        location: {
+            ar: "رحلات العائلات · شرم الشيخ",
+            en: "Family Safe Safari · Sharm",
+            it: "Safari per Famiglie · Sharm",
+            ru: "Семейный тур · Шарм-эль-Шейх"
+        }
+    },
+    {
+        id: "mom-jeep-group",
+        src: "assets/images/real-jeep-group-canyon.jpg",
+        category: "mosa",
+        orientation: "landscape",
+        tripId: "mosa-dinner",
+        verifiedSign: false,
+        title: {
+            ar: "أسطول سيارات 4x4 لاندكروزر مع ضيوفنا أمام جبال سيناء",
+            en: "Happy 4x4 Land Cruiser convoy guests at the Sinai cliff base",
+            it: "Ospiti con i fuoristrada 4x4 Land Cruiser alle pareti del Sinai",
+            ru: "Туристы с конвоем джипов 4x4 Land Cruiser у скал Синая"
+        },
+        location: {
+            ar: "محطة الدفع الرباعي 4x4 · سيناء",
+            en: "4x4 Land Cruiser Fleet · Sinai",
+            it: "Flotta 4x4 Land Cruiser · Sinai",
+            ru: "Джипы 4x4 Land Cruiser · Синай"
+        }
+    }
 ];
 
 function pickLocalized(obj, lang = "ar", fallbackVal = []) {

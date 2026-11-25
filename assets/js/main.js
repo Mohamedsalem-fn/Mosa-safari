@@ -27,9 +27,12 @@ import {
 } from "./modules/ui.js";
 import {
     renderTrips,
+    renderRealMoments,
     toggleFav,
     toggleCompare,
-    openCompareModal
+    openCompareModal,
+    stepMomentLightbox,
+    closeMomentLightbox
 } from "./modules/trips.js";
 import {
     openBookingWithTrip,
@@ -138,6 +141,7 @@ function updateLiveRateBadge() {
 function refreshAllCurrencyViews() {
     updateLiveRateBadge();
     renderTrips();
+    renderRealMoments();
     renderMobileApp();
     refreshAiAssistantUI();
     const bookingModal = document.getElementById("booking-modal");
@@ -367,8 +371,17 @@ window.addEventListener("DOMContentLoaded", () => {
         if (e.key === "Escape") {
             closeBookingModal();
             toggleAiWidget(false);
+            closeMomentLightbox();
             document.getElementById("compare-modal")?.classList.add("hidden");
         }
+        const mlb = document.getElementById("moments-lightbox");
+        if (mlb && !mlb.classList.contains("hidden")) {
+            if (e.key === "ArrowLeft") stepMomentLightbox(document.documentElement.dir === "rtl" ? 1 : -1);
+            if (e.key === "ArrowRight") stepMomentLightbox(document.documentElement.dir === "rtl" ? -1 : 1);
+        }
+    });
+    document.getElementById("moments-lightbox")?.addEventListener("click", e => {
+        if (e.target?.id === "moments-lightbox") closeMomentLightbox();
     });
     ["booking-modal", "compare-modal"].forEach(modalId => {
         const modal = document.getElementById(modalId);

@@ -8,6 +8,7 @@
 
 import {
     SAFARI_TRIPS,
+    REAL_SAFARI_MOMENTS,
     MOSA_RULES,
     getStationLabel,
     getTripRoutes,
@@ -188,7 +189,7 @@ export function renderMobileApp() {
     const stories = [
         { id: "all", label: m.cat_all, img: "assets/images/safari-sunrise.jpg" },
         { id: "sunrise", label: m.cat_sunrise, img: "assets/images/safari-sunrise.jpg" },
-        { id: "morning", label: m.cat_morning, img: "assets/images/safari-morning.jpg" },
+        { id: "morning", label: m.cat_morning, img: "assets/images/real-quad-lineup-wave.jpg" },
         { id: "standard", label: m.cat_standard, img: "assets/images/safari-standard.jpg" },
         { id: "dinner", label: m.cat_dinner, img: "assets/images/safari-dinner.jpg" }
     ];
@@ -415,6 +416,33 @@ export function renderMobileApp() {
                             </div>
                         </div>
                     </article>`;
+                }).join("")}
+            </div>
+        </section>
+
+        <!-- 4B. REAL SAFARI MOMENTS SNAP REEL -->
+        <section id="m-real-moments" class="px-4 pt-6 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+                <h2 class="text-sm font-black">📸 ${esc(g.moments_title || "Authentic Tour Photos")}</h2>
+                <span class="px-2 py-0.5 rounded-full bg-sea/15 text-sea text-[10px] font-black">${REAL_SAFARI_MOMENTS.length}</span>
+            </div>
+            <div class="m-hscroll flex items-stretch gap-3 overflow-x-auto pb-1">
+                ${REAL_SAFARI_MOMENTS.map((item, idx) => {
+                    const isPortrait = item.orientation === "portrait";
+                    const cardW = isPortrait ? "w-40" : "w-60";
+                    const posCls = item.src.includes("camel-redsea") ? "object-top" : "object-center";
+                    const mTitle = item.title?.[lang] || item.title?.en || "";
+                    const mLoc = item.location?.[lang] || item.location?.en || "";
+                    return `<button type="button" onclick="openMomentLightbox(${idx})"
+                        class="shrink-0 ${cardW} h-52 relative rounded-2xl overflow-hidden bg-carbon-900 border border-carbon-900/10 dark:border-white/10 shadow-md text-start active:scale-95 transition">
+                        <img src="${esc(item.src)}" alt="${esc(mTitle)}" loading="lazy" class="w-full h-full object-cover ${posCls}" />
+                        <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-carbon-950/90 via-carbon-950/15 to-transparent"></div>
+                        ${item.verifiedSign ? `<span class="absolute top-2 start-2 px-2 py-0.5 rounded-full bg-sea text-carbon-950 text-[9px] font-black">${esc(g.moments_verified_badge || "✓ Mosa Sign")}</span>` : ""}
+                        <div class="absolute bottom-2.5 inset-x-2.5 text-white">
+                            <div class="text-[9.5px] font-bold text-champagne truncate">${esc(mLoc)}</div>
+                            <div class="text-[11px] font-black leading-tight line-clamp-2">${esc(mTitle)}</div>
+                        </div>
+                    </button>`;
                 }).join("")}
             </div>
         </section>

@@ -8,6 +8,7 @@
 
 import {
     SAFARI_TRIPS,
+    REAL_SAFARI_MOMENTS,
     MOSA_RULES,
     getStationLabel,
     getTripRoutes,
@@ -554,6 +555,38 @@ function renderTourPage() {
                             </ul>
                         </div>
                     </section>
+
+                    <!-- Real Mosa Safari Guest Moments Strip -->
+                    ${(() => {
+                        const matched = REAL_SAFARI_MOMENTS.filter(m => m.tripId === trip.id);
+                        const extras = REAL_SAFARI_MOMENTS.filter(m => m.tripId !== trip.id && m.verifiedSign);
+                        const rest = REAL_SAFARI_MOMENTS.filter(m => m.tripId !== trip.id && !m.verifiedSign);
+                        const realStrip = [...matched, ...extras, ...rest].slice(0, 4);
+                        const stripHeading = g.moments_title || "Authentic Tour Photos";
+                        return `
+                        <section class="p-5 sm:p-7 rounded-3xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 space-y-4">
+                            <div class="flex items-center justify-between gap-2">
+                                <h2 class="text-base sm:text-lg font-black">📸 ${esc(stripHeading)}</h2>
+                                <span class="px-2.5 py-1 rounded-full bg-sea/15 text-sea text-[11px] font-black">${esc(g.moments_verified_badge || "✓ Official Mosa Sign")}</span>
+                            </div>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                ${realStrip.map(item => {
+                                    const mTitle = item.title?.[lang] || item.title?.en || "";
+                                    const ratio = item.orientation === "portrait" ? "aspect-[3/4]" : "aspect-[4/3]";
+                                    const posCls = item.src.includes("camel-redsea") ? "object-top" : "object-center";
+                                    return `
+                                        <button type="button" data-real-zoom="${esc(assetUrl(item.src))}" data-real-cap="${esc(mTitle)}"
+                                            class="group relative ${ratio} rounded-2xl overflow-hidden bg-carbon-900 border border-carbon-900/10 dark:border-white/10 text-start">
+                                            <img src="${esc(assetUrl(item.src))}" alt="${esc(mTitle)}" loading="lazy" class="w-full h-full object-cover ${posCls} group-hover:scale-105 transition duration-500">
+                                            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-carbon-950/90 via-transparent to-transparent"></div>
+                                            ${item.verifiedSign ? `<span class="absolute top-2 start-2 px-2 py-0.5 rounded-full bg-sea text-carbon-950 text-[9px] font-black">✓ Mosa</span>` : ""}
+                                            <span class="absolute bottom-2 inset-x-2 text-white text-[10.5px] font-black line-clamp-2">${esc(mTitle)}</span>
+                                        </button>
+                                    `;
+                                }).join("")}
+                            </div>
+                        </section>`;
+                    })()}
                 </div>
 
                 <!-- STICKY BOOKING CALCULATOR SIDEBAR -->
@@ -713,6 +746,15 @@ function renderTourPage() {
     document.getElementById("tour-hero-trigger")?.addEventListener("click", () => {
         updateLightbox();
         document.getElementById("tour-lightbox")?.classList.remove("hidden");
+    });
+    root.querySelectorAll("[data-real-zoom]").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const lbImg = document.getElementById("lb-img");
+            const lbCap = document.getElementById("lb-caption");
+            if (lbImg) lbImg.src = btn.dataset.realZoom;
+            if (lbCap) lbCap.textContent = btn.dataset.realCap || title;
+            document.getElementById("tour-lightbox")?.classList.remove("hidden");
+        });
     });
     const lb = document.getElementById("tour-lightbox");
     if (lb && !lb.dataset.bound) {
