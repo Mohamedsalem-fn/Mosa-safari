@@ -211,7 +211,7 @@ export function renderMobileApp() {
     root.innerHTML = `
         <!-- 1. IMMERSIVE FULL-BLEED EDITORIAL MOBILE HERO -->
         <section id="m-hero" class="relative w-full overflow-hidden rounded-b-[2rem] bg-carbon-950 text-white shadow-2xl">
-            <img src="assets/images/safari-sunrise.jpg" alt="Mosa Safari Sharm El Sheikh"
+            <img src="assets/images/safari-sunrise-quads.jpg" alt="Mosa Safari Sharm El Sheikh"
                 class="absolute inset-0 w-full h-full object-cover opacity-80 scale-105" />
             <div class="absolute inset-0 bg-gradient-to-b from-carbon-950/85 via-carbon-950/35 to-carbon-950"></div>
 

@@ -51,7 +51,7 @@ export const MOSA_RULES = {
 
 export const HERO_SLIDES = [
     {
-        img: "assets/images/safari-sunrise.jpg",
+        img: "assets/images/safari-sunrise-quads.jpg",
         tag: {
             ar: "شرم الشيخ · 4–5 ساعات · تحرك 04:00 ص",
             en: "Sharm El Sheikh · 4–5 Hours · Departs 04:00 AM",
