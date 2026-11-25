@@ -351,7 +351,7 @@ export default {
         let assetRequest = request;
         if (url.pathname === "/tour" || url.pathname.startsWith("/tour/")) {
             const rewritten = new URL(url.toString());
-            rewritten.pathname = "/tour.html";
+            rewritten.pathname = "/tour";
             assetRequest = new Request(rewritten.toString(), request);
         }
 
