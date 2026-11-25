@@ -821,3 +821,291 @@ function mosa_send_email(array $secrets, string $to, string $subject, string $ht
     }
     return ['ok' => false, 'provider' => (string)($cfg['provider'] ?? 'resend'), 'reason' => $primaryErr ?: $lastErr];
 }
+
+function mosa_normalize_safari_terms(string $text, string $targetLang): string
+{
+    $out = trim($text);
+    if ($out === '') {
+        return '';
+    }
+    if ($targetLang === 'en') {
+        $out = str_ireplace('Beach Buggy', 'ATV Quad', $out);
+        $out = (string)preg_replace('/^Move\s+(\d{1,2}:\d{2})/iu', 'Departs $1', $out);
+        $out = (string)preg_replace('/(\d{1,2}:\d{2})\s*ص\b/u', '$1 AM', $out);
+        $out = (string)preg_replace('/(\d{1,2}:\d{2})\s*م\b/u', '$1 PM', $out);
+    } elseif ($targetLang === 'it') {
+        $out = str_ireplace('Beach Buggy', 'Quad ATV', $out);
+        $out = (string)preg_replace('/^Spostati\s+(\d{1,2}:\d{2})/iu', 'Partenza $1', $out);
+        $out = (string)preg_replace('/(\d{1,2}:\d{2})\s*ص\b/u', '$1 AM', $out);
+        $out = (string)preg_replace('/(\d{1,2}:\d{2})\s*م\b/u', '$1 PM', $out);
+    } elseif ($targetLang === 'ru') {
+        $out = str_ireplace('Beach Buggy', 'квадроцикл ATV', $out);
+        $out = (string)preg_replace('/^Двигаться\s+(\d{1,2}:\d{2})/iu', 'Выезд $1', $out);
+        $out = (string)preg_replace('/(\d{1,2}:\d{2})\s*[صم]\b/u', '$1', $out);
+    }
+    return trim($out);
+}
+
+/**
+ * Translate a slice of strings in a single POST call preserving exact 1:1 ordering.
+ */
+function mosa_translate_batch_post(array $strings, string $sourceLang, string $targetLang): ?array
+{
+    if ($strings === []) {
+        return [];
+    }
+    $url = 'https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl='
+        . rawurlencode($sourceLang) . '&tl=' . rawurlencode($targetLang);
+    $bodyParts = [];
+    foreach ($strings as $s) {
+        $bodyParts[] = 'q=' . rawurlencode((string)$s);
+    }
+    $ctx = stream_context_create([
+        'http' => [
+            'method' => 'POST',
+            'timeout' => 10,
+            'ignore_errors' => true,
+            'header' => "Content-Type: application/x-www-form-urlencoded; charset=UTF-8\r\nUser-Agent: MosaSafariStudio/1.0\r\n",
+            'content' => implode('&', $bodyParts)
+        ]
+    ]);
+    $rawBody = @file_get_contents($url, false, $ctx);
+    if (!is_string($rawBody) || $rawBody === '') {
+        return null;
+    }
+    $decoded = json_decode($rawBody, true);
+    if (!is_array($decoded) || count($decoded) !== count($strings)) {
+        return null;
+    }
+    $out = [];
+    foreach ($decoded as $idx => $item) {
+        $txt = is_array($item) ? (string)($item[0] ?? '') : (string)$item;
+        $out[] = trim($txt) !== '' ? mosa_normalize_safari_terms($txt, $targetLang) : (string)$strings[$idx];
+    }
+    return $out;
+}
+
+function mosa_translate_single(string $text, string $sourceLang, string $targetLang): string
+{
+    $raw = trim($text);
+    if ($raw === '' || preg_match('/^[\d\s.,:%+\-–—$€★]+$/u', $raw)) {
+        return $raw;
+    }
+
+    $url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=' . rawurlencode($sourceLang)
+        . '&tl=' . rawurlencode($targetLang) . '&dt=t&q=' . rawurlencode($raw);
+    $ctx = stream_context_create([
+        'http' => [
+            'method' => 'GET',
+            'timeout' => 8,
+            'ignore_errors' => true,
+            'header' => "User-Agent: MosaSafariStudio/1.0\r\n"
+        ]
+    ]);
+    $body = @file_get_contents($url, false, $ctx);
+    if (is_string($body) && $body !== '') {
+        $decoded = json_decode($body, true);
+        if (is_array($decoded[0] ?? null)) {
+            $acc = '';
+            foreach ($decoded[0] as $seg) {
+                $acc .= (string)($seg[0] ?? '');
+            }
+            if (trim($acc) !== '') {
+                return mosa_normalize_safari_terms($acc, $targetLang);
+            }
+        }
+    }
+
+    $mmUrl = 'https://api.mymemory.translated.net/get?q=' . rawurlencode($raw)
+        . '&langpair=' . rawurlencode($sourceLang . '|' . $targetLang);
+    $mmBody = @file_get_contents($mmUrl, false, $ctx);
+    if (is_string($mmBody) && $mmBody !== '') {
+        $mm = json_decode($mmBody, true);
+        $tr = trim((string)($mm['responseData']['translatedText'] ?? ''));
+        if ($tr !== '') {
+            return mosa_normalize_safari_terms($tr, $targetLang);
+        }
+    }
+    return $raw;
+}
+
+function mosa_translate_tour_items(string $sourceLang, array $targetLangs, array $items): array
+{
+    $supported = ['ar', 'en', 'it', 'ru'];
+    $src = in_array($sourceLang, $supported, true) ? $sourceLang : 'ar';
+    $targets = array_values(array_filter($targetLangs, static fn($l) => in_array($l, $supported, true) && $l !== $src));
+
+    $unique = [];
+    $indexMap = [];
+    $register = static function ($val) use (&$unique, &$indexMap) {
+        $s = trim((string)$val);
+        if ($s === '' || preg_match('/^[\d\s.,:%+\-–—$€★]+$/u', $s)) {
+            return;
+        }
+        if (!array_key_exists($s, $indexMap)) {
+            $indexMap[$s] = count($unique);
+            $unique[] = $s;
+        }
+    };
+
+    foreach (['title', 'badge', 'duration', 'departureWindow', 'subtitle', 'desc', 'seoTitle', 'seoDesc'] as $f) {
+        $register($items[$f] ?? '');
+    }
+    foreach (['highlights', 'includes', 'excludes', 'bring', 'routeLabels'] as $arrKey) {
+        foreach (is_array($items[$arrKey] ?? null) ? $items[$arrKey] : [] as $entry) {
+            $register($entry);
+        }
+    }
+    foreach (is_array($items['itinerary'] ?? null) ? $items['itinerary'] : [] as $st) {
+        if (is_array($st)) {
+            $register($st['time'] ?? '');
+            $register($st['title'] ?? '');
+            $register($st['desc'] ?? '');
+        }
+    }
+
+    $translations = [];
+    foreach ($targets as $tl) {
+        $translatedList = [];
+        foreach (array_chunk($unique, 30) as $chunk) {
+            $batchRes = mosa_translate_batch_post($chunk, $src, $tl);
+            if (is_array($batchRes)) {
+                foreach ($batchRes as $p) {
+                    $translatedList[] = $p;
+                }
+            } else {
+                foreach ($chunk as $one) {
+                    $translatedList[] = mosa_translate_single($one, $src, $tl);
+                }
+            }
+        }
+
+        $lookup = static function ($val) use ($indexMap, $translatedList): string {
+            $s = trim((string)$val);
+            if ($s === '') {
+                return '';
+            }
+            return isset($indexMap[$s]) ? (string)($translatedList[$indexMap[$s]] ?? $s) : $s;
+        };
+
+        $mapArr = static function ($key) use ($items, $lookup): array {
+            $out = [];
+            foreach (is_array($items[$key] ?? null) ? $items[$key] : [] as $v) {
+                $t = $lookup($v);
+                if ($t !== '') {
+                    $out[] = $t;
+                }
+            }
+            return $out;
+        };
+
+        $itinOut = [];
+        foreach (is_array($items['itinerary'] ?? null) ? $items['itinerary'] : [] as $idx => $st) {
+            $itinOut[] = [
+                'step' => (string)($st['step'] ?? str_pad((string)($idx + 1), 2, '0', STR_PAD_LEFT)),
+                'time' => $lookup($st['time'] ?? ''),
+                'title' => $lookup($st['title'] ?? ''),
+                'desc' => $lookup($st['desc'] ?? '')
+            ];
+        }
+
+        $translations[$tl] = [
+            'title' => $lookup($items['title'] ?? ''),
+            'badge' => $lookup($items['badge'] ?? ''),
+            'duration' => $lookup($items['duration'] ?? ''),
+            'departureWindow' => $lookup($items['departureWindow'] ?? ''),
+            'subtitle' => $lookup($items['subtitle'] ?? ''),
+            'desc' => $lookup($items['desc'] ?? ''),
+            'seoTitle' => $lookup($items['seoTitle'] ?? ''),
+            'seoDesc' => $lookup($items['seoDesc'] ?? ''),
+            'highlights' => $mapArr('highlights'),
+            'includes' => $mapArr('includes'),
+            'excludes' => $mapArr('excludes'),
+            'bring' => $mapArr('bring'),
+            'routeLabels' => array_map($lookup, is_array($items['routeLabels'] ?? null) ? $items['routeLabels'] : []),
+            'itinerary' => $itinOut
+        ];
+    }
+    return $translations;
+}
+
+function mosa_media_dir(string $vaultDir): string
+{
+    $dir = rtrim($vaultDir, '/') . '/media';
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0700, true);
+    }
+    mosa_protect_local_dir($dir);
+    return $dir;
+}
+
+function mosa_list_media(string $vaultDir): array
+{
+    $list = mosa_kv_get($vaultDir, 'media_index', []);
+    return is_array($list) ? $list : [];
+}
+
+function mosa_save_media(string $vaultDir, string $filename, string $mimeType, string $dataBase64): array
+{
+    $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+    if (!isset($allowed[$mimeType])) {
+        throw new InvalidArgumentException('Unsupported image format (use JPG, PNG, or WebP)');
+    }
+    $clean = preg_replace('/^data:[^;]+;base64,/', '', trim($dataBase64));
+    $bin = base64_decode((string)$clean, true);
+    if ($bin === false || $bin === '' || strlen($bin) > 1048576) {
+        throw new InvalidArgumentException('Invalid or oversized image (max 1MB)');
+    }
+    $ext = $allowed[$mimeType];
+    $id = 'img-' . base_convert((string)time(), 10, 36) . '-' . bin2hex(random_bytes(3)) . '.' . $ext;
+    $path = mosa_media_dir($vaultDir) . '/' . $id;
+    if (@file_put_contents($path, $bin, LOCK_EX) === false) {
+        throw new RuntimeException('Failed to persist uploaded media');
+    }
+    @chmod($path, 0600);
+    $item = [
+        'id' => $id,
+        'url' => '/api/media/' . $id,
+        'filename' => substr(preg_replace('/[^a-zA-Z0-9_.\-]/', '', $filename), 0, 80) ?: $id,
+        'mimeType' => $mimeType,
+        'size' => strlen($bin),
+        'createdAt' => gmdate('c')
+    ];
+    mosa_kv_mutate($vaultDir, 'media_index', [], static function ($cur) use ($item) {
+        $arr = is_array($cur) ? $cur : [];
+        array_unshift($arr, $item);
+        return array_slice($arr, 0, 120);
+    });
+    return $item;
+}
+
+function mosa_delete_media(string $vaultDir, string $id): bool
+{
+    $safeId = preg_replace('/[^a-zA-Z0-9_.\-]/', '', $id);
+    if ($safeId === '') {
+        return false;
+    }
+    @unlink(mosa_media_dir($vaultDir) . '/' . $safeId);
+    mosa_kv_mutate($vaultDir, 'media_index', [], static function ($cur) use ($safeId) {
+        return array_values(array_filter(is_array($cur) ? $cur : [], static fn($x) => ($x['id'] ?? '') !== $safeId));
+    });
+    return true;
+}
+
+function mosa_serve_media(string $vaultDir, string $id): void
+{
+    $safeId = preg_replace('/[^a-zA-Z0-9_.\-]/', '', $id);
+    $path = mosa_media_dir($vaultDir) . '/' . $safeId;
+    if ($safeId === '' || !is_file($path)) {
+        http_response_code(404);
+        echo 'Media Not Found';
+        exit;
+    }
+    $ext = strtolower(pathinfo($safeId, PATHINFO_EXTENSION));
+    $mime = $ext === 'png' ? 'image/png' : ($ext === 'webp' ? 'image/webp' : 'image/jpeg');
+    header('Content-Type: ' . $mime);
+    header('Cache-Control: public, max-age=31536000, immutable');
+    header('X-Content-Type-Options: nosniff');
+    readfile($path);
+    exit;
+}

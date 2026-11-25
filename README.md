@@ -27,7 +27,9 @@ Mosa-safari/
 ├── cloudflare-admin/
 │   ├── wrangler.jsonc                # Isolated hardened Admin Worker configuration (run_worker_first + MOSA_KV)
 │   ├── package.json                  # Sync & deploy scripts for isolated admin Worker (mosa-safari-admin)
-│   ├── src/index.js                  # Hardened Admin API (HttpOnly cookies, CSRF, IP rate limit, CSP, HSTS)
+│   ├── src/
+│   │   ├── index.js                  # Hardened Admin API (HttpOnly cookies, CSRF, IP rate limit, CSP, HSTS)
+│   │   └── studio.js                 # Media Vault CRUD & 4-Language Auto-Translation Engine
 │   └── public/                       # Isolated admin static assets + strict Disallow robots.txt
 ├── hostinger/
 │   ├── shared/                       # Shared PHP 8 private vault, flock KV store, crypto, Green API & Resend
@@ -48,10 +50,10 @@ Mosa-safari/
     │   └── admin.css                 # Luxury executive dashboard glassmorphism & Chart.js styling
     ├── images/
     │   ├── logo.jpg                  # Brand logo
-    │   ├── safari-sunrise.jpg        # Sunrise Safari (04:00 AM) photography
-    │   ├── safari-morning.jpg        # Morning Safari (08:00 AM) photography
-    │   ├── safari-standard.jpg       # Standard Afternoon Safari (14:15) photography
-    │   └── safari-dinner.jpg         # Dinner Safari & Bedouin Show (15:30+) photography
+    │   ├── safari-sunrise*.jpg       # Sunrise Safari 3-photo gallery (dawn, quads convoy, morning camels)
+    │   ├── safari-morning*.jpg       # Morning Safari 3-photo gallery (desert buggy, sunset quad, Bedouin tea)
+    │   ├── safari-standard*.jpg      # Standard Safari 3-photo gallery (afternoon trail, canyon, camel oasis)
+    │   └── safari-dinner*.jpg        # Dinner Safari 3-photo gallery (sunset BBQ, Tanoura show, campfire night)
     └── js/
         ├── main.js                   # Application entry point, live KV config sync & tracking beacon
         ├── tour-page.js              # Dedicated tour page renderer (4-5h itinerary, gallery, sticky live quote)
@@ -75,7 +77,8 @@ Mosa-safari/
 ## Key Features
 
 - **Full 4-Language Support (`ar`, `en`, `it`, `ru`):** Clean Arabic-first default HTML with full RTL/LTR switching and complete translations across all 4 official Mosa Safari programs, 2-route pickup stops (`Al-Hadaba`, `Naama Bay`, `Conference Center`, `Behind Airport`, `Al-Gharqana`), FAQs, operational rules, booking steps, and AI quick chips.
-- **Official Mosa Safari 2-Route Timetable (4–5 Hours) & Dedicated Tour Pages (`tour.html` / `/tour/<slug>`):** Structured 4–5 hour departure schedules (`Sunrise 04:00 AM`, `Morning 08:00 AM`, `Standard 14:15`, `Dinner 15:30–16:15`) with a 2-column showcase grid, interactive 1-click pickup station selection, dedicated full-details tour pages (5-step itinerary, inclusions/exclusions, gallery switcher, and sticky quote calculator), and embedded `تعليمات هامة` arrival instructions across desktop, mobile shell, booking checkout, emails, and MOSA AI.
+- **Official Mosa Safari 2-Route Timetable (4–5 Hours), Multi-Photo Galleries & Dedicated Tour Pages (`tour.html` / `/tour/<slug>`):** Structured 4–5 hour departure schedules (`Sunrise 04:00 AM`, `Morning 08:00 AM`, `Standard 14:15`, `Dinner 15:30–16:15`) with interactive card gallery switchers, full-screen gallery lightbox, dedicated full-details tour pages (5-step itinerary, inclusions/exclusions, and sticky quote calculator), and embedded `تعليمات هامة` arrival instructions.
+- **Full Tour Studio, Multi-Photo Media Upload & Automatic 4-Language Translation:** From the isolated Admin Command Center (`admin.html`), administrators can customize every tour property (titles, badges, descriptions, highlights, 5-step itineraries, inclusions/exclusions, routes/stops, SEO meta, and multi-photo galleries uploaded directly or chosen from the 12-photo library) in any language (`ar`/`en`/`it`/`ru`) with automatic 1-click/on-save translation across all 4 languages via `POST /api/admin/translate`.
 - **Live Real-Time Multi-Currency Pricing (`USD`, `EGP`, `EUR`):** Automatically fetches live `USD -> EGP` and `USD -> EUR` exchange rates from multi-CDN currency APIs with local caching, dynamically converting all 4 tour cards, the price table, comparison modal, booking totals, and MOSA AI quotes.
 - **Streamlined 5-Step Interactive Booking Modal:** Direct tour selection, traveler details validation, guest count & localized vehicle type, dynamic Route 1 / Route 2 pickup station & clock picker + hotel field, promo code validation (`MOSA20` for 20% off + automatic 10% group discount for 5+ guests), and instant WhatsApp & email confirmation.
 - **Anime.js v4 Cinematic Motion Layer (`assets/js/cinematic.js`):** Staggered hero and card entrances, 3D interactive card tilt, magnetic header buttons, and scroll-reactive floating glass navigation.

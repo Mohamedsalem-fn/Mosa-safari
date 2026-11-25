@@ -11,7 +11,7 @@
     "build:css": "npx tailwindcss -i ./assets/css/input.css -o ./assets/css/tailwind.css --minify",
     "watch:css": "npx tailwindcss -i ./assets/css/input.css -o ./assets/css/tailwind.css --watch",
     "build:hostinger": "bash scripts/build-hostinger.sh",
-    "check": "node --check assets/js/main.js assets/js/tour-page.js assets/js/admin.js assets/js/cinematic.js assets/js/state.js assets/js/data/trips.js assets/js/data/i18n.js assets/js/modules/ui.js assets/js/modules/trips.js assets/js/modules/booking.js assets/js/modules/notifications.js assets/js/modules/ai-assistant.js assets/js/modules/mobile-app.js cloudflare/src/mail.js cloudflare/src/index.js cloudflare-admin/src/index.js netlify/functions/notify-booking.js"
+    "check": "node --check assets/js/main.js assets/js/tour-page.js assets/js/admin.js assets/js/cinematic.js assets/js/state.js assets/js/data/trips.js assets/js/data/i18n.js assets/js/modules/ui.js assets/js/modules/trips.js assets/js/modules/booking.js assets/js/modules/notifications.js assets/js/modules/ai-assistant.js assets/js/modules/mobile-app.js cloudflare/src/mail.js cloudflare/src/index.js cloudflare-admin/src/studio.js cloudflare-admin/src/index.js netlify/functions/notify-booking.js"
   },
   "keywords": [
     "safari",

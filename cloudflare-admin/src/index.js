@@ -13,6 +13,7 @@ import {
     sanitizeMailConfigForClient,
     dispatchPlatformEmail
 } from "../../cloudflare/src/mail.js";
+import { translateTourItems, decodeBase64ToBytes } from "./studio.js";
 
 const KV_KEYS = {
     BOOKINGS: "mosa:bookings",
@@ -614,6 +615,69 @@ async function handleAdminRoute(request, env, url) {
         return jsonResponse({ ok: true, trips: body.trips });
     }
 
+    if (url.pathname === "/api/admin/translate" && request.method === "POST") {
+        try {
+            const body = await request.json();
+            const sourceLang = body?.sourceLang || "ar";
+            const targetLangs = Array.isArray(body?.targetLangs) ? body.targetLangs : ["ar", "en", "it", "ru"];
+            const translations = await translateTourItems(sourceLang, targetLangs, body?.items || {});
+            return jsonResponse({ ok: true, translations });
+        } catch (err) {
+            return jsonResponse({ ok: false, error: err?.message || "Translation failed" }, 500);
+        }
+    }
+
+    if (url.pathname === "/api/admin/media" && request.method === "GET") {
+        const list = await kvGetJson(env, "mosa:media_index", []);
+        return jsonResponse({ ok: true, media: Array.isArray(list) ? list : [] });
+    }
+
+    if (url.pathname === "/api/admin/media" && request.method === "POST") {
+        try {
+            const body = await request.json();
+            const mimeType = String(body?.mimeType || "image/jpeg");
+            const allowed = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
+            if (!allowed[mimeType]) {
+                return jsonResponse({ ok: false, error: "Unsupported image format" }, 400);
+            }
+            const cleanB64 = String(body?.dataBase64 || "").replace(/^data:[^;]+;base64,/, "").replace(/\s+/g, "");
+            const bytes = decodeBase64ToBytes(cleanB64);
+            if (!bytes.length || bytes.length > 900 * 1024) {
+                return jsonResponse({ ok: false, error: "Invalid or oversized image (max 900KB)" }, 400);
+            }
+            const id = `img-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}.${allowed[mimeType]}`;
+            await kvPutJson(env, `mosa:media:${id}`, {
+                id,
+                mimeType,
+                dataBase64: cleanB64,
+                filename: String(body?.filename || id).slice(0, 80),
+                size: bytes.length,
+                createdAt: new Date().toISOString()
+            });
+            const idxList = await kvGetJson(env, "mosa:media_index", []);
+            const nextIdx = [
+                { id, url: `/api/media/${id}`, filename: String(body?.filename || id).slice(0, 80), mimeType, size: bytes.length, createdAt: new Date().toISOString() },
+                ...(Array.isArray(idxList) ? idxList : [])
+            ].slice(0, 100);
+            await kvPutJson(env, "mosa:media_index", nextIdx);
+            await appendAudit(env, "MEDIA_UPLOAD", `Uploaded media image ${id} (${Math.round(bytes.length / 1024)} KB)`);
+            return jsonResponse({ ok: true, id, url: `/api/media/${id}`, media: nextIdx[0] });
+        } catch (err) {
+            return jsonResponse({ ok: false, error: err?.message || "Media upload failed" }, 400);
+        }
+    }
+
+    const delMediaMatch = url.pathname.match(/^\/api\/admin\/media\/([a-zA-Z0-9_.\-]+)$/);
+    if (delMediaMatch && request.method === "DELETE") {
+        const mediaId = delMediaMatch[1];
+        if (env.MOSA_KV) await env.MOSA_KV.delete(`mosa:media:${mediaId}`);
+        const idxList = await kvGetJson(env, "mosa:media_index", []);
+        const nextIdx = (Array.isArray(idxList) ? idxList : []).filter(m => m.id !== mediaId);
+        await kvPutJson(env, "mosa:media_index", nextIdx);
+        await appendAudit(env, "MEDIA_DELETE", `Deleted media image ${mediaId}`);
+        return jsonResponse({ ok: true });
+    }
+
     if (url.pathname === "/api/admin/promos" && request.method === "PUT") {
         const body = await request.json();
         if (!Array.isArray(body.promos)) return jsonResponse({ ok: false, error: "Expected promos array" }, 400);
@@ -705,6 +769,21 @@ async function handleAdminRoute(request, env, url) {
 export default {
     async fetch(request, env) {
         const url = new URL(request.url);
+
+        const mediaMatch = url.pathname.match(/^\/api\/media\/([a-zA-Z0-9_.\-]+)$/);
+        if (mediaMatch && (request.method === "GET" || request.method === "HEAD")) {
+            const rec = await kvGetJson(env, `mosa:media:${mediaMatch[1]}`, null);
+            if (!rec || !rec.dataBase64) return withSecurityHeaders(new Response("Media Not Found", { status: 404 }));
+            const bytes = decodeBase64ToBytes(rec.dataBase64);
+            return new Response(request.method === "HEAD" ? null : bytes, {
+                status: 200,
+                headers: {
+                    "Content-Type": rec.mimeType || "image/jpeg",
+                    "Cache-Control": "public, max-age=31536000, immutable",
+                    "X-Content-Type-Options": "nosniff"
+                }
+            });
+        }
 
         if (url.pathname.startsWith("/api/admin")) {
             return handleAdminRoute(request, env, url);

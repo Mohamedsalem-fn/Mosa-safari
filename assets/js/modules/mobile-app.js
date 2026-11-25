@@ -13,7 +13,8 @@ import {
     getTripRoutes,
     getRouteLabel,
     getTripDetails,
-    getTripPageUrl
+    getTripPageUrl,
+    getTripBadge
 } from "../data/trips.js";
 import { I18N, BADGE_I18N } from "../data/i18n.js";
 import { state, fmtPrice, getActiveRateText } from "../state.js";
@@ -332,18 +333,27 @@ export function renderMobileApp() {
                     const isFav = state.favorites.has(trip.id);
                     const routes = getTripRoutes(trip);
                     const details = getTripDetails(trip, lang);
+                    const galleryList = (details.gallery && details.gallery.length) ? details.gallery : [trip.img];
+                    const cardKey = `m-${trip.id}`;
                     const detailsUrl = getTripPageUrl(trip.id);
-                    const badge = lang === "ar" ? trip.badge : ((BADGE_I18N[lang] && BADGE_I18N[lang][trip.badge]) || trip.badge);
+                    const badge = getTripBadge(trip, lang, BADGE_I18N);
 
                     return `<article class="rounded-3xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 shadow-md overflow-hidden">
                         <div class="relative h-48 bg-carbon-900">
                             <a href="${esc(detailsUrl)}" class="block w-full h-full">
-                                <img src="${esc(trip.img)}" alt="${esc(title)}" loading="lazy" class="w-full h-full object-cover" />
+                                <img data-card-img="${esc(cardKey)}" data-gallery="${esc(JSON.stringify(galleryList))}" src="${esc(galleryList[0] || trip.img)}" alt="${esc(title)}" loading="lazy" class="w-full h-full object-cover" />
                             </a>
                             <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-carbon-950/90 via-carbon-950/20 to-carbon-950/35"></div>
+                            ${galleryList.length > 1 ? `
+                                <button type="button" onclick="cycleCardGallery(event, '${esc(cardKey)}', -1)" aria-label="Previous photo"
+                                    class="absolute start-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-carbon-950/75 text-white border border-white/20 text-sm font-black grid place-items-center">‹</button>
+                                <button type="button" onclick="cycleCardGallery(event, '${esc(cardKey)}', 1)" aria-label="Next photo"
+                                    class="absolute end-2 top-1/2 -translate-y-1/2 z-20 w-7 h-7 rounded-full bg-carbon-950/75 text-white border border-white/20 text-sm font-black grid place-items-center">›</button>
+                            ` : ""}
                             <div class="absolute top-3 start-3 flex items-center gap-1.5">
                                 <span class="px-2.5 py-1 rounded-full bg-carbon-950/80 text-champagne text-[10px] font-black">${esc(badge)}</span>
                                 <span class="px-2.5 py-1 rounded-full bg-sea/90 text-carbon-950 text-[10px] font-black">⏱ ${esc(dur)}</span>
+                                ${galleryList.length > 1 ? `<span class="px-2 py-1 rounded-full bg-carbon-950/80 text-white text-[10px] font-black">📷 ${galleryList.length}</span>` : ""}
                             </div>
                             <button type="button" onclick="toggleFav('${esc(trip.id)}')" aria-label="Favorite"
                                 class="absolute top-3 end-3 w-8 h-8 rounded-xl grid place-items-center ${isFav ? 'bg-rose-500 text-white' : 'bg-carbon-950/70 text-white'} border border-white/15">

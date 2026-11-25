@@ -25,6 +25,11 @@ if (strpos($path, '/api/admin') === 0 || $path === '/admin' || strpos($path, '/a
     mosa_send_json(['ok' => false, 'error' => 'Not Found'], 404);
 }
 
+// Public media delivery for uploaded custom tour gallery photos
+if (preg_match('#^/api/media/([a-zA-Z0-9_.\-]+)$#', $path, $mm) && ($method === 'GET' || $method === 'HEAD')) {
+    mosa_serve_media($vaultDir, $mm[1]);
+}
+
 // 1. GET /api/public/config
 if ($path === '/api/public/config' && $method === 'GET') {
     $trips = mosa_kv_get($vaultDir, 'trips', null);

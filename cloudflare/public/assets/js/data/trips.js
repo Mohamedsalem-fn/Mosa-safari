@@ -146,8 +146,8 @@ export const SAFARI_TRIPS = [
         img: "assets/images/safari-sunrise.jpg",
         gallery: [
             "assets/images/safari-sunrise.jpg",
-            "assets/images/safari-morning.jpg",
-            "assets/images/safari-standard.jpg"
+            "assets/images/safari-sunrise-quads.jpg",
+            "assets/images/safari-sunrise-camels.jpg"
         ],
         descAr: "عِش سحر شروق الشمس بين جبال سيناء على مدار 4 إلى 5 ساعات مع قيادة البيتش باجي وركوب الجمال والشاي البدوي، مع تحرك دقيق عبر مسارين يومياً من كافة مناطق شرم الشيخ.",
         descEn: "Enjoy a full 4–5 hour Sinai sunrise safari with automatic ATV Quads, Echo Mountains photo stops, camel trekking, and Bedouin tea across 2 scheduled routes.",
@@ -261,8 +261,8 @@ export const SAFARI_TRIPS = [
         img: "assets/images/safari-morning.jpg",
         gallery: [
             "assets/images/safari-morning.jpg",
-            "assets/images/safari-standard.jpg",
-            "assets/images/safari-sunrise.jpg"
+            "assets/images/safari-morning-buggy.jpg",
+            "assets/images/safari-morning-camp.jpg"
         ],
         descAr: "جولة صباحية متكاملة (4–5 ساعات) في قلب صحراء شرم الشيخ بقيادة البيتش باجي والباجي الصحراوي مع توقف في الخيمة البدوية وركوب الجمال، تنطلق الساعة 08:00 ص على مسارين.",
         descEn: "Full 4–5 hour morning desert expedition riding ATV Quads and Dune Buggies across South Sinai trails with Echo Canyon & Bedouin camp stops across 2 scheduled routes.",
@@ -376,8 +376,8 @@ export const SAFARI_TRIPS = [
         img: "assets/images/safari-standard.jpg",
         gallery: [
             "assets/images/safari-standard.jpg",
-            "assets/images/safari-morning.jpg",
-            "assets/images/safari-dinner.jpg"
+            "assets/images/safari-standard-echo.jpg",
+            "assets/images/safari-standard-oasis.jpg"
         ],
         descAr: "رحلة السفاري الكلاسيكية بعد الظهر لمدة 4 إلى 5 ساعات وسط جبال الصدى ووديان شرم الشيخ مع الشاي البدوي وركوب الجمال بأفضل قيمة سعرية بدءاً من 14:15.",
         descEn: "Best-value 4–5 hour classic afternoon desert safari starting at 14:15 through Echo Mountains with scenic golden-hour views, camel ride, and Bedouin tea.",
@@ -491,8 +491,8 @@ export const SAFARI_TRIPS = [
         img: "assets/images/safari-dinner.jpg",
         gallery: [
             "assets/images/safari-dinner.jpg",
-            "assets/images/safari-standard.jpg",
-            "assets/images/safari-sunrise.jpg"
+            "assets/images/safari-dinner-show.jpg",
+            "assets/images/safari-dinner-stars.jpg"
         ],
         descAr: "التجربة المسائية الأكثر طلباً في شرم الشيخ (4–5 ساعات): بيتش باجي عند الغروب، ركوب الجمال، بوفيه عشاء بدوي فاخر مشوي، وعروض فنية وتنورة تحت النجوم مع مسارين للعشاء.",
         descEn: "Our top-rated 4–5 hour sunset desert safari: sunset ATV Quad riding, camel trek, open-buffet Bedouin BBQ dinner, and live Tanoura & fire show under Sinai stars.",
@@ -593,10 +593,44 @@ const DEFAULT_TRIPS_SNAPSHOT = SAFARI_TRIPS.map(t => ({
     bring: t.bring
 }));
 
+export const BUILTIN_GALLERY_LIBRARY = [
+    { value: "assets/images/safari-sunrise.jpg", label: "Sunrise 1 — Dawn Silhouette" },
+    { value: "assets/images/safari-sunrise-quads.jpg", label: "Sunrise 2 — Quad Convoy Canyon" },
+    { value: "assets/images/safari-sunrise-camels.jpg", label: "Sunrise 3 — Morning Camels" },
+    { value: "assets/images/safari-morning.jpg", label: "Morning 1 — Desert Safari Trails" },
+    { value: "assets/images/safari-morning-buggy.jpg", label: "Morning 2 — Sunset Dune Quad" },
+    { value: "assets/images/safari-morning-camp.jpg", label: "Morning 3 — Bedouin Tea Host" },
+    { value: "assets/images/safari-standard.jpg", label: "Standard 1 — Afternoon Quads" },
+    { value: "assets/images/safari-standard-echo.jpg", label: "Standard 2 — Red Canyon & Camel" },
+    { value: "assets/images/safari-standard-oasis.jpg", label: "Standard 3 — Desert Tent Oasis" },
+    { value: "assets/images/safari-dinner.jpg", label: "Dinner 1 — Sunset BBQ Banquet" },
+    { value: "assets/images/safari-dinner-show.jpg", label: "Dinner 2 — Egyptian Tanoura Show" },
+    { value: "assets/images/safari-dinner-stars.jpg", label: "Dinner 3 — Bedouin Camp Fire" }
+];
+
 function pickLocalized(obj, lang = "ar", fallbackVal = []) {
     if (!obj) return fallbackVal;
     if (Array.isArray(obj) || typeof obj === "string") return obj;
     return obj[lang] || obj.en || obj.ar || fallbackVal;
+}
+
+/**
+ * Resolve localized card badge text (custom admin localized badges override default static lookup).
+ * @param {object} trip
+ * @param {string} [lang="ar"]
+ * @param {object} [fallbackMap=null]
+ * @returns {string}
+ */
+export function getTripBadge(trip, lang = "ar", fallbackMap = null) {
+    if (!trip) return "";
+    if (lang === "ar") return trip.badge || trip.badgeAr || "";
+    if (lang === "en" && trip.badgeEn) return trip.badgeEn;
+    if (lang === "it" && trip.badgeIt) return trip.badgeIt;
+    if (lang === "ru" && trip.badgeRu) return trip.badgeRu;
+    if (fallbackMap && fallbackMap[lang] && fallbackMap[lang][trip.badge]) {
+        return fallbackMap[lang][trip.badge];
+    }
+    return trip.badgeEn || trip.badge || "";
 }
 
 /**
@@ -638,15 +672,23 @@ export function getTripDetails(trip, lang = "ar") {
     const src = { ...base, ...(trip || {}) };
     const subKey = lang === "it" ? "subtitleIt" : lang === "ru" ? "subtitleRu" : lang === "en" ? "subtitleEn" : "subtitleAr";
     const depWin = pickLocalized(src.departureWindow, lang, pickLocalized(base.departureWindow, lang, ""));
+    const customGallery = Array.isArray(trip?.gallery) ? trip.gallery.filter(Boolean) : null;
+    const baseGallery = Array.isArray(base.gallery) ? base.gallery : ["assets/images/safari-sunrise.jpg"];
+    const resolvedGallery = (customGallery && customGallery.length)
+        ? customGallery
+        : (trip?.img ? [trip.img, ...baseGallery.filter(g => g !== trip.img)] : baseGallery);
+
     return {
         subtitle: src[subKey] || src.subtitleEn || src.subtitleAr || "",
         departureWindow: depWin,
-        gallery: Array.isArray(src.gallery) && src.gallery.length ? src.gallery : [src.img || "assets/images/safari-sunrise.jpg", ...(base.gallery || []).slice(1)],
+        gallery: resolvedGallery,
         highlights: pickLocalized(src.highlights, lang, pickLocalized(base.highlights, lang, [])),
         itinerary: pickLocalized(src.itinerary, lang, pickLocalized(base.itinerary, lang, [])),
         includes: pickLocalized(src.includes, lang, pickLocalized(base.includes, lang, [])),
         excludes: pickLocalized(src.excludes, lang, pickLocalized(base.excludes, lang, [])),
-        bring: pickLocalized(src.bring, lang, pickLocalized(base.bring, lang, []))
+        bring: pickLocalized(src.bring, lang, pickLocalized(base.bring, lang, [])),
+        seoTitle: pickLocalized(src.seoTitle, lang, ""),
+        seoDesc: pickLocalized(src.seoDesc, lang, "")
     };
 }
 

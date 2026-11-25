@@ -6,17 +6,18 @@
  * -------------------------------------------------------------------------------
  */
 
-import { SAFARI_TRIPS } from "./data/trips.js";
+import {
+    SAFARI_TRIPS,
+    BUILTIN_GALLERY_LIBRARY,
+    PICKUP_STATIONS,
+    getTripDetails,
+    getTripRoutes
+} from "./data/trips.js";
 
 const STORAGE_LANG_KEY = "mosa_admin_lang_v1";
 const STORAGE_THEME_KEY = "mosa_admin_theme_v1";
 
-const IMAGE_CHOICES = [
-    { value: "assets/images/safari-sunrise.jpg", label: "Sunrise Safari (04:00 AM)" },
-    { value: "assets/images/safari-morning.jpg", label: "Morning Safari (08:00 AM)" },
-    { value: "assets/images/safari-standard.jpg", label: "Standard Afternoon Safari (14:15)" },
-    { value: "assets/images/safari-dinner.jpg", label: "Dinner & BBQ Show Safari (15:30)" }
-];
+const IMAGE_CHOICES = BUILTIN_GALLERY_LIBRARY;
 
 const AT = {
     ar: {
@@ -816,16 +817,23 @@ function renderToursTab(root) {
                 const cCount = clicks[trip.id] || 0;
                 const bkCount = stats.tourBookCount[trip.id] || 0;
                 const rev = stats.tourRev[trip.id] || 0;
+                const det = getTripDetails(trip, adminState.lang);
+                const photoCnt = (det.gallery && det.gallery.length) ? det.gallery.length : 1;
+                const routesCnt = getTripRoutes(trip).length;
+                const storeUrl = (adminState.overview.settings?.storefrontUrl || "https://mosasafari.com") + `/tour.html?id=${encodeURIComponent(trip.id)}`;
                 return `
                 <article class="rounded-3xl bg-white dark:bg-carbon-900 border ${isActive ? 'border-carbon-900/10 dark:border-white/10' : 'border-rose-500/40 opacity-75'} overflow-hidden flex flex-col">
-                    <div class="relative h-40 bg-carbon-950">
+                    <div class="relative h-44 bg-carbon-950">
                         <img src="${esc(trip.img)}" alt="${esc(trip.titleEn)}" class="w-full h-full object-cover opacity-85">
                         <div class="absolute inset-0 bg-gradient-to-t from-carbon-950 via-transparent to-carbon-950/30"></div>
-                        <span class="absolute top-3 start-3 px-2.5 py-1 rounded-lg text-[10px] font-black ${isActive ? 'bg-sea text-carbon-950' : 'bg-rose-600 text-white'}">${isActive ? (isAr ? 'مفعّل بالموقع' : 'LIVE') : (isAr ? 'مخفي' : 'HIDDEN')}</span>
+                        <div class="absolute top-3 start-3 flex items-center gap-1.5">
+                            <span class="px-2.5 py-1 rounded-lg text-[10px] font-black ${isActive ? 'bg-sea text-carbon-950' : 'bg-rose-600 text-white'}">${isActive ? (isAr ? 'مفعّل بالموقع' : 'LIVE') : (isAr ? 'مخفي' : 'HIDDEN')}</span>
+                            <span class="px-2 py-1 rounded-lg bg-carbon-950/80 text-white text-[10px] font-black">📷 ${photoCnt}</span>
+                        </div>
                         <span class="absolute top-3 end-3 px-2.5 py-1 rounded-lg bg-carbon-950/80 text-champagne text-xs font-black">★ ${trip.rating}</span>
                         <div class="absolute bottom-3 inset-x-3 flex items-end justify-between text-white">
                             <div>
-                                <div class="text-[10px] opacity-75">${esc(trip.vehicle)}</div>
+                                <div class="text-[10px] opacity-75">${esc(trip.vehicle)} · ${routesCnt} ${isAr ? "مسارات" : "routes"}</div>
                                 <div class="text-lg font-black text-champagne">$${Number(trip.fromPrice).toFixed(2)} <span class="text-xs text-white/75">/ $${Number(trip.adultPrice).toFixed(2)}</span></div>
                             </div>
                             <span class="px-2 py-0.5 rounded bg-white/15 text-[10px] font-bold">${esc(isAr ? trip.duration : trip.durationEn)}</span>
@@ -841,9 +849,14 @@ function renderToursTab(root) {
                             <div><span class="block opacity-60">${isAr ? "حجوزات" : "Bookings"}</span><strong class="font-black">${bkCount}</strong></div>
                             <div><span class="block opacity-60">${isAr ? "إيرادات" : "Rev"}</span><strong class="font-black text-sea">$${rev.toFixed(0)}</strong></div>
                         </div>
-                        <div class="flex items-center gap-2 pt-1">
-                            <button type="button" data-edit-tour="${idx}" class="flex-1 py-2 rounded-xl bg-champagne hover:bg-champagne-light text-carbon-950 font-black text-xs transition">${t("edit_btn")}</button>
-                            <button type="button" data-toggle-tour="${idx}" class="px-3 py-2 rounded-xl border border-carbon-900/15 dark:border-white/15 text-xs font-black hover:border-champagne transition">${isActive ? (isAr ? "إخفاء" : "Hide") : (isAr ? "تفعيل" : "Show")}</button>
+                        <div class="space-y-2 pt-1">
+                            <button type="button" data-edit-tour="${idx}" class="w-full py-2.5 rounded-xl bg-champagne hover:bg-champagne-light text-carbon-950 font-black text-xs transition">${isAr ? "✨ تخصيص كامل (الصور · الصفحة · اللغات)" : "✨ Full Tour & Page Studio"}</button>
+                            <div class="grid grid-cols-4 gap-1.5 text-[11px]">
+                                <a href="${esc(storeUrl)}" target="_blank" rel="noopener noreferrer" title="Preview" class="py-1.5 rounded-lg border border-carbon-900/15 dark:border-white/15 font-extrabold text-center hover:border-champagne transition">↗ ${isAr ? "معاينة" : "View"}</a>
+                                <button type="button" data-dup-tour="${idx}" title="Duplicate" class="py-1.5 rounded-lg border border-carbon-900/15 dark:border-white/15 font-extrabold hover:border-champagne transition">${isAr ? "نسخ" : "Copy"}</button>
+                                <button type="button" data-toggle-tour="${idx}" class="py-1.5 rounded-lg border border-carbon-900/15 dark:border-white/15 font-extrabold hover:border-champagne transition">${isActive ? (isAr ? "إخفاء" : "Hide") : (isAr ? "تفعيل" : "Show")}</button>
+                                <button type="button" data-del-tour="${idx}" class="py-1.5 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white font-black transition">✕</button>
+                            </div>
                         </div>
                     </div>
                 </article>`;
@@ -864,6 +877,24 @@ function renderToursTab(root) {
     root.querySelectorAll("[data-edit-tour]").forEach(btn => {
         btn.addEventListener("click", () => openTourEditorModal(Number(btn.dataset.editTour)));
     });
+    root.querySelectorAll("[data-dup-tour]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+            const idx = Number(btn.dataset.dupTour);
+            const list = effectiveTrips().map(item => structuredClone(item));
+            const copy = structuredClone(list[idx]);
+            copy.id = `${copy.id || "mosa-tour"}-${Date.now().toString(36).slice(-4)}`;
+            copy.titleAr = (copy.titleAr || copy.titleEn) + " (نسخة)";
+            copy.titleEn = (copy.titleEn || copy.titleAr) + " (Copy)";
+            list.push(copy);
+            try {
+                const res = await apiFetch("/api/admin/trips", { method: "PUT", body: JSON.stringify({ trips: list }) });
+                adminState.overview.trips = res.trips;
+                updateNavBadges();
+                renderToursTab(root);
+                showAdminToast(isAr ? "تم نسخ الرحلة ✓" : "Tour duplicated ✓");
+            } catch (err) { showAdminToast(err.message, "err"); }
+        });
+    });
     root.querySelectorAll("[data-toggle-tour]").forEach(btn => {
         btn.addEventListener("click", async () => {
             const idx = Number(btn.dataset.toggleTour);
@@ -875,6 +906,25 @@ function renderToursTab(root) {
                 updateNavBadges();
                 renderToursTab(root);
                 showAdminToast(isAr ? "تم تحديث حالة الرحلة" : "Tour visibility updated");
+            } catch (err) { showAdminToast(err.message, "err"); }
+        });
+    });
+    root.querySelectorAll("[data-del-tour]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+            const list = effectiveTrips().map(item => ({ ...item }));
+            if (list.length <= 1) {
+                showAdminToast(isAr ? "يجب بقاء رحلة واحدة على الأقل" : "Keep at least 1 tour", "err");
+                return;
+            }
+            if (!window.confirm(isAr ? "حذف هذا البرنامج نهائياً؟" : "Delete this tour permanently?")) return;
+            const idx = Number(btn.dataset.delTour);
+            list.splice(idx, 1);
+            try {
+                const res = await apiFetch("/api/admin/trips", { method: "PUT", body: JSON.stringify({ trips: list }) });
+                adminState.overview.trips = res.trips;
+                updateNavBadges();
+                renderToursTab(root);
+                showAdminToast(isAr ? "تم حذف البرنامج" : "Tour deleted");
             } catch (err) { showAdminToast(err.message, "err"); }
         });
     });
@@ -1706,9 +1756,14 @@ function renderAuditTab(root) {
 
 // ---------- MODALS ----------
 
-function openModal(title, subtitle, bodyHtml, footerHtml) {
+function openModal(title, subtitle, bodyHtml, footerHtml, opts = {}) {
     const m = document.getElementById("admin-modal");
+    const card = document.getElementById("admin-modal-card");
     if (!m) return;
+    if (card) {
+        card.classList.toggle("max-w-5xl", Boolean(opts.wide));
+        card.classList.toggle("max-w-2xl", !opts.wide);
+    }
     document.getElementById("admin-modal-title").textContent = title;
     document.getElementById("admin-modal-subtitle").textContent = subtitle || "";
     document.getElementById("admin-modal-body").innerHTML = bodyHtml;
@@ -1718,6 +1773,11 @@ function openModal(title, subtitle, bodyHtml, footerHtml) {
 
 function closeModal() {
     document.getElementById("admin-modal")?.classList.add("hidden");
+    const card = document.getElementById("admin-modal-card");
+    if (card) {
+        card.classList.remove("max-w-5xl");
+        card.classList.add("max-w-2xl");
+    }
 }
 
 function openBookingDetailModal(ref) {
@@ -1875,95 +1935,774 @@ function openManualBookingModal() {
     });
 }
 
-function openTourEditorModal(idx) {
-    const isAr = adminState.lang === "ar";
-    const list = effectiveTrips().map(x => ({ ...x }));
-    const isNew = idx < 0;
-    const item = isNew ? {
-        id: "mosa-custom-" + Date.now().toString(36),
+const STUDIO_LANGS = [
+    { id: "ar", label: "العربية AR" },
+    { id: "en", label: "English EN" },
+    { id: "it", label: "Italiano IT" },
+    { id: "ru", label: "Русский RU" }
+];
+
+function capLang(l) {
+    return l.charAt(0).toUpperCase() + l.slice(1);
+}
+
+function makeDefaultTripDraft() {
+    const id = "mosa-tour-" + Date.now().toString(36);
+    const stepTemplate = [
+        { step: "01", time: "04:00", title: "الاستلام والتحرك من نقطتك", desc: "استلام مكيّف من نقطة التجمع المحددة." },
+        { step: "02", time: "04:45", title: "التدريب واستلام الخوذات", desc: "شرح القيادة الآمنة قبل الانطلاق." },
+        { step: "03", time: "05:30", title: "جولة السفاري في الصحراء", desc: "قيادة ممتعة عبر وديان وجبال شرم الشيخ." },
+        { step: "04", time: "06:45", title: "القرية البدوية والجمال", desc: "ضيافة الشاي البدوي وتجربة ركوب الجمال." },
+        { step: "05", time: "08:15", title: "العودة لنقطة الاستلام", desc: "رحلة عودة مريحة بعد 4–5 ساعات." }
+    ];
+    return {
+        id,
         category: "sunrise",
         slotType: "morning",
+        icon: "🏜️",
         city: "Sharm El Sheikh",
         cityAr: "شرم الشيخ",
-        titleAr: "",
-        titleEn: "",
-        titleIt: "",
-        titleRu: "",
+        titleAr: "🏜️ رحلة سفاري جديدة — شرم الشيخ",
+        titleEn: "🏜️ New Safari Tour — Sharm El Sheikh",
+        titleIt: "🏜️ Nuovo Tour Safari — Sharm El Sheikh",
+        titleRu: "🏜️ Новый сафари-тур — Шарм-эль-Шейх",
+        subtitleAr: "تجربة صحراوية متكاملة لمدة 4–5 ساعات في قلب سيناء.",
+        subtitleEn: "Complete 4–5 hour Sinai desert adventure.",
+        subtitleIt: "Avventura completa di 4–5 ore nel deserto del Sinai.",
+        subtitleRu: "Полноценное 4–5-часовое приключение в пустыне Синая.",
         fromPrice: 12,
         adultPrice: 20,
         duration: "4–5 ساعات",
         durationEn: "4–5 hours",
         durationIt: "4–5 ore",
         durationRu: "4–5 часов",
+        departureWindow: { ar: "تحرك 08:00 ص", en: "Departs 08:00 AM", it: "Partenza 08:00 AM", ru: "Выезд 08:00" },
         rating: 4.9,
-        badge: "جديد",
-        vehicle: "ATV Quad",
+        badge: "برنامج مخصص",
+        badgeEn: "Featured Tour",
+        badgeIt: "Tour in Evidenza",
+        badgeRu: "Популярный тур",
+        vehicle: "ATV Quad + Camel + Bedouin Tea",
         img: IMAGE_CHOICES[0].value,
-        descAr: "",
-        descEn: "",
-        descIt: "",
-        descRu: "",
+        gallery: [IMAGE_CHOICES[0].value, IMAGE_CHOICES[1].value, IMAGE_CHOICES[2].value],
+        descAr: "رحلة سفاري مميزة في شرم الشيخ لمدة 4–5 ساعات تشمل الانتقالات والقيادة والضيافة البدوية.",
+        descEn: "Featured 4–5 hour Sharm El Sheikh safari including transfers, desert riding, and Bedouin tea.",
+        descIt: "Safari di 4–5 ore a Sharm El Sheikh con trasferimenti, guida e tè beduino.",
+        descRu: "Сафари-тур 4–5 часов в Шарм-эль-Шейхе с трансфером, катанием и бедуинским чаем.",
+        highlights: {
+            ar: ["مدة 4–5 ساعات", "انتقالات مكيفة ذهاب وعودة", "مرشد محترف وتدريب عملي"],
+            en: ["4–5 Hours Duration", "Round-trip AC Transfers", "Pro Guide & Practice"],
+            it: ["Durata 4–5 Ore", "Trasferimenti A/R", "Guida Esperta"],
+            ru: ["Длительность 4–5 ч", "Трансфер туда-обратно", "Опытный гид"]
+        },
+        itinerary: { ar: stepTemplate, en: [], it: [], ru: [] },
+        includes: { ar: ["انتقالات مكيفة ذهاب وعودة", "الخوذة والتدريب", "المرشد والشاي البدوي"], en: [], it: [], ru: [] },
+        excludes: { ar: ["الوشاح والنظارة الاختيارية", "التصوير الاحترافي"], en: [], it: [], ru: [] },
+        bring: { ar: ["حذاء رياضي مغلق", "نظارة شمسية", "كاميرا أو هاتف مشحون"], en: [], it: [], ru: [] },
+        seoTitle: { ar: "", en: "", it: "", ru: "" },
+        seoDesc: { ar: "", en: "", it: "", ru: "" },
+        routes: structuredClone(SAFARI_TRIPS[0].routes),
         active: true
-    } : list[idx];
+    };
+}
 
-    const bodyHtml = `
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-            <div><label class="block font-extrabold mb-1">${isAr ? "العنوان (عربي)" : "Title (AR)"}</label><input id="tr-tar" type="text" value="${esc(item.titleAr)}" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-bold"></div>
-            <div><label class="block font-extrabold mb-1">Title (EN)</label><input id="tr-ten" type="text" value="${esc(item.titleEn)}" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-bold"></div>
-            <div><label class="block font-extrabold mb-1">Title (IT)</label><input id="tr-tit" type="text" value="${esc(item.titleIt)}" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-bold"></div>
-            <div><label class="block font-extrabold mb-1">Title (RU)</label><input id="tr-tru" type="text" value="${esc(item.titleRu)}" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-bold"></div>
-            <div><label class="block font-extrabold mb-1">${isAr ? "السعر يبدأ من ($)" : "From Price ($)"}</label><input id="tr-from" type="number" step="0.01" value="${item.fromPrice}" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-black"></div>
-            <div><label class="block font-extrabold mb-1">${isAr ? "سعر الفرد الكامل ($)" : "Adult Price ($)"}</label><input id="tr-adult" type="number" step="0.01" value="${item.adultPrice}" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-black"></div>
-            <div><label class="block font-extrabold mb-1">${isAr ? "الفئة" : "Category"}</label>
-                <select id="tr-cat" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-bold">
-                    <option value="sunrise" ${item.category === "sunrise" ? "selected" : ""}>🌅 رحلة الشروق (Sunrise)</option>
-                    <option value="morning" ${item.category === "morning" ? "selected" : ""}>☀️ الرحلة الصباحية (Morning)</option>
-                    <option value="standard" ${item.category === "standard" ? "selected" : ""}>🌄 الرحلات العادية (Standard)</option>
-                    <option value="dinner" ${item.category === "dinner" ? "selected" : ""}>🌙 رحلة العشاء (Dinner)</option>
-                </select>
-            </div>
-            <div><label class="block font-extrabold mb-1">${isAr ? "التقييم (★)" : "Rating"}</label><input id="tr-rate" type="number" step="0.1" max="5" min="1" value="${item.rating}" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-black"></div>
-            <div><label class="block font-extrabold mb-1">${isAr ? "المركبة" : "Vehicle"}</label><input id="tr-veh" type="text" value="${esc(item.vehicle)}" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-bold"></div>
-            <div><label class="block font-extrabold mb-1">${isAr ? "الصورة" : "Cover Image"}</label>
-                <select id="tr-img" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-bold">
-                    ${IMAGE_CHOICES.map(ic => `<option value="${ic.value}" ${item.img === ic.value ? "selected" : ""}>${ic.label}</option>`).join("")}
-                </select>
-            </div>
-            <div><label class="block font-extrabold mb-1">${isAr ? "المدة (عربي)" : "Duration (AR)"}</label><input id="tr-dur" type="text" value="${esc(item.duration)}" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-bold"></div>
-            <div><label class="block font-extrabold mb-1">Duration (EN)</label><input id="tr-duren" type="text" value="${esc(item.durationEn)}" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-bold"></div>
-            <div class="sm:col-span-2"><label class="block font-extrabold mb-1">${isAr ? "الوصف (عربي)" : "Description (AR)"}</label><textarea id="tr-dar" rows="2" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15">${esc(item.descAr)}</textarea></div>
-            <div class="sm:col-span-2"><label class="block font-extrabold mb-1">Description (EN)</label><textarea id="tr-den" rows="2" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15">${esc(item.descEn)}</textarea></div>
-        </div>
-    `;
+function normalizeTripForStudio(raw) {
+    const t = structuredClone(raw);
+    const baseDet = {};
+    for (const l of ["ar", "en", "it", "ru"]) {
+        baseDet[l] = getTripDetails(t, l);
+    }
+    const baseRoutes = structuredClone(getTripRoutes(t));
+    t.icon = t.icon || "🏜️";
+    t.city = t.city || "Sharm El Sheikh";
+    t.cityAr = t.cityAr || "شرم الشيخ";
+    t.badgeEn = t.badgeEn || baseDet.en?.badge || "";
+    t.badgeIt = t.badgeIt || "";
+    t.badgeRu = t.badgeRu || "";
+    t.subtitleAr = t.subtitleAr ?? baseDet.ar.subtitle;
+    t.subtitleEn = t.subtitleEn ?? baseDet.en.subtitle;
+    t.subtitleIt = t.subtitleIt ?? baseDet.it.subtitle;
+    t.subtitleRu = t.subtitleRu ?? baseDet.ru.subtitle;
+    t.durationEn = t.durationEn || t.duration || "4–5 hours";
+    t.durationIt = t.durationIt || "4–5 ore";
+    t.durationRu = t.durationRu || "4–5 часов";
+    t.gallery = Array.isArray(t.gallery) && t.gallery.length ? [...t.gallery] : [t.img || IMAGE_CHOICES[0].value];
+    if (!t.img) t.img = t.gallery[0];
+    t.departureWindow = typeof t.departureWindow === "object" ? { ...t.departureWindow } : { ar: baseDet.ar.departureWindow, en: baseDet.en.departureWindow, it: baseDet.it.departureWindow, ru: baseDet.ru.departureWindow };
+    t.highlights = { ar: baseDet.ar.highlights, en: baseDet.en.highlights, it: baseDet.it.highlights, ru: baseDet.ru.highlights };
+    t.itinerary = { ar: baseDet.ar.itinerary, en: baseDet.en.itinerary, it: baseDet.it.itinerary, ru: baseDet.ru.itinerary };
+    t.includes = { ar: baseDet.ar.includes, en: baseDet.en.includes, it: baseDet.it.includes, ru: baseDet.ru.includes };
+    t.excludes = { ar: baseDet.ar.excludes, en: baseDet.en.excludes, it: baseDet.it.excludes, ru: baseDet.ru.excludes };
+    t.bring = { ar: baseDet.ar.bring, en: baseDet.en.bring, it: baseDet.it.bring, ru: baseDet.ru.bring };
+    t.seoTitle = { ar: t.seoTitle?.ar || "", en: t.seoTitle?.en || "", it: t.seoTitle?.it || "", ru: t.seoTitle?.ru || "" };
+    t.seoDesc = { ar: t.seoDesc?.ar || "", en: t.seoDesc?.en || "", it: t.seoDesc?.it || "", ru: t.seoDesc?.ru || "" };
+    t.routes = baseRoutes.map((r, idx) => ({
+        id: r.id || `route${idx + 1}`,
+        label: typeof r.label === "object" ? { ar: "", en: "", it: "", ru: "", ...r.label } : { ar: String(r.label || `المسار ${idx + 1}`), en: `Route ${idx + 1}`, it: `Percorso ${idx + 1}`, ru: `Маршрут ${idx + 1}` },
+        stops: Array.isArray(r.stops) ? r.stops.map(s => ({ station: s.station || "naama", timeAr: s.timeAr || s.timeEn || "08:00", timeEn: s.timeEn || s.timeAr || "08:00", emoji: s.emoji || "🕒" })) : []
+    }));
+    return t;
+}
 
-    openModal(isNew ? t("add_tour") : t("edit_btn"), item.id, bodyHtml, `<button id="tr-save" type="button" class="px-5 py-2.5 rounded-xl bg-champagne text-carbon-950 font-black text-xs">${t("save")}</button>`);
+function getLangValue(draft, field, lang) {
+    if (field === "title") return draft[`title${capLang(lang)}`] || "";
+    if (field === "subtitle") return draft[`subtitle${capLang(lang)}`] || "";
+    if (field === "desc") return draft[`desc${capLang(lang)}`] || "";
+    if (field === "badge") return lang === "ar" ? (draft.badge || "") : (draft[`badge${capLang(lang)}`] || "");
+    if (field === "duration") return lang === "ar" ? (draft.duration || "") : (draft[`duration${capLang(lang)}`] || "");
+    return draft[field]?.[lang] || "";
+}
 
-    document.getElementById("tr-save")?.addEventListener("click", async () => {
-        item.titleAr = document.getElementById("tr-tar").value.trim() || item.titleEn;
-        item.titleEn = document.getElementById("tr-ten").value.trim() || item.titleAr;
-        item.titleIt = document.getElementById("tr-tit").value.trim() || item.titleEn;
-        item.titleRu = document.getElementById("tr-tru").value.trim() || item.titleEn;
-        item.fromPrice = Number(document.getElementById("tr-from").value) || 10;
-        item.adultPrice = Number(document.getElementById("tr-adult").value) || 20;
-        item.category = document.getElementById("tr-cat").value;
-        item.rating = Number(document.getElementById("tr-rate").value) || 4.8;
-        item.vehicle = document.getElementById("tr-veh").value.trim();
-        item.img = document.getElementById("tr-img").value;
-        item.duration = document.getElementById("tr-dur").value.trim();
-        item.durationEn = document.getElementById("tr-duren").value.trim();
-        item.descAr = document.getElementById("tr-dar").value.trim();
-        item.descEn = document.getElementById("tr-den").value.trim();
+function setLangValue(draft, field, lang, value) {
+    if (field === "title") draft[`title${capLang(lang)}`] = value;
+    else if (field === "subtitle") draft[`subtitle${capLang(lang)}`] = value;
+    else if (field === "desc") draft[`desc${capLang(lang)}`] = value;
+    else if (field === "badge") {
+        if (lang === "ar") draft.badge = value;
+        else draft[`badge${capLang(lang)}`] = value;
+    } else if (field === "duration") {
+        if (lang === "ar") draft.duration = value;
+        else draft[`duration${capLang(lang)}`] = value;
+    } else {
+        draft[field] = draft[field] || {};
+        draft[field][lang] = value;
+    }
+}
 
-        if (isNew) list.push(item); else list[idx] = item;
-        try {
-            const res = await apiFetch("/api/admin/trips", { method: "PUT", body: JSON.stringify({ trips: list }) });
-            adminState.overview.trips = res.trips;
-            closeModal();
-            updateNavBadges();
-            renderActiveTab();
-            showAdminToast(isAr ? "تم حفظ الرحلة ومزامنتها ✓" : "Tour saved & synced ✓");
-        } catch (err) { showAdminToast(err.message, "err"); }
+async function compressImageToPayload(file) {
+    const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ""));
+        reader.onerror = () => reject(new Error("File read failed"));
+        reader.readAsDataURL(file);
     });
+    const img = await new Promise((resolve, reject) => {
+        const el = new Image();
+        el.onload = () => resolve(el);
+        el.onerror = () => reject(new Error("Invalid image"));
+        el.src = dataUrl;
+    });
+    const maxW = 1440;
+    const maxH = 960;
+    const ratio = Math.min(1, maxW / img.width, maxH / img.height);
+    const w = Math.max(1, Math.round(img.width * ratio));
+    const h = Math.max(1, Math.round(img.height * ratio));
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, w, h);
+    const compressed = canvas.toDataURL("image/jpeg", 0.85);
+    return {
+        filename: (file.name || "photo.jpg").replace(/\.[^.]+$/, "") + ".jpg",
+        mimeType: "image/jpeg",
+        dataBase64: compressed.split(",")[1]
+    };
+}
+
+function buildTranslateItems(draft, srcLang) {
+    return {
+        title: getLangValue(draft, "title", srcLang),
+        badge: getLangValue(draft, "badge", srcLang),
+        duration: getLangValue(draft, "duration", srcLang),
+        departureWindow: getLangValue(draft, "departureWindow", srcLang),
+        subtitle: getLangValue(draft, "subtitle", srcLang),
+        desc: getLangValue(draft, "desc", srcLang),
+        seoTitle: getLangValue(draft, "seoTitle", srcLang),
+        seoDesc: getLangValue(draft, "seoDesc", srcLang),
+        highlights: draft.highlights?.[srcLang] || [],
+        includes: draft.includes?.[srcLang] || [],
+        excludes: draft.excludes?.[srcLang] || [],
+        bring: draft.bring?.[srcLang] || [],
+        routeLabels: (draft.routes || []).map(r => r.label?.[srcLang] || ""),
+        itinerary: draft.itinerary?.[srcLang] || []
+    };
+}
+
+function applyTranslationsToDraft(draft, translations) {
+    for (const [tl, data] of Object.entries(translations || {})) {
+        if (!["ar", "en", "it", "ru"].includes(tl) || !data) continue;
+        if (data.title) setLangValue(draft, "title", tl, data.title);
+        if (data.badge) setLangValue(draft, "badge", tl, data.badge);
+        if (data.duration) setLangValue(draft, "duration", tl, data.duration);
+        if (data.departureWindow) setLangValue(draft, "departureWindow", tl, data.departureWindow);
+        if (data.subtitle) setLangValue(draft, "subtitle", tl, data.subtitle);
+        if (data.desc) setLangValue(draft, "desc", tl, data.desc);
+        if (data.seoTitle) setLangValue(draft, "seoTitle", tl, data.seoTitle);
+        if (data.seoDesc) setLangValue(draft, "seoDesc", tl, data.seoDesc);
+        if (Array.isArray(data.highlights)) draft.highlights[tl] = data.highlights;
+        if (Array.isArray(data.includes)) draft.includes[tl] = data.includes;
+        if (Array.isArray(data.excludes)) draft.excludes[tl] = data.excludes;
+        if (Array.isArray(data.bring)) draft.bring[tl] = data.bring;
+        if (Array.isArray(data.itinerary)) draft.itinerary[tl] = data.itinerary;
+        if (Array.isArray(data.routeLabels)) {
+            draft.routes.forEach((r, ri) => {
+                if (data.routeLabels[ri]) r.label[tl] = data.routeLabels[ri];
+            });
+        }
+    }
+}
+
+function openTourEditorModal(idx) {
+    const isAr = adminState.lang === "ar";
+    const list = effectiveTrips().map(x => structuredClone(x));
+    const isNew = idx < 0;
+    const draft = normalizeTripForStudio(isNew ? makeDefaultTripDraft() : list[idx]);
+
+    const studio = {
+        tab: "basics",
+        editLang: adminState.lang === "en" ? "en" : "ar",
+        sourceLang: adminState.lang === "en" ? "en" : "ar",
+        autoTranslate: true,
+        dirtyLangText: isNew,
+        translating: false,
+        uploading: false,
+        uploadedMedia: []
+    };
+
+    const collectInputsIntoDraft = () => {
+        const el = id => document.getElementById(id);
+        const l = studio.editLang;
+        if (studio.tab === "basics") {
+            const newId = el("st-id")?.value.trim();
+            if (newId) draft.id = newId.replace(/[^a-zA-Z0-9_-]/g, "-");
+            draft.category = el("st-cat")?.value || draft.category;
+            draft.slotType = el("st-slot")?.value || draft.slotType;
+            draft.icon = el("st-icon")?.value.trim() || "🏜️";
+            draft.fromPrice = Number(el("st-from")?.value) || 10;
+            draft.adultPrice = Number(el("st-adult")?.value) || 20;
+            draft.rating = Math.min(5, Math.max(1, Number(el("st-rate")?.value) || 4.8));
+            draft.vehicle = el("st-veh")?.value.trim() || draft.vehicle;
+            draft.active = el("st-active") ? el("st-active").checked : draft.active;
+            if (el("st-title")) setLangValue(draft, "title", l, el("st-title").value.trim());
+            if (el("st-badge")) setLangValue(draft, "badge", l, el("st-badge").value.trim());
+            if (el("st-dur")) setLangValue(draft, "duration", l, el("st-dur").value.trim());
+            if (el("st-dep")) setLangValue(draft, "departureWindow", l, el("st-dep").value.trim());
+        } else if (studio.tab === "content") {
+            if (el("st-sub")) setLangValue(draft, "subtitle", l, el("st-sub").value.trim());
+            if (el("st-desc")) setLangValue(draft, "desc", l, el("st-desc").value.trim());
+            draft.highlights[l] = [...document.querySelectorAll("[data-st-hl]")].map(inp => inp.value.trim()).filter(Boolean);
+        } else if (studio.tab === "itinerary") {
+            draft.itinerary[l] = [...document.querySelectorAll("[data-st-step-row]")].map((row, rIdx) => ({
+                step: row.querySelector("[data-sf='step']")?.value.trim() || String(rIdx + 1).padStart(2, "0"),
+                time: row.querySelector("[data-sf='time']")?.value.trim() || "",
+                title: row.querySelector("[data-sf='title']")?.value.trim() || "",
+                desc: row.querySelector("[data-sf='desc']")?.value.trim() || ""
+            }));
+            for (const lk of ["includes", "excludes", "bring"]) {
+                draft[lk][l] = [...document.querySelectorAll(`[data-st-list='${lk}']`)].map(inp => inp.value.trim()).filter(Boolean);
+            }
+        } else if (studio.tab === "routes") {
+            if (el("st-seot")) setLangValue(draft, "seoTitle", l, el("st-seot").value.trim());
+            if (el("st-seod")) setLangValue(draft, "seoDesc", l, el("st-seod").value.trim());
+            document.querySelectorAll("[data-st-route]").forEach(rBox => {
+                const ri = Number(rBox.dataset.stRoute);
+                if (!draft.routes[ri]) return;
+                const lbl = rBox.querySelector("[data-r-label]")?.value.trim();
+                if (lbl !== undefined) draft.routes[ri].label[l] = lbl;
+                rBox.querySelectorAll("[data-st-stop]").forEach(stRow => {
+                    const si = Number(stRow.dataset.stStop);
+                    if (!draft.routes[ri].stops[si]) return;
+                    draft.routes[ri].stops[si].emoji = stRow.querySelector("[data-sf='emoji']")?.value.trim() || "🕒";
+                    draft.routes[ri].stops[si].station = stRow.querySelector("[data-sf='station']")?.value.trim() || "naama";
+                    draft.routes[ri].stops[si].timeAr = stRow.querySelector("[data-sf='timeAr']")?.value.trim() || "08:00";
+                    draft.routes[ri].stops[si].timeEn = stRow.querySelector("[data-sf='timeEn']")?.value.trim() || "08:00";
+                });
+            });
+        }
+        draft.img = draft.gallery[0] || IMAGE_CHOICES[0].value;
+    };
+
+    const runStudioTranslate = async (showToastMsg = true) => {
+        collectInputsIntoDraft();
+        studio.translating = true;
+        renderStudioBody();
+        try {
+            const payload = {
+                sourceLang: studio.sourceLang,
+                targetLangs: ["ar", "en", "it", "ru"].filter(x => x !== studio.sourceLang),
+                items: buildTranslateItems(draft, studio.sourceLang)
+            };
+            const res = await apiFetch("/api/admin/translate", { method: "POST", body: JSON.stringify(payload) });
+            applyTranslationsToDraft(draft, res.translations);
+            studio.dirtyLangText = false;
+            if (showToastMsg) showAdminToast(isAr ? "تمت ترجمة وتحديث الـ 4 لغات تلقائياً ✓" : "Auto-translated all 4 languages ✓");
+            return true;
+        } catch (err) {
+            showAdminToast(err.message, "err");
+            return false;
+        } finally {
+            studio.translating = false;
+            renderStudioBody();
+        }
+    };
+
+    const renderListEditor = (lk, heading, colorCls) => {
+        const arr = draft[lk][studio.editLang] || [];
+        return `
+            <div class="p-3.5 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-black ${colorCls}">${heading} (${arr.length})</span>
+                    <button type="button" data-add-list="${lk}" class="px-2.5 py-1 rounded-lg bg-champagne text-carbon-950 font-black text-[11px]">+ ${isAr ? "إضافة" : "Add"}</button>
+                </div>
+                <div class="space-y-1.5">
+                    ${arr.map((val, idx2) => `
+                        <div class="flex items-center gap-1.5">
+                            <input type="text" data-st-list="${lk}" value="${esc(val)}" class="flex-1 px-2.5 py-1.5 rounded-xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 text-xs font-bold">
+                            <button type="button" data-del-list="${lk}:${idx2}" class="px-2 py-1.5 rounded-lg bg-rose-500/15 text-rose-500 font-black text-xs">✕</button>
+                        </div>
+                    `).join("")}
+                </div>
+            </div>`;
+    };
+
+    const renderStudioBody = () => {
+        const l = studio.editLang;
+        const tabs = [
+            { id: "basics", label: isAr ? "1. الأساسيات والأسعار" : "1. Basics & Pricing" },
+            { id: "gallery", label: isAr ? `2. الصور (${draft.gallery.length})` : `2. Gallery (${draft.gallery.length})` },
+            { id: "content", label: isAr ? "3. الوصف والمميزات" : "3. Content & Highlights" },
+            { id: "itinerary", label: isAr ? "4. خط السير والشمول" : "4. Itinerary & Inclusions" },
+            { id: "routes", label: isAr ? "5. المسارات و SEO" : "5. Routes & Page SEO" }
+        ];
+
+        let tabHtml = "";
+        if (studio.tab === "basics") {
+            tabHtml = `
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                    <div class="sm:col-span-2 lg:col-span-2"><label class="block font-extrabold mb-1">${isAr ? `عنوان البرنامج (${l.toUpperCase()}) *` : `Title (${l.toUpperCase()}) *`}</label><input id="st-title" type="text" value="${esc(getLangValue(draft, "title", l))}" class="st-lang-inp w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-black"></div>
+                    <div><label class="block font-extrabold mb-1">${isAr ? `شارة البطاقة (${l.toUpperCase()})` : `Badge (${l.toUpperCase()})`}</label><input id="st-badge" type="text" value="${esc(getLangValue(draft, "badge", l))}" class="st-lang-inp w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-bold"></div>
+                    <div><label class="block font-extrabold mb-1">${isAr ? `المدة (${l.toUpperCase()})` : `Duration (${l.toUpperCase()})`}</label><input id="st-dur" type="text" value="${esc(getLangValue(draft, "duration", l))}" class="st-lang-inp w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-bold"></div>
+                    <div><label class="block font-extrabold mb-1">${isAr ? `نافذة التحرك (${l.toUpperCase()})` : `Departure Window (${l.toUpperCase()})`}</label><input id="st-dep" type="text" value="${esc(getLangValue(draft, "departureWindow", l))}" class="st-lang-inp w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-bold"></div>
+                    <div><label class="block font-extrabold mb-1">${isAr ? "الأيقونة (Emoji)" : "Icon"}</label><input id="st-icon" type="text" value="${esc(draft.icon)}" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-bold"></div>
+                    <div><label class="block font-extrabold mb-1">${isAr ? "السعر يبدأ من ($)" : "From Price ($)"}</label><input id="st-from" type="number" step="0.01" value="${draft.fromPrice}" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-black"></div>
+                    <div><label class="block font-extrabold mb-1">${isAr ? "سعر الفرد الكامل ($)" : "Adult Price ($)"}</label><input id="st-adult" type="number" step="0.01" value="${draft.adultPrice}" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-black"></div>
+                    <div><label class="block font-extrabold mb-1">${isAr ? "التقييم (★)" : "Rating"}</label><input id="st-rate" type="number" step="0.1" min="1" max="5" value="${draft.rating}" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-black"></div>
+                    <div><label class="block font-extrabold mb-1">${isAr ? "الفئة" : "Category"}</label>
+                        <select id="st-cat" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-bold">
+                            <option value="sunrise" ${draft.category === "sunrise" ? "selected" : ""}>🌅 الشروق (sunrise)</option>
+                            <option value="morning" ${draft.category === "morning" ? "selected" : ""}>☀️ الصباحية (morning)</option>
+                            <option value="standard" ${draft.category === "standard" ? "selected" : ""}>🌄 العادية (standard)</option>
+                            <option value="dinner" ${draft.category === "dinner" ? "selected" : ""}>🌙 العشاء (dinner)</option>
+                        </select>
+                    </div>
+                    <div><label class="block font-extrabold mb-1">${isAr ? "الفترة" : "Time Slot"}</label>
+                        <select id="st-slot" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-bold">
+                            <option value="morning" ${draft.slotType === "morning" ? "selected" : ""}>${t("slot_morning")}</option>
+                            <option value="evening" ${draft.slotType === "evening" ? "selected" : ""}>${t("slot_evening")}</option>
+                        </select>
+                    </div>
+                    <div><label class="block font-extrabold mb-1">${isAr ? "رابط الصفحة (Slug)" : "URL Slug ID"}</label><input id="st-id" type="text" value="${esc(draft.id)}" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-mono font-bold"></div>
+                    <div class="sm:col-span-2"><label class="block font-extrabold mb-1">${isAr ? "ملخص المركبات والأنشطة" : "Vehicles Summary"}</label><input id="st-veh" type="text" value="${esc(draft.vehicle)}" class="w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-bold"></div>
+                    <label class="flex items-center gap-2 p-2.5 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 font-black cursor-pointer self-end"><input id="st-active" type="checkbox" ${draft.active !== false ? "checked" : ""} class="accent-sea"> ${isAr ? "تفعيل البرنامج بالموقع" : "Show on Storefront"}</label>
+                </div>`;
+        } else if (studio.tab === "gallery") {
+            const mediaPool = [
+                ...studio.uploadedMedia.map(m => ({ value: m.url, label: `Uploaded: ${m.filename}` })),
+                ...IMAGE_CHOICES
+            ];
+            tabHtml = `
+                <div class="space-y-4 text-xs">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <label class="p-4 rounded-2xl border-2 border-dashed border-champagne/50 bg-champagne/10 hover:bg-champagne/15 cursor-pointer flex items-center justify-center gap-2 font-black text-champagne-dark dark:text-champagne transition">
+                            <input id="st-file-upload" type="file" accept="image/*" multiple class="hidden">
+                            <span>${studio.uploading ? (isAr ? "جاري رفع الصور..." : "Uploading...") : (isAr ? "📤 رفع صور جديدة من جهازك (متعدد)" : "📤 Upload Photo(s) from Device")}</span>
+                        </label>
+                        <div class="flex items-center gap-2 p-2 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10">
+                            <input id="st-img-url" type="url" placeholder="https://..." class="flex-1 px-2.5 py-2 bg-transparent font-bold focus:outline-none">
+                            <button id="st-add-url" type="button" class="px-3 py-2 rounded-xl bg-carbon-900 dark:bg-champagne text-white dark:text-carbon-950 font-black">+ URL</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="font-black mb-2">${isAr ? `معرض صور البرنامج الحالي (${draft.gallery.length} صورة — الأولى هي الصورة الرئيسية)` : `Tour Gallery (${draft.gallery.length} photos — #1 is Cover)`}</div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                            ${draft.gallery.map((url, gi) => `
+                                <div class="rounded-2xl overflow-hidden bg-[#F6F3EC] dark:bg-carbon-900 border ${gi === 0 ? "border-champagne ring-2 ring-champagne/40" : "border-carbon-900/10 dark:border-white/10"} flex flex-col">
+                                    <div class="relative h-28 bg-carbon-950">
+                                        <img src="${esc(url)}" alt="Photo ${gi + 1}" class="w-full h-full object-cover">
+                                        ${gi === 0 ? `<span class="absolute top-1.5 start-1.5 px-2 py-0.5 rounded bg-champagne text-carbon-950 text-[10px] font-black">${isAr ? "الرئيسية ★" : "Cover ★"}</span>` : ""}
+                                    </div>
+                                    <div class="p-1.5 flex items-center justify-between gap-1 text-[10px]">
+                                        <button type="button" data-gal-cover="${gi}" class="px-2 py-1 rounded bg-white dark:bg-carbon-800 font-black hover:bg-champagne hover:text-carbon-950">${gi === 0 ? "★" : (isAr ? "تعيين رئيسية" : "Cover")}</button>
+                                        <div class="flex gap-1">
+                                            ${gi > 0 ? `<button type="button" data-gal-move="${gi}:-1" class="px-1.5 py-1 rounded bg-white dark:bg-carbon-800 font-black">←</button>` : ""}
+                                            ${gi < draft.gallery.length - 1 ? `<button type="button" data-gal-move="${gi}:1" class="px-1.5 py-1 rounded bg-white dark:bg-carbon-800 font-black">→</button>` : ""}
+                                            <button type="button" data-gal-del="${gi}" class="px-1.5 py-1 rounded bg-rose-500/15 text-rose-500 font-black">✕</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join("")}
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="font-black mb-2 opacity-80">${isAr ? "مكتبة صور موسى سفاري والصور المرفوعة (اضغط للإضافة للمعرض):" : "Media Library (Tap to add to tour gallery):"}</div>
+                        <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                            ${mediaPool.map(mp => {
+                                const used = draft.gallery.includes(mp.value);
+                                return `
+                                    <button type="button" data-lib-add="${esc(mp.value)}" class="relative rounded-xl overflow-hidden border ${used ? "border-sea ring-2 ring-sea/35" : "border-carbon-900/10 dark:border-white/10 opacity-85 hover:opacity-100"} text-start transition">
+                                        <img src="${esc(mp.value)}" alt="${esc(mp.label)}" class="w-full h-16 object-cover">
+                                        <div class="p-1 text-[9px] font-extrabold truncate bg-white dark:bg-carbon-800">${used ? "✓ " : "+ "}${esc(mp.label)}</div>
+                                    </button>`;
+                            }).join("")}
+                        </div>
+                    </div>
+                </div>`;
+        } else if (studio.tab === "content") {
+            const hlArr = draft.highlights[l] || [];
+            tabHtml = `
+                <div class="space-y-4 text-xs">
+                    <div>
+                        <label class="block font-extrabold mb-1">${isAr ? `العنوان الفرعي بصفحة التفاصيل (${l.toUpperCase()})` : `Page Hero Subtitle (${l.toUpperCase()})`}</label>
+                        <input id="st-sub" type="text" value="${esc(getLangValue(draft, "subtitle", l))}" class="st-lang-inp w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-bold">
+                    </div>
+                    <div>
+                        <label class="block font-extrabold mb-1">${isAr ? `الوصف الكامل للبرنامج (${l.toUpperCase()})` : `Full Description (${l.toUpperCase()})`}</label>
+                        <textarea id="st-desc" rows="3" class="st-lang-inp w-full px-3 py-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/15 dark:border-white/15 font-medium">${esc(getLangValue(draft, "desc", l))}</textarea>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="font-black text-champagne-dark dark:text-champagne">${isAr ? `أبرز المميزات (${l.toUpperCase()}) ✓` : `Highlights (${l.toUpperCase()}) ✓`}</span>
+                            <button id="st-add-hl" type="button" class="px-3 py-1 rounded-lg bg-champagne text-carbon-950 font-black">+ ${isAr ? "ميزة" : "Add"}</button>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            ${hlArr.map((val, hi) => `
+                                <div class="flex items-center gap-1.5">
+                                    <input type="text" data-st-hl="${hi}" value="${esc(val)}" class="st-lang-inp flex-1 px-2.5 py-2 rounded-xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 font-bold">
+                                    <button type="button" data-del-hl="${hi}" class="px-2 py-2 rounded-lg bg-rose-500/15 text-rose-500 font-black">✕</button>
+                                </div>
+                            `).join("")}
+                        </div>
+                    </div>
+                </div>`;
+        } else if (studio.tab === "itinerary") {
+            const steps = draft.itinerary[l] || [];
+            tabHtml = `
+                <div class="space-y-4 text-xs">
+                    <div class="p-4 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="font-black text-champagne-dark dark:text-champagne">${isAr ? `خط سير الرحلة بالتفصيل (${l.toUpperCase()})` : `Step-by-Step Itinerary (${l.toUpperCase()})`}</span>
+                            <button id="st-add-step" type="button" class="px-3 py-1 rounded-lg bg-champagne text-carbon-950 font-black">+ ${isAr ? "مرحلة" : "Add Step"}</button>
+                        </div>
+                        <div class="space-y-2.5">
+                            ${steps.map((st, si) => `
+                                <div data-st-step-row="${si}" class="p-3 rounded-xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 grid grid-cols-12 gap-2">
+                                    <input type="text" data-sf="step" value="${esc(st.step || String(si + 1).padStart(2, "0"))}" class="col-span-2 px-2 py-1.5 rounded-lg bg-[#F6F3EC] dark:bg-carbon-900 font-black text-center">
+                                    <input type="text" data-sf="time" value="${esc(st.time || "")}" placeholder="04:00" class="st-lang-inp col-span-3 px-2 py-1.5 rounded-lg bg-[#F6F3EC] dark:bg-carbon-900 font-mono font-bold">
+                                    <input type="text" data-sf="title" value="${esc(st.title || "")}" placeholder="${isAr ? "عنوان المرحلة" : "Step title"}" class="st-lang-inp col-span-6 px-2.5 py-1.5 rounded-lg bg-[#F6F3EC] dark:bg-carbon-900 font-black">
+                                    <button type="button" data-del-step="${si}" class="col-span-1 rounded-lg bg-rose-500/15 text-rose-500 font-black">✕</button>
+                                    <input type="text" data-sf="desc" value="${esc(st.desc || "")}" placeholder="${isAr ? "تفاصيل المرحلة" : "Step details"}" class="st-lang-inp col-span-12 px-2.5 py-1.5 rounded-lg bg-[#F6F3EC] dark:bg-carbon-900">
+                                </div>
+                            `).join("")}
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        ${renderListEditor("includes", isAr ? "✓ ما يشمله السعر" : "✓ Included", "text-sea")}
+                        ${renderListEditor("excludes", isAr ? "✕ غير مشمول" : "✕ Excluded", "text-copper")}
+                        ${renderListEditor("bring", isAr ? "🎒 ماذا تحضر معك؟" : "🎒 What to Bring", "text-champagne-dark dark:text-champagne")}
+                    </div>
+                </div>`;
+        } else if (studio.tab === "routes") {
+            tabHtml = `
+                <div class="space-y-4 text-xs">
+                    <div class="flex items-center justify-between">
+                        <span class="font-black">${isAr ? `مسارات ونقاط الاستلام (${draft.routes.length})` : `Pickup Routes (${draft.routes.length})`}</span>
+                        <button id="st-add-route" type="button" class="px-3 py-1.5 rounded-xl bg-champagne text-carbon-950 font-black">+ ${isAr ? "مسار جديد" : "Add Route"}</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        ${draft.routes.map((rt, ri) => `
+                            <div data-st-route="${ri}" class="p-3.5 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 space-y-2.5">
+                                <div class="flex items-center gap-2">
+                                    <input type="text" data-r-label value="${esc(rt.label?.[l] || "")}" class="st-lang-inp flex-1 px-2.5 py-1.5 rounded-xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 font-black">
+                                    <button type="button" data-add-stop="${ri}" class="px-2.5 py-1.5 rounded-lg bg-sea text-carbon-950 font-black">+ ${isAr ? "محطة" : "Stop"}</button>
+                                    ${draft.routes.length > 1 ? `<button type="button" data-del-route="${ri}" class="px-2 py-1.5 rounded-lg bg-rose-500/15 text-rose-500 font-black">✕</button>` : ""}
+                                </div>
+                                <div class="space-y-1.5">
+                                    ${(rt.stops || []).map((st, si) => `
+                                        <div data-st-stop="${si}" class="grid grid-cols-12 gap-1.5 items-center">
+                                            <input type="text" data-sf="emoji" value="${esc(st.emoji || "🕒")}" class="col-span-2 px-1.5 py-1.5 rounded-lg bg-white dark:bg-carbon-800 text-center">
+                                            <input type="text" list="st-station-datalist" data-sf="station" value="${esc(st.station)}" class="col-span-4 px-2 py-1.5 rounded-lg bg-white dark:bg-carbon-800 font-bold">
+                                            <input type="text" data-sf="timeAr" value="${esc(st.timeAr)}" placeholder="04:00 ص" class="col-span-3 px-2 py-1.5 rounded-lg bg-white dark:bg-carbon-800 font-mono">
+                                            <input type="text" data-sf="timeEn" value="${esc(st.timeEn)}" placeholder="04:00 AM" class="col-span-2 px-1.5 py-1.5 rounded-lg bg-white dark:bg-carbon-800 font-mono">
+                                            <button type="button" data-del-stop="${ri}:${si}" class="col-span-1 py-1.5 rounded-lg bg-rose-500/15 text-rose-500 font-black">✕</button>
+                                        </div>
+                                    `).join("")}
+                                </div>
+                            </div>
+                        `).join("")}
+                    </div>
+                    <datalist id="st-station-datalist">
+                        ${Object.keys(PICKUP_STATIONS).map(k => `<option value="${k}">${PICKUP_STATIONS[k].ar} — ${PICKUP_STATIONS[k].en}</option>`).join("")}
+                    </datalist>
+
+                    <div class="p-4 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-900 border border-champagne/30 space-y-2.5">
+                        <div class="font-black text-champagne-dark dark:text-champagne">🔍 ${isAr ? `إعدادات SEO لصفحة الرحلة (${l.toUpperCase()})` : `Dedicated Page SEO Meta (${l.toUpperCase()})`}</div>
+                        <div><label class="block font-bold mb-1">${isAr ? "عنوان جوجل المخصص (اختياري)" : "Custom SEO Title (optional)"}</label><input id="st-seot" type="text" value="${esc(getLangValue(draft, "seoTitle", l))}" placeholder="${esc(getLangValue(draft, "title", l))}" class="st-lang-inp w-full px-3 py-2 rounded-xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 font-bold"></div>
+                        <div><label class="block font-bold mb-1">${isAr ? "وصف جوجل المخصص (اختياري)" : "Custom Meta Description (optional)"}</label><textarea id="st-seod" rows="2" placeholder="${esc(getLangValue(draft, "subtitle", l))}" class="st-lang-inp w-full px-3 py-2 rounded-xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10">${esc(getLangValue(draft, "seoDesc", l))}</textarea></div>
+                    </div>
+                </div>`;
+        }
+
+        const bodyHtml = `
+            <div class="space-y-4">
+                <div class="p-3 rounded-2xl bg-carbon-950 text-white border border-champagne/30 flex flex-wrap items-center justify-between gap-2.5 text-xs">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        ${STUDIO_LANGS.map(sl => `
+                            <button type="button" data-st-lang="${sl.id}"
+                                class="px-3 py-1.5 rounded-xl font-black transition ${studio.editLang === sl.id ? "bg-champagne text-carbon-950 shadow-md" : "bg-white/10 hover:bg-white/20 text-white"}">
+                                ${sl.label}${studio.sourceLang === sl.id && studio.dirtyLangText ? " *" : ""}
+                            </button>
+                        `).join("")}
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <label class="flex items-center gap-1.5 text-[11px] font-extrabold text-white/90 cursor-pointer">
+                            <input id="st-auto-tr" type="checkbox" ${studio.autoTranslate ? "checked" : ""} class="accent-champagne">
+                            <span>${isAr ? "ترجمة تلقائية للـ 4 لغات عند الحفظ" : "Auto-translate all 4 langs on save"}</span>
+                        </label>
+                        <button id="st-tr-now" type="button" ${studio.translating ? "disabled" : ""}
+                            class="px-3 py-1.5 rounded-xl bg-sea text-carbon-950 hover:bg-sea-dark hover:text-white font-black transition disabled:opacity-60">
+                            ${studio.translating ? (isAr ? "جاري الترجمة..." : "Translating...") : (isAr ? "✨ ترجم الآن لكل اللغات" : "✨ Auto-Translate All Now")}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-1.5 border-b border-carbon-900/10 dark:border-white/10 pb-2.5">
+                    ${tabs.map(tb => `
+                        <button type="button" data-st-tab="${tb.id}"
+                            class="px-3 py-2 rounded-xl text-xs font-black transition ${studio.tab === tb.id ? "bg-carbon-950 dark:bg-champagne text-white dark:text-carbon-950" : "bg-[#F6F3EC] dark:bg-carbon-900 hover:border-champagne border border-transparent"}">
+                            ${tb.label}
+                        </button>
+                    `).join("")}
+                </div>
+
+                <div>${tabHtml}</div>
+            </div>`;
+
+        const footerHtml = `
+            <div class="w-full flex flex-wrap items-center justify-between gap-2 text-xs">
+                <span class="opacity-70 font-bold">${isAr ? `لغة المصدر الحالية للتعديلات: ${studio.sourceLang.toUpperCase()}` : `Active source language: ${studio.sourceLang.toUpperCase()}`}</span>
+                <div class="flex items-center gap-2">
+                    <button type="button" id="st-cancel-btn" class="px-4 py-2.5 rounded-xl border border-carbon-900/15 dark:border-white/15 font-bold">${t("cancel")}</button>
+                    <button id="tr-save" type="button" class="px-5 py-2.5 rounded-xl bg-champagne hover:bg-champagne-light text-carbon-950 font-black shadow-lg shadow-champagne/25">${t("save")}</button>
+                </div>
+            </div>`;
+
+        openModal(
+            isNew ? t("add_tour") : (isAr ? "استوديو تخصيص البرنامج والصفحة" : "Full Tour & Page Studio"),
+            `${draft.id} · /tour.html?id=${draft.id}`,
+            bodyHtml,
+            footerHtml,
+            { wide: true }
+        );
+
+        bindStudioEvents();
+    };
+
+    const bindStudioEvents = () => {
+        document.querySelectorAll(".st-lang-inp").forEach(inp => {
+            inp.addEventListener("input", () => {
+                studio.sourceLang = studio.editLang;
+                studio.dirtyLangText = true;
+            });
+        });
+
+        document.querySelectorAll("[data-st-lang]").forEach(btn => {
+            btn.addEventListener("click", () => {
+                collectInputsIntoDraft();
+                studio.editLang = btn.dataset.stLang;
+                renderStudioBody();
+            });
+        });
+
+        document.querySelectorAll("[data-st-tab]").forEach(btn => {
+            btn.addEventListener("click", () => {
+                collectInputsIntoDraft();
+                studio.tab = btn.dataset.stTab;
+                renderStudioBody();
+            });
+        });
+
+        document.getElementById("st-auto-tr")?.addEventListener("change", e => {
+            studio.autoTranslate = e.target.checked;
+        });
+
+        document.getElementById("st-tr-now")?.addEventListener("click", () => runStudioTranslate(true));
+        document.getElementById("st-cancel-btn")?.addEventListener("click", closeModal);
+
+        // Gallery Handlers
+        document.getElementById("st-file-upload")?.addEventListener("change", async e => {
+            const files = [...(e.target.files || [])];
+            if (!files.length) return;
+            studio.uploading = true;
+            renderStudioBody();
+            try {
+                for (const f of files) {
+                    const payload = await compressImageToPayload(f);
+                    const res = await apiFetch("/api/admin/media", { method: "POST", body: JSON.stringify(payload) });
+                    if (res.url && !draft.gallery.includes(res.url)) draft.gallery.push(res.url);
+                    if (res.media) studio.uploadedMedia.unshift(res.media);
+                }
+                draft.img = draft.gallery[0] || IMAGE_CHOICES[0].value;
+                showAdminToast(isAr ? "تم رفع الصور وإضافتها للمعرض ✓" : "Photos uploaded to gallery ✓");
+            } catch (err) {
+                showAdminToast(err.message, "err");
+            } finally {
+                studio.uploading = false;
+                renderStudioBody();
+            }
+        });
+
+        document.getElementById("st-add-url")?.addEventListener("click", () => {
+            const val = document.getElementById("st-img-url")?.value.trim();
+            if (!val) return;
+            if (!draft.gallery.includes(val)) draft.gallery.push(val);
+            draft.img = draft.gallery[0];
+            renderStudioBody();
+        });
+
+        document.querySelectorAll("[data-gal-cover]").forEach(b => b.addEventListener("click", () => {
+            const i = Number(b.dataset.galCover);
+            const [picked] = draft.gallery.splice(i, 1);
+            if (picked) draft.gallery.unshift(picked);
+            draft.img = draft.gallery[0] || IMAGE_CHOICES[0].value;
+            renderStudioBody();
+        }));
+        document.querySelectorAll("[data-gal-move]").forEach(b => b.addEventListener("click", () => {
+            const [iStr, dStr] = b.dataset.galMove.split(":");
+            const i = Number(iStr);
+            const j = i + Number(dStr);
+            if (j >= 0 && j < draft.gallery.length) {
+                [draft.gallery[i], draft.gallery[j]] = [draft.gallery[j], draft.gallery[i]];
+                draft.img = draft.gallery[0];
+                renderStudioBody();
+            }
+        }));
+        document.querySelectorAll("[data-gal-del]").forEach(b => b.addEventListener("click", () => {
+            if (draft.gallery.length <= 1) return showAdminToast(isAr ? "يجب بقاء صورة واحدة على الأقل" : "Keep at least 1 photo", "err");
+            draft.gallery.splice(Number(b.dataset.galDel), 1);
+            draft.img = draft.gallery[0];
+            renderStudioBody();
+        }));
+        document.querySelectorAll("[data-lib-add]").forEach(b => b.addEventListener("click", () => {
+            const url = b.dataset.libAdd;
+            if (!draft.gallery.includes(url)) draft.gallery.push(url);
+            draft.img = draft.gallery[0];
+            renderStudioBody();
+        }));
+
+        // Content & Lists Handlers
+        document.getElementById("st-add-hl")?.addEventListener("click", () => {
+            collectInputsIntoDraft();
+            draft.highlights[studio.editLang].push(studio.editLang === "ar" ? "ميزة جديدة" : "New highlight");
+            studio.sourceLang = studio.editLang;
+            studio.dirtyLangText = true;
+            renderStudioBody();
+        });
+        document.querySelectorAll("[data-del-hl]").forEach(b => b.addEventListener("click", () => {
+            collectInputsIntoDraft();
+            draft.highlights[studio.editLang].splice(Number(b.dataset.delHl), 1);
+            studio.sourceLang = studio.editLang;
+            studio.dirtyLangText = true;
+            renderStudioBody();
+        }));
+
+        document.getElementById("st-add-step")?.addEventListener("click", () => {
+            collectInputsIntoDraft();
+            const arr = draft.itinerary[studio.editLang];
+            arr.push({ step: String(arr.length + 1).padStart(2, "0"), time: "08:00", title: "", desc: "" });
+            studio.sourceLang = studio.editLang;
+            studio.dirtyLangText = true;
+            renderStudioBody();
+        });
+        document.querySelectorAll("[data-del-step]").forEach(b => b.addEventListener("click", () => {
+            collectInputsIntoDraft();
+            draft.itinerary[studio.editLang].splice(Number(b.dataset.delStep), 1);
+            studio.sourceLang = studio.editLang;
+            studio.dirtyLangText = true;
+            renderStudioBody();
+        }));
+
+        document.querySelectorAll("[data-add-list]").forEach(b => b.addEventListener("click", () => {
+            collectInputsIntoDraft();
+            draft[b.dataset.addList][studio.editLang].push("");
+            studio.sourceLang = studio.editLang;
+            studio.dirtyLangText = true;
+            renderStudioBody();
+        }));
+        document.querySelectorAll("[data-del-list]").forEach(b => b.addEventListener("click", () => {
+            collectInputsIntoDraft();
+            const [lk, idx2] = b.dataset.delList.split(":");
+            draft[lk][studio.editLang].splice(Number(idx2), 1);
+            studio.sourceLang = studio.editLang;
+            studio.dirtyLangText = true;
+            renderStudioBody();
+        }));
+
+        // Routes Handlers
+        document.getElementById("st-add-route")?.addEventListener("click", () => {
+            collectInputsIntoDraft();
+            const n = draft.routes.length + 1;
+            draft.routes.push({
+                id: `route${n}`,
+                label: { ar: `المسار ${n}`, en: `Route ${n}`, it: `Percorso ${n}`, ru: `Маршрут ${n}` },
+                stops: [{ station: "naama", timeAr: "08:00 ص", timeEn: "08:00 AM", emoji: "🕗" }]
+            });
+            studio.sourceLang = studio.editLang;
+            studio.dirtyLangText = true;
+            renderStudioBody();
+        });
+        document.querySelectorAll("[data-del-route]").forEach(b => b.addEventListener("click", () => {
+            collectInputsIntoDraft();
+            draft.routes.splice(Number(b.dataset.delRoute), 1);
+            renderStudioBody();
+        }));
+        document.querySelectorAll("[data-add-stop]").forEach(b => b.addEventListener("click", () => {
+            collectInputsIntoDraft();
+            draft.routes[Number(b.dataset.addStop)]?.stops.push({ station: "naama", timeAr: "08:00 ص", timeEn: "08:00 AM", emoji: "🕒" });
+            renderStudioBody();
+        }));
+        document.querySelectorAll("[data-del-stop]").forEach(b => b.addEventListener("click", () => {
+            collectInputsIntoDraft();
+            const [ri, si] = b.dataset.delStop.split(":").map(Number);
+            draft.routes[ri]?.stops.splice(si, 1);
+            renderStudioBody();
+        }));
+
+        // Save & Sync
+        document.getElementById("tr-save")?.addEventListener("click", async () => {
+            const btn = document.getElementById("tr-save");
+            if (btn) btn.disabled = true;
+            collectInputsIntoDraft();
+            if (studio.autoTranslate && studio.dirtyLangText) {
+                await runStudioTranslate(false);
+            }
+            draft.img = draft.gallery[0] || IMAGE_CHOICES[0].value;
+            if (isNew) list.push(draft);
+            else list[idx] = draft;
+            try {
+                const res = await apiFetch("/api/admin/trips", { method: "PUT", body: JSON.stringify({ trips: list }) });
+                adminState.overview.trips = res.trips;
+                closeModal();
+                updateNavBadges();
+                renderActiveTab();
+                showAdminToast(isAr ? "تم حفظ البرنامج وتحديث اللغات والصور بالموقع ✓" : "Tour, gallery & translations synced live ✓");
+            } catch (err) {
+                showAdminToast(err.message, "err");
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        });
+    };
+
+    renderStudioBody();
+    apiFetch("/api/admin/media").then(r => {
+        if (Array.isArray(r.media)) {
+            studio.uploadedMedia = r.media;
+            if (studio.tab === "gallery") renderStudioBody();
+        }
+    }).catch(() => {});
 }
 
 function openPromoModal(idx) {

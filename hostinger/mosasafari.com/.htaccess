@@ -29,7 +29,7 @@ DirectoryIndex index.php index.html
     RewriteRule \.(log|sh|sql|md|json|lock|env|bak)$ - [R=404,L]
 
     # 4. Route Storefront Public APIs
-    RewriteRule ^api/(public/config|track|notify-booking)$ api/index.php [QSA,L]
+    RewriteRule ^api/(public/config|track|notify-booking|media/[a-zA-Z0-9_.\-]+)$ api/index.php [QSA,L]
 
     # 5. Route Homepage & Dedicated Tour Details Pages through PHP Multilingual SEO Pre-Renderers
     RewriteRule ^$ index.php [QSA,L]

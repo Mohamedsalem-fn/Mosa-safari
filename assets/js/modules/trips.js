@@ -13,11 +13,40 @@ import {
     getTripRoutes,
     getRouteLabel,
     getTripDetails,
-    getTripPageUrl
+    getTripPageUrl,
+    getTripBadge
 } from "../data/trips.js";
 import { I18N, BADGE_I18N } from "../data/i18n.js";
 import { state, fmtPrice, safeSetStorage } from "../state.js";
 import { showToast } from "./ui.js";
+
+const cardGalleryIdx = {};
+
+if (typeof window !== "undefined") {
+    window.cycleCardGallery = function (ev, cardKey, deltaOrIdx, isDirectIdx = false) {
+        if (ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+        }
+        const imgEl = document.querySelector(`[data-card-img="${cardKey}"]`);
+        if (!imgEl) return;
+        let list = [];
+        try { list = JSON.parse(imgEl.dataset.gallery || "[]"); } catch { list = []; }
+        if (list.length < 2) return;
+        const cur = cardGalleryIdx[cardKey] || 0;
+        const next = isDirectIdx
+            ? Math.max(0, Math.min(list.length - 1, Number(deltaOrIdx) || 0))
+            : (cur + Number(deltaOrIdx) + list.length) % list.length;
+        cardGalleryIdx[cardKey] = next;
+        imgEl.src = list[next];
+        document.querySelectorAll(`[data-card-dot="${cardKey}"]`).forEach((dot, i) => {
+            dot.classList.toggle("w-4", i === next);
+            dot.classList.toggle("bg-champagne", i === next);
+            dot.classList.toggle("w-1.5", i !== next);
+            dot.classList.toggle("bg-white/50", i !== next);
+        });
+    };
+}
 
 function esc(val) {
     return String(val ?? "")
@@ -217,27 +246,40 @@ export function renderTrips() {
         const cityLabel = L.city_sharm || trip.city;
         const dur = getTripDuration(trip);
         const details = getTripDetails(trip, lang);
+        const galleryList = (details.gallery && details.gallery.length) ? details.gallery : [trip.img];
+        const cardKey = `d-${trip.id}`;
+        const curGalIdx = (cardGalleryIdx[cardKey] || 0) % galleryList.length;
+        const activePhoto = galleryList[curGalIdx] || trip.img;
         const detailsUrl = getTripPageUrl(trip.id);
-        const badgeText = lang === "ar"
-            ? trip.badge
-            : ((BADGE_I18N[lang] && BADGE_I18N[lang][trip.badge]) || trip.badge);
+        const badgeText = getTripBadge(trip, lang, BADGE_I18N);
         const descText = getTripDesc(trip);
 
         return `
           <article style="--si:${idx}" class="trip-card in group rounded-3xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 hover:border-champagne/60 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col overflow-hidden">
             <div class="relative h-64 sm:h-72 overflow-hidden bg-carbon-900">
               <a href="${esc(detailsUrl)}" class="block w-full h-full">
-                <img src="${esc(trip.img)}" alt="${esc(title)}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
+                <img data-card-img="${esc(cardKey)}" data-gallery="${esc(JSON.stringify(galleryList))}" src="${esc(activePhoto)}" alt="${esc(title)}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
               </a>
               <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-carbon-950/90 via-carbon-950/20 to-carbon-950/40"></div>
 
+              ${galleryList.length > 1 ? `
+                <button type="button" onclick="cycleCardGallery(event, '${esc(cardKey)}', -1)" aria-label="Previous photo"
+                  class="absolute start-2.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-carbon-950/75 hover:bg-champagne hover:text-carbon-950 text-white border border-white/20 text-base font-black grid place-items-center transition opacity-90 sm:opacity-0 sm:group-hover:opacity-100">‹</button>
+                <button type="button" onclick="cycleCardGallery(event, '${esc(cardKey)}', 1)" aria-label="Next photo"
+                  class="absolute end-2.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-carbon-950/75 hover:bg-champagne hover:text-carbon-950 text-white border border-white/20 text-base font-black grid place-items-center transition opacity-90 sm:opacity-0 sm:group-hover:opacity-100">›</button>
+                <div class="absolute bottom-2 inset-x-0 flex items-center justify-center gap-1 z-20">
+                  ${galleryList.map((_, gi) => `<button type="button" data-card-dot="${esc(cardKey)}" onclick="cycleCardGallery(event, '${esc(cardKey)}', ${gi}, true)" aria-label="Photo ${gi + 1}" class="h-1.5 rounded-full transition-all ${gi === curGalIdx ? 'w-4 bg-champagne' : 'w-1.5 bg-white/50'}"></button>`).join("")}
+                </div>
+              ` : ""}
+
               <!-- Top Badges -->
-              <div class="absolute top-3.5 start-3.5 flex flex-wrap items-center gap-2 z-10">
+              <div class="absolute top-3.5 start-3.5 flex flex-wrap items-center gap-1.5 z-10">
                 <span class="px-3 py-1 rounded-full bg-carbon-950/80 backdrop-blur-md border border-champagne/40 text-champagne text-xs font-black">${esc(badgeText)}</span>
                 <span class="px-3 py-1 rounded-full bg-sea/90 text-carbon-950 text-xs font-black flex items-center gap-1">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" class="w-3.5 h-3.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                   ${esc(dur)}
                 </span>
+                ${galleryList.length > 1 ? `<span class="px-2 py-1 rounded-full bg-carbon-950/80 border border-white/15 text-white text-[10.5px] font-black">📷 ${galleryList.length}</span>` : ""}
               </div>
 
               <!-- Compare & Favorite -->

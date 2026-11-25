@@ -12,7 +12,8 @@ import {
     getStationLabel,
     getTripRoutes,
     getRouteLabel,
-    getTripDetails
+    getTripDetails,
+    getTripBadge
 } from "./data/trips.js";
 import { I18N, BADGE_I18N, BOOKING_I18N } from "./data/i18n.js";
 import {
@@ -268,10 +269,10 @@ function updateTourSeo(trip, details) {
     const lang = state.lang || "ar";
     const title = getTripTitle(trip, lang);
     const dur = getTripDuration(trip, lang);
-    const fullTitle = `${title} (${dur}) | Mosa Safari — mosasafari.com`;
+    const fullTitle = details.seoTitle || `${title} (${dur}) | Mosa Safari — mosasafari.com`;
     document.title = fullTitle;
 
-    const descText = `${details.subtitle || getTripDesc(trip, lang)} (${dur})`;
+    const descText = details.seoDesc || `${details.subtitle || getTripDesc(trip, lang)} (${dur})`;
     const setMeta = (selector, value) => {
         const el = document.querySelector(selector);
         if (el && value) el.setAttribute("content", value);
@@ -290,12 +291,14 @@ function updateTourSeo(trip, details) {
 
     const ld = document.getElementById("tour-schema-jsonld");
     if (ld) {
+        const allImgs = (details.gallery && details.gallery.length ? details.gallery : [trip.img])
+            .map(gImg => gImg.startsWith("http") ? gImg : `https://mosasafari.com${assetUrl(gImg)}`);
         ld.textContent = JSON.stringify({
             "@context": "https://schema.org",
             "@type": ["Product", "TouristTrip"],
             name: title,
             description: descText,
-            image: `https://mosasafari.com${assetUrl(trip.img)}`,
+            image: allImgs,
             sku: trip.id,
             url: `https://mosasafari.com/tour.html?id=${encodeURIComponent(trip.id)}`,
             brand: { "@type": "Brand", name: "Mosa Safari" },
@@ -334,8 +337,9 @@ function renderTourPage() {
     const details = getTripDetails(trip, lang);
     const routes = getTripRoutes(trip);
     const gallery = (details.gallery || [trip.img]).map(assetUrl);
+    if (tourState.activeImgIdx >= gallery.length) tourState.activeImgIdx = 0;
     const heroImg = gallery[tourState.activeImgIdx] || gallery[0];
-    const badgeText = lang === "ar" ? trip.badge : ((BADGE_I18N[lang] && BADGE_I18N[lang][trip.badge]) || trip.badge);
+    const badgeText = getTripBadge(trip, lang, BADGE_I18N);
     const quote = computeSidebarQuote(trip);
     const otherTrips = SAFARI_TRIPS.filter(t => t.active !== false && t.id !== trip.id);
 
@@ -378,8 +382,8 @@ function renderTourPage() {
             <!-- 2. Tour Hero Showcase + Key Facts Bar -->
             <section class="rounded-3xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 shadow-xl overflow-hidden">
                 <div class="grid grid-cols-1 lg:grid-cols-12">
-                    <div class="lg:col-span-7 relative bg-carbon-950">
-                        <div class="aspect-[16/10] w-full overflow-hidden">
+                    <div class="lg:col-span-7 relative bg-carbon-950 group">
+                        <div class="aspect-[16/10] w-full overflow-hidden cursor-zoom-in" id="tour-hero-trigger">
                             <img id="tour-hero-img" src="${esc(heroImg)}" alt="${esc(title)}" class="w-full h-full object-cover transition duration-500">
                         </div>
                         <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-carbon-950/85 via-transparent to-carbon-950/30"></div>
@@ -387,20 +391,27 @@ function renderTourPage() {
                             <span class="px-3 py-1 rounded-full bg-carbon-950/80 border border-champagne/40 text-champagne text-xs font-black">${esc(badgeText)}</span>
                             <span class="px-3 py-1 rounded-full bg-sea text-carbon-950 text-xs font-black">⏱ ${esc(dur)}</span>
                         </div>
-                        <div class="absolute top-4 end-4 px-3 py-1 rounded-full bg-carbon-950/80 border border-white/15 text-champagne text-xs font-black">
-                            ★ ${trip.rating}
+                        <div class="absolute top-4 end-4 flex items-center gap-1.5">
+                            <span class="px-2.5 py-1 rounded-full bg-carbon-950/80 border border-white/15 text-white text-xs font-black">📷 <span dir="ltr">${tourState.activeImgIdx + 1} / ${gallery.length}</span></span>
+                            <span class="px-3 py-1 rounded-full bg-carbon-950/80 border border-white/15 text-champagne text-xs font-black">★ ${trip.rating}</span>
                         </div>
-                        <!-- Gallery Thumbnails -->
+                        ${gallery.length > 1 ? `
+                            <button type="button" id="tour-hero-prev" aria-label="Previous image"
+                                class="absolute start-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-carbon-950/75 hover:bg-champagne hover:text-carbon-950 text-white border border-white/20 text-lg font-black grid place-items-center transition">‹</button>
+                            <button type="button" id="tour-hero-next" aria-label="Next image"
+                                class="absolute end-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-carbon-950/75 hover:bg-champagne hover:text-carbon-950 text-white border border-white/20 text-lg font-black grid place-items-center transition">›</button>
+                        ` : ""}
+                        <!-- Scrollable Multi-Photo Thumbnails -->
                         <div class="absolute bottom-3 inset-x-4 flex items-center justify-between gap-3">
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 overflow-x-auto m-hscroll pb-0.5 max-w-full">
                                 ${gallery.map((gImg, idx) => `
                                     <button type="button" data-gallery-idx="${idx}"
-                                        class="w-14 h-10 sm:w-16 sm:h-12 rounded-xl overflow-hidden border-2 transition ${idx === tourState.activeImgIdx ? 'border-champagne scale-105' : 'border-white/40 opacity-75 hover:opacity-100'}">
+                                        class="shrink-0 w-14 h-10 sm:w-16 sm:h-12 rounded-xl overflow-hidden border-2 transition ${idx === tourState.activeImgIdx ? 'border-champagne scale-105' : 'border-white/40 opacity-75 hover:opacity-100'}">
                                         <img src="${esc(gImg)}" alt="Preview ${idx + 1}" class="w-full h-full object-cover">
                                     </button>
                                 `).join("")}
                             </div>
-                            <span class="hidden sm:inline-flex px-3 py-1.5 rounded-xl bg-carbon-950/80 backdrop-blur-md border border-white/15 text-white text-xs font-extrabold">${esc(c.pay_badge)}</span>
+                            <span class="hidden sm:inline-flex shrink-0 px-3 py-1.5 rounded-xl bg-carbon-950/80 backdrop-blur-md border border-white/15 text-white text-xs font-extrabold">${esc(c.pay_badge)}</span>
                         </div>
                     </div>
 
@@ -683,6 +694,46 @@ function renderTourPage() {
             renderTourPage();
         });
     });
+    document.getElementById("tour-hero-prev")?.addEventListener("click", e => {
+        e.stopPropagation();
+        tourState.activeImgIdx = (tourState.activeImgIdx - 1 + gallery.length) % gallery.length;
+        renderTourPage();
+    });
+    document.getElementById("tour-hero-next")?.addEventListener("click", e => {
+        e.stopPropagation();
+        tourState.activeImgIdx = (tourState.activeImgIdx + 1) % gallery.length;
+        renderTourPage();
+    });
+    const updateLightbox = () => {
+        const lbImg = document.getElementById("lb-img");
+        const lbCap = document.getElementById("lb-caption");
+        if (lbImg) lbImg.src = gallery[tourState.activeImgIdx] || gallery[0];
+        if (lbCap) lbCap.textContent = `${title} · ${tourState.activeImgIdx + 1} / ${gallery.length}`;
+    };
+    document.getElementById("tour-hero-trigger")?.addEventListener("click", () => {
+        updateLightbox();
+        document.getElementById("tour-lightbox")?.classList.remove("hidden");
+    });
+    const lb = document.getElementById("tour-lightbox");
+    if (lb && !lb.dataset.bound) {
+        lb.dataset.bound = "1";
+        document.getElementById("lb-close")?.addEventListener("click", () => lb.classList.add("hidden"));
+        document.getElementById("lb-prev")?.addEventListener("click", () => {
+            const gLen = getTripDetails(getCurrentTrip(), state.lang).gallery.length || 1;
+            tourState.activeImgIdx = (tourState.activeImgIdx - 1 + gLen) % gLen;
+            renderTourPage();
+            updateLightbox();
+        });
+        document.getElementById("lb-next")?.addEventListener("click", () => {
+            const gLen = getTripDetails(getCurrentTrip(), state.lang).gallery.length || 1;
+            tourState.activeImgIdx = (tourState.activeImgIdx + 1) % gLen;
+            renderTourPage();
+            updateLightbox();
+        });
+        lb.addEventListener("click", e => {
+            if (e.target === lb) lb.classList.add("hidden");
+        });
+    }
 
     root.querySelectorAll("[data-pick-route]").forEach(btn => {
         btn.addEventListener("click", () => {
@@ -867,6 +918,7 @@ window.addEventListener("DOMContentLoaded", () => {
         if (e.key === "Escape") {
             closeBookingModal();
             toggleAiWidget(false);
+            document.getElementById("tour-lightbox")?.classList.add("hidden");
         }
     });
     document.getElementById("booking-modal")?.addEventListener("click", e => {

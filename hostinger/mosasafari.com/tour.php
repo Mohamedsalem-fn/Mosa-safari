@@ -9,6 +9,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/api/_lib/mosa_core.php';
+
 $reqPath = parse_url((string)($_SERVER['REQUEST_URI'] ?? '/tour.html'), PHP_URL_PATH) ?: '/tour.html';
 $tourId = strtolower(trim((string)($_GET['id'] ?? '')));
 if ($tourId === '' && preg_match('#^/tour/([a-z0-9_-]+)/?$#i', $reqPath, $m)) {
@@ -52,12 +54,46 @@ $toursMeta = [
     ]
 ];
 
-if (!isset($toursMeta[$tourId])) {
-    $tourId = 'mosa-sunrise';
+$resolvedMeta = null;
+$vaultDir = mosa_vault_dir(__DIR__);
+$kvTrips = mosa_kv_get($vaultDir, 'trips', null);
+if (is_array($kvTrips)) {
+    foreach ($kvTrips as $t) {
+        if (!is_array($t)) {
+            continue;
+        }
+        $tid = strtolower((string)($t['id'] ?? ''));
+        $tcat = strtolower((string)($t['category'] ?? ''));
+        if ($tourId !== '' && ($tid === $tourId || $tcat === $tourId)) {
+            $cap = ucfirst($lang);
+            $customTitle = trim((string)($t['seoTitle'][$lang] ?? ($t['title' . $cap] ?? ($t['titleAr'] ?? ($t['titleEn'] ?? '')))));
+            $customDesc = trim((string)($t['seoDesc'][$lang] ?? ($t['subtitle' . $cap] ?? ($t['desc' . $cap] ?? ($t['descAr'] ?? ($t['descEn'] ?? ''))))));
+            $rawImg = (string)($t['img'] ?? ($t['gallery'][0] ?? 'assets/images/safari-sunrise.jpg'));
+            $fullImg = strpos($rawImg, 'http') === 0 ? $rawImg : ('https://mosasafari.com/' . ltrim($rawImg, '/'));
+            if ($customTitle !== '') {
+                $tourId = $tid ?: $tourId;
+                $resolvedMeta = [
+                    'img' => $fullImg,
+                    'title' => $customTitle . ' | Mosa Safari',
+                    'desc' => $customDesc !== '' ? $customDesc : ($toursMeta['mosa-sunrise'][$lang]['desc'])
+                ];
+                break;
+            }
+        }
+    }
 }
 
-$tMeta = $toursMeta[$tourId];
-$m = $tMeta[$lang];
+if ($resolvedMeta === null) {
+    if (!isset($toursMeta[$tourId])) {
+        $tourId = 'mosa-sunrise';
+    }
+    $resolvedMeta = [
+        'img' => $toursMeta[$tourId]['img'],
+        'title' => $toursMeta[$tourId][$lang]['title'],
+        'desc' => $toursMeta[$tourId][$lang]['desc']
+    ];
+}
+
 $dir = $lang === 'ar' ? 'rtl' : 'ltr';
 $canonicalUrl = 'https://mosasafari.com/tour.html?id=' . urlencode($tourId);
 
@@ -73,9 +109,9 @@ $replaceOnce = static function (string $pattern, string $replacement, string $su
     return (string)preg_replace_callback($pattern, static fn() => $replacement, $subject, 1);
 };
 
-$safeTitle = htmlspecialchars($m['title'], ENT_QUOTES, 'UTF-8');
-$safeDesc = htmlspecialchars($m['desc'], ENT_QUOTES, 'UTF-8');
-$safeImg = htmlspecialchars($tMeta['img'], ENT_QUOTES, 'UTF-8');
+$safeTitle = htmlspecialchars($resolvedMeta['title'], ENT_QUOTES, 'UTF-8');
+$safeDesc = htmlspecialchars($resolvedMeta['desc'], ENT_QUOTES, 'UTF-8');
+$safeImg = htmlspecialchars($resolvedMeta['img'], ENT_QUOTES, 'UTF-8');
 
 $html = $replaceOnce('/<html\s+lang="[^"]*"\s+dir="[^"]*"/i', '<html lang="' . $lang . '" dir="' . $dir . '"', $html);
 $html = $replaceOnce('/<title>.*?<\/title>/is', '<title>' . $safeTitle . '</title>', $html);

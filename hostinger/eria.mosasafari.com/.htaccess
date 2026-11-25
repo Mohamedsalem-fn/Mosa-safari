@@ -25,8 +25,8 @@ DirectoryIndex index.php
     RewriteRule ^admin\.html$ - [R=404,L]
     RewriteRule \.(log|sh|sql|md|lock|env|bak)$ - [R=404,L]
 
-    # 3. Route Admin API endpoints to PHP handler
-    RewriteRule ^api/admin(/.*)?$ api/index.php [QSA,L]
+    # 3. Route Admin API endpoints & media delivery to PHP handler
+    RewriteRule ^api/(admin|media)(/.*)?$ api/index.php [QSA,L]
 
     # 4. Route root & /admin to hardened index.php wrapper
     RewriteRule ^$ index.php [L]

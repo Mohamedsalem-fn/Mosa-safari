@@ -29,6 +29,11 @@ $secrets = mosa_load_secrets($vaultDir, [__DIR__ . '/.mosa_secrets.php']);
 $path = parse_url((string)($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?: '/';
 $method = strtoupper((string)($_SERVER['REQUEST_METHOD'] ?? 'GET'));
 
+// Public media delivery for uploaded admin gallery images
+if (preg_match('#^/api/media/([a-zA-Z0-9_.\-]+)$#', $path, $mm) && ($method === 'GET' || $method === 'HEAD')) {
+    mosa_serve_media($vaultDir, $mm[1]);
+}
+
 function mosa_verify_origin_headers(): bool
 {
     $secFetch = strtolower((string)($_SERVER['HTTP_SEC_FETCH_SITE'] ?? ''));
@@ -449,7 +454,7 @@ if (preg_match('#^/api/admin/bookings/([^/]+)$#', $path, $m)) {
 
 // 9. PUT /api/admin/trips
 if ($path === '/api/admin/trips' && $method === 'PUT') {
-    $body = mosa_read_json_body(262144);
+    $body = mosa_read_json_body(1048576);
     if (!is_array($body)) {
         mosa_send_json(['ok' => false, 'error' => 'Invalid JSON'], 400);
     }
@@ -464,6 +469,49 @@ if ($path === '/api/admin/trips' && $method === 'PUT') {
     mosa_kv_put($vaultDir, 'trips', array_values($body['trips']));
     mosa_append_audit($vaultDir, 'TRIPS_UPDATE', 'Saved ' . count($body['trips']) . ' safari programs');
     mosa_send_json(['ok' => true, 'trips' => array_values($body['trips'])]);
+}
+
+// 9b. POST /api/admin/translate (4-language auto-translation)
+if ($path === '/api/admin/translate' && $method === 'POST') {
+    $body = mosa_read_json_body(262144);
+    if (!is_array($body)) {
+        mosa_send_json(['ok' => false, 'error' => 'Invalid JSON'], 400);
+    }
+    $sourceLang = (string)($body['sourceLang'] ?? 'ar');
+    $targetLangs = is_array($body['targetLangs'] ?? null) ? $body['targetLangs'] : ['ar', 'en', 'it', 'ru'];
+    $items = is_array($body['items'] ?? null) ? $body['items'] : [];
+    $translations = mosa_translate_tour_items($sourceLang, $targetLangs, $items);
+    mosa_send_json(['ok' => true, 'translations' => $translations]);
+}
+
+// 9c. GET | POST /api/admin/media & DELETE /api/admin/media/:id
+if ($path === '/api/admin/media') {
+    if ($method === 'GET') {
+        mosa_send_json(['ok' => true, 'media' => mosa_list_media($vaultDir)]);
+    }
+    if ($method === 'POST') {
+        $body = mosa_read_json_body(1572864);
+        if (!is_array($body)) {
+            mosa_send_json(['ok' => false, 'error' => 'Invalid JSON'], 400);
+        }
+        try {
+            $item = mosa_save_media(
+                $vaultDir,
+                (string)($body['filename'] ?? 'upload.jpg'),
+                (string)($body['mimeType'] ?? 'image/jpeg'),
+                (string)($body['dataBase64'] ?? '')
+            );
+            mosa_append_audit($vaultDir, 'MEDIA_UPLOAD', 'Uploaded media image ' . $item['id']);
+            mosa_send_json(['ok' => true, 'id' => $item['id'], 'url' => $item['url'], 'media' => $item]);
+        } catch (Throwable $e) {
+            mosa_send_json(['ok' => false, 'error' => $e->getMessage()], 400);
+        }
+    }
+}
+if (preg_match('#^/api/admin/media/([a-zA-Z0-9_.\-]+)$#', $path, $dm) && $method === 'DELETE') {
+    mosa_delete_media($vaultDir, $dm[1]);
+    mosa_append_audit($vaultDir, 'MEDIA_DELETE', 'Deleted media image ' . $dm[1]);
+    mosa_send_json(['ok' => true]);
 }
 
 // 10. PUT /api/admin/promos

@@ -259,6 +259,22 @@
         </div>
     </div>
 
+    <!-- FULLSCREEN GALLERY LIGHTBOX -->
+    <div id="tour-lightbox"
+        class="hidden fixed inset-0 z-[90] bg-carbon-950/95 backdrop-blur-md flex flex-col items-center justify-center p-4">
+        <button id="lb-close" type="button" aria-label="Close Lightbox"
+            class="absolute top-4 end-4 w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 text-white text-lg font-black grid place-items-center transition">✕</button>
+        <div class="relative w-full max-w-5xl flex items-center justify-center gap-3">
+            <button id="lb-prev" type="button" aria-label="Previous"
+                class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-carbon-900/90 border border-white/20 hover:border-champagne text-white text-xl font-black grid place-items-center shrink-0 transition">‹</button>
+            <img id="lb-img" src="" alt="Gallery Preview"
+                class="max-h-[78vh] w-auto max-w-full rounded-2xl object-contain shadow-2xl border border-white/15">
+            <button id="lb-next" type="button" aria-label="Next"
+                class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-carbon-900/90 border border-white/20 hover:border-champagne text-white text-xl font-black grid place-items-center shrink-0 transition">›</button>
+        </div>
+        <div id="lb-caption" class="mt-3 text-xs sm:text-sm font-black text-champagne">1 / 3</div>
+    </div>
+
     <script type="module" src="/assets/js/tour-page.js"></script>
 </body>
 

@@ -333,6 +333,24 @@ export default {
     async fetch(request, env) {
         const url = new URL(request.url);
 
+        const mediaMatch = url.pathname.match(/^\/api\/media\/([a-zA-Z0-9_.\-]+)$/);
+        if (mediaMatch && (request.method === "GET" || request.method === "HEAD")) {
+            const rec = await kvGetJson(env, `mosa:media:${mediaMatch[1]}`, null);
+            if (!rec || !rec.dataBase64) return new Response("Media Not Found", { status: 404 });
+            const clean = String(rec.dataBase64).replace(/^data:[^;]+;base64,/, "").replace(/\s+/g, "");
+            const bin = atob(clean);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            return new Response(request.method === "HEAD" ? null : bytes, {
+                status: 200,
+                headers: {
+                    "Content-Type": rec.mimeType || "image/jpeg",
+                    "Cache-Control": "public, max-age=31536000, immutable",
+                    "X-Content-Type-Options": "nosniff"
+                }
+            });
+        }
+
         if (url.pathname === "/api/public/config" && request.method === "GET") {
             return handlePublicConfig(env);
         }
