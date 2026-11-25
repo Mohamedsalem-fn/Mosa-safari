@@ -113,6 +113,33 @@ async function initAnimeV4Layer() {
 
         animateTripCards();
         document.addEventListener("mosa:trips-rendered", animateTripCards);
+
+        // 4. Scroll-driven word-by-word tagline reveal
+        const initTaglineReveal = () => {
+            document.querySelectorAll("[data-tagline-reveal]").forEach(el => {
+                const raw = (el.textContent || "").trim();
+                if (!raw) return;
+                el.innerHTML = raw.split(/\s+/).map(w => `<span class="tagline-word">${w}</span>`).join(" ");
+                const words = el.querySelectorAll(".tagline-word");
+                if (!words.length) return;
+                const obs = new IntersectionObserver(entries => {
+                    for (const entry of entries) {
+                        if (!entry.isIntersecting) continue;
+                        animate(words, {
+                            opacity: [0.22, 1],
+                            translateY: [8, 0],
+                            duration: 550,
+                            delay: stagger(45),
+                            ease: "outExpo"
+                        });
+                        obs.disconnect();
+                    }
+                }, { threshold: 0.35 });
+                obs.observe(el);
+            });
+        };
+        initTaglineReveal();
+        document.addEventListener("mosa:lang-applied", initTaglineReveal);
     } catch {
         // Fallback to CSS-only animations if offline or CDN blocked
     }

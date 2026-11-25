@@ -17,7 +17,7 @@ npm run check
 echo "==> 2. Syncing Hostinger storefront (https://mosasafari.com)..."
 SITE_DIR="$ROOT_DIR/hostinger/mosasafari.com"
 mkdir -p "$SITE_DIR/api/_lib"
-cp index.html robots.txt sitemap.xml manifest.webmanifest "$SITE_DIR/"
+cp index.html tour.html robots.txt sitemap.xml manifest.webmanifest "$SITE_DIR/"
 rm -rf "$SITE_DIR/assets"
 cp -r assets "$SITE_DIR/assets"
 rm -f "$SITE_DIR/assets/js/env.local.js" "$SITE_DIR/assets/js/admin.js" "$SITE_DIR/assets/css/admin.css" "$SITE_DIR/assets/css/input.css"

@@ -7,6 +7,6 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "sync": "rm -rf public && mkdir -p public && cp ../index.html ../robots.txt ../sitemap.xml ../manifest.webmanifest public/ && cp -r ../assets public/assets && rm -f public/assets/js/env.local.js public/assets/js/admin.js public/assets/css/admin.css public/assets/css/input.css public/admin.html"
+    "sync": "rm -rf public && mkdir -p public && cp ../index.html ../tour.html ../robots.txt ../sitemap.xml ../manifest.webmanifest public/ && cp -r ../assets public/assets && rm -f public/assets/js/env.local.js public/assets/js/admin.js public/assets/css/admin.css public/assets/css/input.css public/admin.html"
   }
 }

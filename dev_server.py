@@ -8,6 +8,7 @@
 
 import json
 import os
+import re
 import smtplib
 import urllib.request
 import urllib.error
@@ -41,6 +42,8 @@ class MosaDevHandler(SimpleHTTPRequestHandler):
                 "settings": {}
             })
             return
+        if re.match(r"^/tour(/[a-zA-Z0-9_-]+)?/?(\?.*)?$", self.path):
+            self.path = "/tour.html"
         super().do_GET()
 
     def do_POST(self):

@@ -261,6 +261,7 @@ export function applyLanguage(lang, onLanguageApplied) {
     }
 
     if (onLanguageApplied) onLanguageApplied();
+    document.dispatchEvent(new CustomEvent("mosa:lang-applied"));
 }
 
 export function detectLanguageByCountry(onLanguageApplied) {

@@ -348,7 +348,14 @@ export default {
             return handleNotifyBooking(request, env);
         }
 
-        const response = await env.ASSETS.fetch(request);
+        let assetRequest = request;
+        if (url.pathname === "/tour" || url.pathname.startsWith("/tour/")) {
+            const rewritten = new URL(url.toString());
+            rewritten.pathname = "/tour.html";
+            assetRequest = new Request(rewritten.toString(), request);
+        }
+
+        const response = await env.ASSETS.fetch(assetRequest);
         const newHeaders = new Headers(response.headers);
         newHeaders.set("X-Frame-Options", "SAMEORIGIN");
         newHeaders.set("X-Content-Type-Options", "nosniff");

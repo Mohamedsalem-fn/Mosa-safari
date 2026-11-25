@@ -10,6 +10,7 @@
 module.exports = {
     content: [
         "./index.html",
+        "./tour.html",
         "./admin.html",
         "./assets/js/**/*.js"
     ],

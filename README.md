@@ -8,7 +8,8 @@ A modern, multilingual, launch-ready web platform for booking luxury desert safa
 
 ```text
 Mosa-safari/
-├── index.html                        # Clean Arabic-first semantic entry point (SEO, JSON-LD, UI layout)
+├── index.html                        # Clean Arabic-first semantic entry point (SEO, JSON-LD, 2-col showcase)
+├── tour.html                         # Dedicated interactive tour details page (/tour.html?id=... & /tour/<slug>)
 ├── admin.html                        # Isolated Executive Admin Dashboard UI (Chart.js & CRM modals)
 ├── package.json                      # Project metadata, dev server, CSS build, and JS check scripts
 ├── tailwind.config.js                # Tailwind CSS configuration (custom theme & content paths)
@@ -30,7 +31,7 @@ Mosa-safari/
 │   └── public/                       # Isolated admin static assets + strict Disallow robots.txt
 ├── hostinger/
 │   ├── shared/                       # Shared PHP 8 private vault, flock KV store, crypto, Green API & Resend
-│   ├── mosasafari.com/               # Hostinger public_html package (PHP SEO pre-renderer, API, .htaccess)
+│   ├── mosasafari.com/               # Hostinger public_html package (PHP SEO index.php & tour.php, API, .htaccess)
 │   └── eria.mosasafari.com/          # Hostinger isolated admin subdomain package (bcrypt, CSRF, hardened .htaccess)
 ├── scripts/
 │   └── build-hostinger.sh            # Turnkey CSS/JS/PHP check & Hostinger ZIP packager (dist/hostinger/)
@@ -53,6 +54,7 @@ Mosa-safari/
     │   └── safari-dinner.jpg         # Dinner Safari & Bedouin Show (15:30+) photography
     └── js/
         ├── main.js                   # Application entry point, live KV config sync & tracking beacon
+        ├── tour-page.js              # Dedicated tour page renderer (4-5h itinerary, gallery, sticky live quote)
         ├── admin.js                  # Executive Admin Dashboard logic (KPIs, CRM, Tours, Promos, Settings)
         ├── cinematic.js              # Anime.js v4 motion layer, 3D card tilt & magnetic controls
         ├── state.js                  # Reactive app state, live exchange rate fetcher, storage helpers
@@ -73,7 +75,7 @@ Mosa-safari/
 ## Key Features
 
 - **Full 4-Language Support (`ar`, `en`, `it`, `ru`):** Clean Arabic-first default HTML with full RTL/LTR switching and complete translations across all 4 official Mosa Safari programs, 2-route pickup stops (`Al-Hadaba`, `Naama Bay`, `Conference Center`, `Behind Airport`, `Al-Gharqana`), FAQs, operational rules, booking steps, and AI quick chips.
-- **Official Mosa Safari 2-Route Timetable & 10-Minute Policy:** Structured departure schedules (`Sunrise 04:00 AM`, `Morning 08:00 AM`, `Standard 14:15`, `Dinner 15:30–16:15`) with interactive 1-click pickup station selection and embedded `تعليمات هامة` arrival instructions across desktop, mobile shell, booking checkout, emails, and MOSA AI.
+- **Official Mosa Safari 2-Route Timetable (4–5 Hours) & Dedicated Tour Pages (`tour.html` / `/tour/<slug>`):** Structured 4–5 hour departure schedules (`Sunrise 04:00 AM`, `Morning 08:00 AM`, `Standard 14:15`, `Dinner 15:30–16:15`) with a 2-column showcase grid, interactive 1-click pickup station selection, dedicated full-details tour pages (5-step itinerary, inclusions/exclusions, gallery switcher, and sticky quote calculator), and embedded `تعليمات هامة` arrival instructions across desktop, mobile shell, booking checkout, emails, and MOSA AI.
 - **Live Real-Time Multi-Currency Pricing (`USD`, `EGP`, `EUR`):** Automatically fetches live `USD -> EGP` and `USD -> EUR` exchange rates from multi-CDN currency APIs with local caching, dynamically converting all 4 tour cards, the price table, comparison modal, booking totals, and MOSA AI quotes.
 - **Streamlined 5-Step Interactive Booking Modal:** Direct tour selection, traveler details validation, guest count & localized vehicle type, dynamic Route 1 / Route 2 pickup station & clock picker + hotel field, promo code validation (`MOSA20` for 20% off + automatic 10% group discount for 5+ guests), and instant WhatsApp & email confirmation.
 - **Anime.js v4 Cinematic Motion Layer (`assets/js/cinematic.js`):** Staggered hero and card entrances, 3D interactive card tilt, magnetic header buttons, and scroll-reactive floating glass navigation.

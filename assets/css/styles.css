@@ -633,3 +633,18 @@ body.ai-sheet-open { overflow: hidden; }
         max-height: 86dvh !important;
     }
 }
+
+/* ---------- Luxury Editorial Expedition Steps & Tagline Reveal ---------- */
+.tagline-word {
+    display: inline-block;
+    transition: opacity 0.4s ease, transform 0.4s var(--ease-out);
+}
+.expedition-step {
+    position: relative;
+    transition: transform 0.4s var(--ease-out), border-color 0.35s, box-shadow 0.4s;
+}
+.expedition-step:hover {
+    transform: translateY(-4px);
+    border-color: rgba(var(--gold), 0.55);
+    box-shadow: 0 22px 46px -24px rgba(0, 0, 0, 0.38);
+}

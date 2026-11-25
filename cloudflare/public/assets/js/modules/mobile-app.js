@@ -11,11 +11,13 @@ import {
     MOSA_RULES,
     getStationLabel,
     getTripRoutes,
-    getRouteLabel
+    getRouteLabel,
+    getTripDetails,
+    getTripPageUrl
 } from "../data/trips.js";
 import { I18N, BADGE_I18N } from "../data/i18n.js";
 import { state, fmtPrice, getActiveRateText } from "../state.js";
-import { getTripTitle, getTripDuration, getStopClock } from "./trips.js";
+import { getTripTitle, getTripDesc, getTripDuration, getStopClock } from "./trips.js";
 import { showToast } from "./ui.js";
 
 function esc(val) {
@@ -32,24 +34,23 @@ const MOBILE_UI_I18N = {
         location: "شرم الشيخ · جنوب سيناء",
         hero_kicker: "خصم 20% بكود MOSA20",
         hero_h1: "شركة موسى سفاري شرم الشيخ",
-        hero_sub: "4 رحلات رسمية · مواعيد استلام دقيقة بمسارين · الدفع عند الوصول",
-        cta_explore: "احجز رحلتك الآن",
+        hero_sub: "4 رحلات رسمية (4–5 ساعات) · مواعيد استلام دقيقة بمسارين · الدفع عند الوصول",
+        cta_explore: "استكشف البرامج واحجز",
         cta_ai: "اسأل MOSA AI",
-        sec_stories: "الرحلات المتاحة",
-        sec_featured: "أبرز رحلات موسى سفاري",
-        sec_schedule: "📍 مواعيد التحرك وأماكن الاستلام",
-        sec_all: "جميع البرامج الرسمية",
+        sec_stories: "الرحلات المتاحة (4–5 ساعات)",
+        sec_schedule: "📍 تعليمات هامة للاستلام",
+        sec_all: "البرامج الرسمية الكاملة",
         sec_why: "لماذا موسى سفاري؟",
         sec_faq: "الأسئلة الشائعة",
         promo_title: "كود خصم حصري 20%",
         promo_sub: "اضغط لنسخ الكود واستخدامه عند الحجز",
         promo_copied: "تم نسخ كود الخصم MOSA20 ✓",
         trust_1: "دفع عند الوصول",
-        trust_2: "5 نقاط استلام",
+        trust_2: "رحلة 4–5 ساعات",
         trust_3: "مسارين يومياً",
-        book_short: "احجز",
+        details_btn: "التفاصيل الكاملة",
         nav_home: "الرئيسية",
-        nav_tours: "المواعيد",
+        nav_tours: "البرامج",
         nav_ai: "MOSA AI",
         nav_book: "احجز الآن",
         cat_all: "الكل",
@@ -62,24 +63,23 @@ const MOBILE_UI_I18N = {
         location: "Sharm El Sheikh · South Sinai",
         hero_kicker: "20% OFF with code MOSA20",
         hero_h1: "Mosa Safari Sharm El Sheikh",
-        hero_sub: "4 Official Tours · 2 Punctual Pickup Routes · Pay on Arrival",
-        cta_explore: "Book Your Safari",
+        hero_sub: "4 Official Tours (4–5 Hours) · 2 Punctual Pickup Routes · Pay on Arrival",
+        cta_explore: "Browse & Book Tours",
         cta_ai: "Ask MOSA AI",
-        sec_stories: "Browse Official Tours",
-        sec_featured: "Mosa Safari Lineup",
-        sec_schedule: "📍 Pickup Timetable & Routes",
-        sec_all: "All Official Programs",
+        sec_stories: "Filter Official Tours",
+        sec_schedule: "📍 Important Pickup Rules",
+        sec_all: "Official Safari Programs",
         sec_why: "Why Mosa Safari?",
         sec_faq: "Quick FAQ",
         promo_title: "Exclusive 20% Promo Code",
         promo_sub: "Tap to copy & apply at checkout",
         promo_copied: "Promo code MOSA20 copied ✓",
         trust_1: "Pay on Arrival",
-        trust_2: "5 Pickup Stops",
+        trust_2: "4–5 Hours Tour",
         trust_3: "2 Routes Daily",
-        book_short: "Book",
+        details_btn: "Full Details",
         nav_home: "Home",
-        nav_tours: "Schedule",
+        nav_tours: "Programs",
         nav_ai: "MOSA AI",
         nav_book: "Book Now",
         cat_all: "All",
@@ -92,12 +92,11 @@ const MOBILE_UI_I18N = {
         location: "Sharm El Sheikh · Sinai del Sud",
         hero_kicker: "20% Sconto con codice MOSA20",
         hero_h1: "Mosa Safari Sharm El Sheikh",
-        hero_sub: "4 Tour Ufficiali · 2 Percorsi Puntuali · Paga all'Arrivo",
-        cta_explore: "Prenota Ora",
+        hero_sub: "4 Tour Ufficiali (4–5 Ore) · 2 Percorsi Puntuali · Paga all'Arrivo",
+        cta_explore: "Scopri e Prenota",
         cta_ai: "Chiedi a MOSA AI",
-        sec_stories: "Sfoglia i Tour Ufficiali",
-        sec_featured: "I 4 Programmi Ufficiali",
-        sec_schedule: "📍 Orari e Punti di Ritiro",
+        sec_stories: "Filtra i Tour Ufficiali",
+        sec_schedule: "📍 Regole Importanti Ritiro",
         sec_all: "Tutti i Programmi",
         sec_why: "Perché Mosa Safari?",
         sec_faq: "Domande Frequenti",
@@ -105,11 +104,11 @@ const MOBILE_UI_I18N = {
         promo_sub: "Tocca per copiare e usare al checkout",
         promo_copied: "Codice MOSA20 copiato ✓",
         trust_1: "Paga all'Arrivo",
-        trust_2: "5 Punti Ritiro",
+        trust_2: "Durata 4–5 Ore",
         trust_3: "2 Percorsi",
-        book_short: "Prenota",
+        details_btn: "Dettagli",
         nav_home: "Home",
-        nav_tours: "Orari",
+        nav_tours: "Tour",
         nav_ai: "MOSA AI",
         nav_book: "Prenota",
         cat_all: "Tutti",
@@ -122,24 +121,23 @@ const MOBILE_UI_I18N = {
         location: "Шарм-эль-Шейх · Южный Синай",
         hero_kicker: "Скидка 20% по коду MOSA20",
         hero_h1: "Mosa Safari Шарм-эль-Шейх",
-        hero_sub: "4 официальных тура · 2 маршрута сбора · Оплата на месте",
-        cta_explore: "Забронировать тур",
+        hero_sub: "4 официальных тура (4–5 часов) · 2 маршрута сбора · Оплата на месте",
+        cta_explore: "Выбрать и забронировать",
         cta_ai: "Спросить MOSA AI",
-        sec_stories: "Официальные туры",
-        sec_featured: "Все 4 программы",
-        sec_schedule: "📍 Расписание и точки сбора",
-        sec_all: "Доступные программы",
+        sec_stories: "Выбор программы",
+        sec_schedule: "📍 Важные правила посадки",
+        sec_all: "Официальные программы",
         sec_why: "Почему Mosa Safari?",
         sec_faq: "Частые вопросы",
         promo_title: "Промокод на скидку 20%",
         promo_sub: "Нажмите, чтобы скопировать код",
         promo_copied: "Промокод MOSA20 скопирован ✓",
         trust_1: "Оплата на месте",
-        trust_2: "5 точек посадки",
+        trust_2: "Тур 4–5 часов",
         trust_3: "2 маршрута",
-        book_short: "Бронь",
+        details_btn: "Подробнее",
         nav_home: "Главная",
-        nav_tours: "График",
+        nav_tours: "Туры",
         nav_ai: "MOSA AI",
         nav_book: "Бронь",
         cat_all: "Все",
@@ -195,7 +193,6 @@ export function renderMobileApp() {
     ];
 
     const activeTrips = SAFARI_TRIPS.filter(t => t.active !== false);
-    const featuredTrips = activeTrips.slice(0, 4);
 
     let filtered = [...activeTrips];
     if (state.categoryFilter !== "all") {
@@ -257,16 +254,16 @@ export function renderMobileApp() {
                 <div>
                     <div class="text-[11px] font-bold text-champagne/90 tracking-wide">${esc(m.location)}</div>
                     <h1 class="text-2xl font-black leading-tight mt-0.5 text-white">${esc(m.hero_h1)}</h1>
-                    <p class="text-xs text-white/80 mt-1.5 leading-relaxed">${esc(m.hero_sub)}</p>
+                    <p class="text-xs text-white/85 mt-1.5 leading-relaxed">${esc(m.hero_sub)}</p>
                 </div>
 
                 <!-- Dual Action Pills -->
                 <div class="grid grid-cols-12 gap-2 pt-1">
-                    <button type="button" onclick="openBookingModal()"
+                    <a href="#m-tours-section"
                         class="col-span-7 py-3 px-3 rounded-2xl bg-champagne text-carbon-950 font-black text-xs shadow-lg shadow-champagne/30 flex items-center justify-center gap-1.5 active:scale-95 transition">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
                         <span>${esc(m.cta_explore)}</span>
-                    </button>
+                    </a>
                     <button type="button" onclick="toggleAiWidget(true)"
                         class="col-span-5 py-3 px-2.5 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 active:scale-95 transition">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-champagne" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
@@ -275,7 +272,7 @@ export function renderMobileApp() {
                 </div>
 
                 <!-- Micro Trust Strip -->
-                <div class="grid grid-cols-3 gap-1.5 pt-2 border-t border-white/15 text-[10px] font-bold text-white/85 text-center">
+                <div class="grid grid-cols-3 gap-1.5 pt-2 border-t border-white/15 text-[10px] font-bold text-white/90 text-center">
                     <div class="py-1 rounded-lg bg-white/5">✓ ${esc(m.trust_1)}</div>
                     <div class="py-1 rounded-lg bg-white/5">✓ ${esc(m.trust_2)}</div>
                     <div class="py-1 rounded-lg bg-white/5">✓ ${esc(m.trust_3)}</div>
@@ -302,41 +299,7 @@ export function renderMobileApp() {
             </div>
         </section>
 
-        <!-- 3. FEATURED 4-TOUR SNAP CAROUSEL -->
-        <section class="pt-5">
-            <div class="px-4 flex items-center justify-between mb-2.5">
-                <h2 class="text-sm font-black">${esc(m.sec_featured)}</h2>
-                <a href="#m-schedule-section" class="text-[11px] font-extrabold text-sea">${esc(m.sec_schedule)} →</a>
-            </div>
-            <div class="m-hscroll flex items-stretch gap-3 overflow-x-auto px-4 pb-2 snap-x snap-mandatory">
-                ${featuredTrips.map(trip => {
-                    const title = getTripTitle(trip);
-                    const dur = getTripDuration(trip);
-                    const badge = lang === "ar" ? trip.badge : ((BADGE_I18N[lang] && BADGE_I18N[lang][trip.badge]) || trip.badge);
-                    return `<article onclick="openBookingWithTrip('${esc(trip.id)}')" class="snap-start shrink-0 w-[14.5rem] rounded-2xl overflow-hidden bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 shadow-md active:scale-[0.98] transition cursor-pointer">
-                        <div class="relative h-28 bg-carbon-900">
-                            <img src="${esc(trip.img)}" alt="${esc(title)}" loading="lazy" class="w-full h-full object-cover" />
-                            <div class="absolute inset-0 bg-gradient-to-t from-carbon-950/85 via-transparent to-carbon-950/20"></div>
-                            <span class="absolute top-2 start-2 px-2 py-0.5 rounded-md bg-carbon-950/75 text-champagne text-[9.5px] font-black">${esc(badge)}</span>
-                            <span class="absolute top-2 end-2 px-1.5 py-0.5 rounded-md bg-carbon-950/75 text-white text-[10px] font-black">★ ${trip.rating}</span>
-                            <div class="absolute bottom-2 start-2 text-white">
-                                <span class="text-sm font-black text-champagne">${fmtPrice(trip.fromPrice)}</span>
-                                <span class="text-[9.5px] opacity-80"> / ${esc(dur)}</span>
-                            </div>
-                        </div>
-                        <div class="p-2.5">
-                            <h3 class="text-xs font-black leading-snug line-clamp-2 min-h-[2rem]">${esc(title)}</h3>
-                            <div class="mt-2 flex items-center justify-between text-[10px] font-bold text-sea-dark dark:text-sea">
-                                <span class="truncate">${esc(trip.vehicle)}</span>
-                                <span class="px-2 py-0.5 rounded-md bg-champagne text-carbon-950 font-black shrink-0">${esc(m.book_short)}</span>
-                            </div>
-                        </div>
-                    </article>`;
-                }).join("")}
-            </div>
-        </section>
-
-        <!-- 4. INTERACTIVE PROMO BANNER -->
+        <!-- 3. INTERACTIVE PROMO BANNER -->
         <section class="px-4 pt-4">
             <button type="button" onclick="copyMosaPromo()"
                 class="w-full p-3.5 rounded-2xl bg-gradient-to-r from-carbon-900 via-carbon-800 to-carbon-900 text-white border border-champagne/40 shadow-lg flex items-center justify-between gap-3 text-start active:scale-[0.99] transition">
@@ -348,9 +311,9 @@ export function renderMobileApp() {
             </button>
         </section>
 
-        <!-- 5. OFFICIAL 4 TOURS LIST -->
+        <!-- 4. CRYSTAL-CLEAR FULL-WIDTH MOBILE PROGRAM SHOWCASE CARDS -->
         <section id="m-tours-section" class="px-4 pt-5">
-            <div class="flex items-center justify-between gap-2 mb-3">
+            <div class="flex items-center justify-between gap-2 mb-3.5">
                 <h2 class="text-sm font-black">${esc(m.sec_all)} (${filtered.length})</h2>
                 <select onchange="setMobileSort(this.value)" aria-label="Sort"
                     class="px-2.5 py-1.5 rounded-xl bg-white dark:bg-carbon-800 border border-carbon-900/15 dark:border-white/15 text-[11px] font-extrabold focus:outline-none">
@@ -361,58 +324,92 @@ export function renderMobileApp() {
                 </select>
             </div>
 
-            <div class="space-y-3">
+            <div class="space-y-4">
                 ${filtered.map(trip => {
                     const title = getTripTitle(trip);
+                    const desc = getTripDesc(trip);
                     const dur = getTripDuration(trip);
                     const isFav = state.favorites.has(trip.id);
                     const routes = getTripRoutes(trip);
-                    return `<article class="p-3 rounded-2xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 shadow-sm space-y-2.5">
-                        <div class="flex items-stretch gap-3">
-                            <div class="relative w-24 h-24 rounded-xl overflow-hidden shrink-0 bg-carbon-900">
+                    const details = getTripDetails(trip, lang);
+                    const detailsUrl = getTripPageUrl(trip.id);
+                    const badge = lang === "ar" ? trip.badge : ((BADGE_I18N[lang] && BADGE_I18N[lang][trip.badge]) || trip.badge);
+
+                    return `<article class="rounded-3xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 shadow-md overflow-hidden">
+                        <div class="relative h-48 bg-carbon-900">
+                            <a href="${esc(detailsUrl)}" class="block w-full h-full">
                                 <img src="${esc(trip.img)}" alt="${esc(title)}" loading="lazy" class="w-full h-full object-cover" />
-                                <span class="absolute bottom-1 start-1 px-1.5 py-0.5 rounded bg-carbon-950/80 text-champagne text-[9.5px] font-black">★ ${trip.rating}</span>
-                                <button type="button" onclick="toggleFav('${esc(trip.id)}')" aria-label="Favorite"
-                                    class="absolute top-1 end-1 w-6 h-6 rounded-lg grid place-items-center ${isFav ? 'bg-rose-500 text-white' : 'bg-carbon-950/65 text-white'}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-                                </button>
+                            </a>
+                            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-carbon-950/90 via-carbon-950/20 to-carbon-950/35"></div>
+                            <div class="absolute top-3 start-3 flex items-center gap-1.5">
+                                <span class="px-2.5 py-1 rounded-full bg-carbon-950/80 text-champagne text-[10px] font-black">${esc(badge)}</span>
+                                <span class="px-2.5 py-1 rounded-full bg-sea/90 text-carbon-950 text-[10px] font-black">⏱ ${esc(dur)}</span>
                             </div>
-                            <div class="flex-1 min-w-0 flex flex-col justify-between py-0.5">
-                                <div>
-                                    <div class="text-[10px] font-extrabold text-sea-dark dark:text-sea truncate">${esc(dur)} · ${esc(trip.vehicle)}</div>
-                                    <h3 class="text-xs font-black leading-snug line-clamp-2 mt-0.5">${esc(title)}</h3>
+                            <button type="button" onclick="toggleFav('${esc(trip.id)}')" aria-label="Favorite"
+                                class="absolute top-3 end-3 w-8 h-8 rounded-xl grid place-items-center ${isFav ? 'bg-rose-500 text-white' : 'bg-carbon-950/70 text-white'} border border-white/15">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                            </button>
+                            <div class="pointer-events-none absolute bottom-3 inset-x-3 flex items-end justify-between text-white">
+                                <div class="leading-tight">
+                                    <span class="text-[10px] text-white/75 block">${esc(g.from_label)}</span>
+                                    <span class="text-lg font-black text-champagne">${fmtPrice(trip.fromPrice)}</span>
+                                    <span class="text-[10px] text-white/75">(${fmtPrice(trip.adultPrice)})</span>
                                 </div>
-                                <div class="flex items-end justify-between gap-2 pt-1.5">
-                                    <div class="leading-none">
-                                        <span class="text-[9.5px] opacity-60 block">${esc(g.from_label)}</span>
-                                        <span class="text-sm font-black text-champagne-dark dark:text-champagne">${fmtPrice(trip.fromPrice)}</span>
-                                    </div>
-                                    <button type="button" onclick="openBookingWithTrip('${esc(trip.id)}')"
-                                        class="px-3.5 py-1.5 rounded-xl bg-carbon-950 dark:bg-champagne text-white dark:text-carbon-950 font-black text-[11px] active:scale-95 transition">
-                                        ${esc(g.book_now)}
-                                    </button>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="px-2 py-0.5 rounded-lg bg-carbon-950/80 text-[10px] font-extrabold border border-white/15">${esc(details.departureWindow)}</span>
+                                    <span class="px-2 py-0.5 rounded-lg bg-carbon-950/80 text-champagne text-[10px] font-black">★ ${trip.rating}</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="p-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 space-y-1.5 text-[10px]">
-                            ${routes.map(r => `
-                                <div class="flex flex-wrap items-center gap-1">
-                                    <span class="font-black text-champagne-dark dark:text-champagne me-1">${esc(getRouteLabel(r, lang))}:</span>
-                                    ${(r.stops || []).map(st => `
-                                        <button type="button" onclick="openBookingWithStop('${esc(trip.id)}', '${esc(r.id)}', '${esc(st.station)}')"
-                                            class="px-1.5 py-0.5 rounded bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 font-bold">
-                                            ${esc(getStopClock(st, lang))} ${esc(getStationLabel(st.station, lang))}
-                                        </button>
-                                    `).join("")}
-                                </div>
-                            `).join("")}
+
+                        <div class="p-4 space-y-3">
+                            <div>
+                                <div class="text-[10.5px] font-extrabold text-sea-dark dark:text-sea">${esc(trip.vehicle)}</div>
+                                <h3 class="text-sm font-black leading-snug mt-0.5">
+                                    <a href="${esc(detailsUrl)}">${esc(title)}</a>
+                                </h3>
+                                <p class="text-[11.5px] opacity-75 leading-relaxed mt-1 line-clamp-2">${esc(desc)}</p>
+                            </div>
+
+                            <div class="flex flex-wrap gap-1">
+                                ${(details.highlights || []).slice(0, 3).map(h => `
+                                    <span class="px-2 py-0.5 rounded-md bg-champagne/10 border border-champagne/25 text-[10px] font-extrabold">✓ ${esc(h)}</span>
+                                `).join("")}
+                            </div>
+
+                            <!-- Clean 2-Column Mobile Pickup Timetable -->
+                            <div class="grid grid-cols-2 gap-2">
+                                ${routes.map(r => `
+                                    <div class="p-2 rounded-xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10 space-y-1">
+                                        <div class="text-[10px] font-black text-champagne-dark dark:text-champagne border-b border-carbon-900/10 dark:border-white/10 pb-0.5">${esc(getRouteLabel(r, lang))}</div>
+                                        ${(r.stops || []).map(st => `
+                                            <button type="button" onclick="openBookingWithStop('${esc(trip.id)}', '${esc(r.id)}', '${esc(st.station)}')"
+                                                class="w-full px-1.5 py-1 rounded-lg bg-white dark:bg-carbon-800 text-[10px] font-bold flex items-center justify-between gap-1 active:scale-95 transition">
+                                                <span class="truncate">${esc(getStationLabel(st.station, lang))}</span>
+                                                <span class="font-mono font-black text-champagne-dark dark:text-champagne shrink-0">${esc(getStopClock(st, lang))}</span>
+                                            </button>
+                                        `).join("")}
+                                    </div>
+                                `).join("")}
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2 pt-1">
+                                <a href="${esc(detailsUrl)}"
+                                    class="py-2.5 px-3 rounded-xl border border-carbon-900/15 dark:border-champagne/40 text-center font-black text-xs flex items-center justify-center">
+                                    ${esc(m.details_btn)}
+                                </a>
+                                <button type="button" onclick="openBookingWithTrip('${esc(trip.id)}')"
+                                    class="py-2.5 px-3 rounded-xl bg-champagne text-carbon-950 font-black text-xs shadow-md shadow-champagne/20 active:scale-95 transition">
+                                    ${esc(g.book_now)}
+                                </button>
+                            </div>
                         </div>
                     </article>`;
                 }).join("")}
             </div>
         </section>
 
-        <!-- 6. OFFICIAL PICKUP TIMETABLE & IMPORTANT RULES -->
+        <!-- 5. IMPORTANT PICKUP RULES -->
         <section id="m-schedule-section" class="px-4 pt-6 space-y-3">
             <h2 class="text-sm font-black">${esc(m.sec_schedule)}</h2>
             <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-champagne/40 space-y-1.5">
@@ -423,7 +420,7 @@ export function renderMobileApp() {
             </div>
         </section>
 
-        <!-- 7. COMPACT STATS STRIP -->
+        <!-- 6. COMPACT STATS STRIP -->
         <section class="px-4 pt-5">
             <h2 class="text-sm font-black mb-2.5">${esc(m.sec_why)}</h2>
             <div class="grid grid-cols-4 gap-1.5 text-center mb-3">
@@ -432,8 +429,8 @@ export function renderMobileApp() {
                     <div class="text-[9.5px] text-white/70 font-bold mt-0.5">${lang === "ar" ? "سنة خبرة" : "Years"}</div>
                 </div>
                 <div class="p-2.5 rounded-xl bg-carbon-900 text-white border border-white/10">
-                    <div class="text-base font-black text-champagne">5</div>
-                    <div class="text-[9.5px] text-white/70 font-bold mt-0.5">${lang === "ar" ? "نقاط استلام" : "Pickups"}</div>
+                    <div class="text-base font-black text-champagne">4–5h</div>
+                    <div class="text-[9.5px] text-white/70 font-bold mt-0.5">${lang === "ar" ? "مدة الرحلة" : "Duration"}</div>
                 </div>
                 <div class="p-2.5 rounded-xl bg-carbon-900 text-white border border-white/10">
                     <div class="text-base font-black text-sea">${activeTrips.length}</div>
@@ -446,7 +443,7 @@ export function renderMobileApp() {
             </div>
         </section>
 
-        <!-- 8. COMPACT MOBILE FAQ ACCORDION -->
+        <!-- 7. COMPACT MOBILE FAQ ACCORDION -->
         <section class="px-4 pt-2 pb-6">
             <h2 class="text-sm font-black mb-2.5">${esc(m.sec_faq)}</h2>
             <div class="space-y-2">
@@ -463,14 +460,14 @@ export function renderMobileApp() {
             </div>
         </section>
 
-        <!-- 9. COMPACT MOBILE FOOTER -->
+        <!-- 8. COMPACT MOBILE FOOTER -->
         <footer class="px-4 py-5 text-center text-[11px] opacity-70 border-t border-carbon-900/10 dark:border-white/10">
             <div class="font-black text-carbon-900 dark:text-white">${esc(g.footer_brand)}</div>
             <div class="mt-0.5">${esc(g.footer_addr)}</div>
             <div class="mt-1">© 2026 mosasafari.com</div>
         </footer>
 
-        <!-- 10. FLOATING GLASS PILL BOTTOM NAVIGATION BAR -->
+        <!-- 9. FLOATING GLASS PILL BOTTOM NAVIGATION BAR -->
         <nav aria-label="Mobile Navigation"
             class="fixed bottom-3 inset-x-3 z-40 rounded-2xl bg-carbon-950/95 backdrop-blur-xl border border-white/15 px-2 py-1.5 shadow-[0_12px_36px_-8px_rgba(0,0,0,0.65)]">
             <div class="grid grid-cols-4 items-center gap-1">
