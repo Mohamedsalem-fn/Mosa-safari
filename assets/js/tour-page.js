@@ -358,16 +358,23 @@ function renderTourPage() {
     if (footerAll) footerAll.textContent = c.back_all;
 
     root.innerHTML = `
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-8">
-            <!-- 1. Breadcrumb + Quick 4-Tour Switcher -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 space-y-6 sm:space-y-8">
+            <!-- 1. Breadcrumb + Mobile Back Button + Quick 4-Tour Switcher -->
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                <nav aria-label="Breadcrumb" class="flex flex-wrap items-center gap-1.5 text-xs font-bold opacity-80">
-                    <a href="/index.html" class="hover:text-champagne-dark dark:hover:text-champagne">${esc(c.home)}</a>
-                    <span>/</span>
-                    <a href="/index.html#programs" class="hover:text-champagne-dark dark:hover:text-champagne">${esc(c.programs)}</a>
-                    <span>/</span>
-                    <span class="font-black text-champagne-dark dark:text-champagne">${esc(title)}</span>
-                </nav>
+                <div class="flex items-center justify-between gap-2 min-w-0">
+                    <a href="/index.html#programs" id="mobile-back-home-link"
+                        class="md:hidden inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-carbon-800 border border-carbon-900/15 dark:border-white/15 hover:border-champagne shadow-sm text-xs font-black transition shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" class="w-3.5 h-3.5 rtl:rotate-180"><path d="m15 18-6-6 6-6"/></svg>
+                        <span>${esc(c.back_all)}</span>
+                    </a>
+                    <nav aria-label="Breadcrumb" class="flex flex-wrap items-center gap-1.5 text-xs font-bold opacity-80 min-w-0">
+                        <a href="/index.html" class="hover:text-champagne-dark dark:hover:text-champagne shrink-0">${esc(c.home)}</a>
+                        <span class="shrink-0">/</span>
+                        <a href="/index.html#programs" class="hover:text-champagne-dark dark:hover:text-champagne shrink-0">${esc(c.programs)}</a>
+                        <span class="hidden sm:inline shrink-0">/</span>
+                        <span class="hidden sm:inline font-black text-champagne-dark dark:text-champagne truncate">${esc(title)}</span>
+                    </nav>
+                </div>
                 <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-1.5">
                     ${SAFARI_TRIPS.filter(t => t.active !== false).map(t => {
                         const isCur = t.id === trip.id;
@@ -384,17 +391,19 @@ function renderTourPage() {
             <section class="rounded-3xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 shadow-xl overflow-hidden">
                 <div class="grid grid-cols-1 lg:grid-cols-12">
                     <div class="lg:col-span-7 relative bg-carbon-950 group">
-                        <div class="aspect-[16/10] w-full overflow-hidden cursor-zoom-in" id="tour-hero-trigger">
+                        <div class="aspect-[4/3] sm:aspect-[16/10] w-full overflow-hidden cursor-zoom-in" id="tour-hero-trigger">
                             <img id="tour-hero-img" src="${esc(heroImg)}" alt="${esc(title)}" class="w-full h-full object-cover transition duration-500">
                         </div>
                         <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-carbon-950/85 via-transparent to-carbon-950/30"></div>
-                        <div class="absolute top-4 start-4 flex flex-wrap gap-2">
-                            <span class="px-3 py-1 rounded-full bg-carbon-950/80 border border-champagne/40 text-champagne text-xs font-black">${esc(badgeText)}</span>
-                            <span class="px-3 py-1 rounded-full bg-sea text-carbon-950 text-xs font-black">⏱ ${esc(dur)}</span>
-                        </div>
-                        <div class="absolute top-4 end-4 flex items-center gap-1.5">
-                            <span class="px-2.5 py-1 rounded-full bg-carbon-950/80 border border-white/15 text-white text-xs font-black">📷 <span dir="ltr">${tourState.activeImgIdx + 1} / ${gallery.length}</span></span>
-                            <span class="px-3 py-1 rounded-full bg-carbon-950/80 border border-white/15 text-champagne text-xs font-black">★ ${trip.rating}</span>
+                        <div class="pointer-events-none absolute top-3 sm:top-4 inset-x-3 sm:inset-x-4 flex items-start justify-between gap-2">
+                            <div class="flex flex-wrap items-center gap-1.5 min-w-0">
+                                <span class="px-2.5 sm:px-3 py-1 rounded-full bg-carbon-950/80 backdrop-blur-sm border border-champagne/40 text-champagne text-[11px] sm:text-xs font-black truncate max-w-full">${esc(badgeText)}</span>
+                                <span class="px-2.5 sm:px-3 py-1 rounded-full bg-sea text-carbon-950 text-[11px] sm:text-xs font-black whitespace-nowrap">⏱ ${esc(dur)}</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <span class="px-2.5 py-1 rounded-full bg-carbon-950/80 backdrop-blur-sm border border-white/15 text-white text-[11px] sm:text-xs font-black whitespace-nowrap">📷 <span dir="ltr">${tourState.activeImgIdx + 1} / ${gallery.length}</span></span>
+                                <span class="px-2.5 py-1 rounded-full bg-carbon-950/80 backdrop-blur-sm border border-white/15 text-champagne text-[11px] sm:text-xs font-black whitespace-nowrap">★ ${trip.rating}</span>
+                            </div>
                         </div>
                         ${gallery.length > 1 ? `
                             <button type="button" id="tour-hero-prev" aria-label="Previous image"
