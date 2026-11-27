@@ -420,7 +420,7 @@ function renderTourPage() {
                         <div class="space-y-3">
                             <div class="text-xs font-black text-sea-dark dark:text-sea">📍 ${esc(g.city_sharm)} · ${esc(details.departureWindow)}</div>
                             <h1 class="text-2xl sm:text-3xl font-black leading-tight">${esc(title)}</h1>
-                            <p class="text-sm text-carbon-900/75 dark:text-[#B5B0A8] leading-relaxed">${esc(details.subtitle || desc)}</p>
+                            <p class="text-sm sm:text-base text-carbon-900/75 dark:text-[#B5B0A8] leading-relaxed">${esc(details.subtitle || desc)}</p>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3 text-xs">
@@ -434,22 +434,22 @@ function renderTourPage() {
                             </div>
                             <div class="p-3 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10">
                                 <span class="opacity-65 block font-bold">${esc(c.veh_lbl)}</span>
-                                <strong class="text-xs font-black text-sea mt-0.5 block">${esc(trip.vehicle)}</strong>
+                                <strong class="text-xs sm:text-sm font-black text-sea mt-0.5 block">${esc(trip.vehicle)}</strong>
                             </div>
                             <div class="p-3 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-900 border border-carbon-900/10 dark:border-white/10">
                                 <span class="opacity-65 block font-bold">${esc(c.routes_lbl)}</span>
-                                <strong class="text-xs font-black mt-0.5 block">${esc(c.routes_val)}</strong>
+                                <strong class="text-xs sm:text-sm font-black mt-0.5 block">${esc(c.routes_val)}</strong>
                             </div>
                         </div>
 
                         <div class="flex items-center justify-between gap-3 pt-3 border-t border-carbon-900/10 dark:border-white/10">
                             <div>
-                                <span class="text-[11px] opacity-65 block font-bold">${esc(c.from_shared)}</span>
+                                <span class="text-xs opacity-65 block font-bold">${esc(c.from_shared)}</span>
                                 <span class="text-2xl font-black text-champagne-dark dark:text-champagne">${fmtPrice(trip.fromPrice)}</span>
                                 <span class="text-xs opacity-65">(${fmtPrice(trip.adultPrice)} ${esc(c.full_adult)})</span>
                             </div>
                             <button type="button" id="hero-book-now-btn"
-                                class="px-5 py-3 rounded-xl bg-champagne hover:bg-champagne-light text-carbon-950 font-black text-xs sm:text-sm shadow-lg shadow-champagne/25 transition">
+                                class="px-5 py-3 rounded-xl bg-champagne hover:bg-champagne-light text-carbon-950 font-black text-sm shadow-lg shadow-champagne/25 transition">
                                 ${esc(g.book_now)}
                             </button>
                         </div>
@@ -464,10 +464,10 @@ function renderTourPage() {
                     <!-- Overview & Highlights -->
                     <section class="p-5 sm:p-7 rounded-3xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 space-y-4">
                         <h2 class="text-lg sm:text-xl font-black">${esc(c.overview_title)}</h2>
-                        <p class="text-sm text-carbon-900/80 dark:text-[#CEC8BE] leading-relaxed">${esc(desc)}</p>
+                        <p class="text-sm sm:text-base text-carbon-900/80 dark:text-[#CEC8BE] leading-relaxed">${esc(desc)}</p>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                             ${(details.highlights || []).map(hl => `
-                                <div class="p-3.5 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-900 border border-champagne/25 flex items-center gap-2.5 text-xs sm:text-sm font-black">
+                                <div class="p-3.5 rounded-2xl bg-[#F6F3EC] dark:bg-carbon-900 border border-champagne/25 flex items-center gap-2.5 text-sm font-black">
                                     <span class="w-6 h-6 rounded-lg bg-sea/20 text-sea grid place-items-center shrink-0">✓</span>
                                     <span>${esc(hl)}</span>
                                 </div>
@@ -487,10 +487,10 @@ function renderTourPage() {
                                     <div class="w-10 h-10 rounded-xl bg-champagne text-carbon-950 font-black text-sm grid place-items-center shrink-0">${esc(item.step)}</div>
                                     <div class="min-w-0 flex-1">
                                         <div class="flex flex-wrap items-center justify-between gap-2">
-                                            <h3 class="text-sm sm:text-base font-black">${esc(item.title)}</h3>
-                                            <span class="px-2.5 py-0.5 rounded-lg bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 font-mono text-[11px] font-black text-champagne-dark dark:text-champagne">${esc(item.time)}</span>
+                                            <h3 class="text-base font-black">${esc(item.title)}</h3>
+                                            <span class="px-2.5 py-0.5 rounded-lg bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 font-mono text-xs font-black text-champagne-dark dark:text-champagne">${esc(item.time)}</span>
                                         </div>
-                                        <p class="text-xs sm:text-sm text-carbon-900/75 dark:text-[#B5B0A8] leading-relaxed mt-1">${esc(item.desc)}</p>
+                                        <p class="text-sm text-carbon-900/75 dark:text-[#B5B0A8] leading-relaxed mt-1">${esc(item.desc)}</p>
                                     </div>
                                 </div>
                             `).join("")}
@@ -501,7 +501,7 @@ function renderTourPage() {
                     <section class="p-5 sm:p-7 rounded-3xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 space-y-4">
                         <div>
                             <h2 class="text-lg sm:text-xl font-black">${esc(c.schedule_title)}</h2>
-                            <p class="text-xs sm:text-sm opacity-75 mt-1 font-bold">${esc(c.schedule_hint)}</p>
+                            <p class="text-sm opacity-75 mt-1 font-bold">${esc(c.schedule_hint)}</p>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -515,9 +515,9 @@ function renderTourPage() {
                                             const active = tourState.pickupRoute === route.id && tourState.pickupStation === st.station;
                                             return `
                                                 <button type="button" data-pick-route="${esc(route.id)}" data-pick-station="${esc(st.station)}"
-                                                    class="w-full px-3 py-2.5 rounded-xl border text-start flex items-center justify-between gap-2 text-xs sm:text-sm font-bold transition ${active ? 'bg-champagne text-carbon-950 border-champagne shadow-md' : 'bg-white dark:bg-carbon-800 border-carbon-900/10 dark:border-white/10 hover:border-champagne'}">
+                                                    class="w-full px-3 py-2.5 rounded-xl border text-start flex items-center justify-between gap-2 text-sm font-bold transition ${active ? 'bg-champagne text-carbon-950 border-champagne shadow-md' : 'bg-white dark:bg-carbon-800 border-carbon-900/10 dark:border-white/10 hover:border-champagne'}">
                                                     <span>${st.emoji || "🕒"} <strong class="font-mono">${esc(getStopClock(st, lang))}</strong> — ${esc(getStationLabel(st.station, lang))}</span>
-                                                    <span class="text-[11px] font-black">${active ? c.selected_tag : g.book_now}</span>
+                                                    <span class="text-xs font-black">${active ? c.selected_tag : g.book_now}</span>
                                                 </button>
                                             `;
                                         }).join("")}
@@ -527,8 +527,8 @@ function renderTourPage() {
                         </div>
 
                         <div class="rounded-2xl p-4 sm:p-5 bg-amber-500/10 border border-champagne/40 space-y-2">
-                            <div class="text-sm font-black text-champagne-dark dark:text-champagne">${esc(rules.title)}</div>
-                            <ul class="space-y-1 text-xs sm:text-sm font-bold text-carbon-900/85 dark:text-[#F4EFE6]">
+                            <div class="text-sm sm:text-base font-black text-champagne-dark dark:text-champagne">${esc(rules.title)}</div>
+                            <ul class="space-y-1.5 text-sm font-bold text-carbon-900/85 dark:text-[#F4EFE6]">
                                 ${rules.items.map(line => `<li class="flex items-start gap-2"><span class="text-champagne-dark dark:text-champagne">•</span><span>${esc(line)}</span></li>`).join("")}
                             </ul>
                         </div>
@@ -537,20 +537,20 @@ function renderTourPage() {
                     <!-- Included / Excluded / What to Bring -->
                     <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="p-5 rounded-3xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 space-y-3">
-                            <h3 class="text-sm font-black text-sea">✓ ${esc(c.inc_title)}</h3>
-                            <ul class="space-y-2 text-xs font-bold opacity-85">
+                            <h3 class="text-base font-black text-sea">✓ ${esc(c.inc_title)}</h3>
+                            <ul class="space-y-2 text-sm font-bold opacity-85">
                                 ${(details.includes || []).map(x => `<li class="flex items-start gap-1.5"><span class="text-sea shrink-0">✓</span><span>${esc(x)}</span></li>`).join("")}
                             </ul>
                         </div>
                         <div class="p-5 rounded-3xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 space-y-3">
-                            <h3 class="text-sm font-black text-copper">✕ ${esc(c.exc_title)}</h3>
-                            <ul class="space-y-2 text-xs font-bold opacity-80">
+                            <h3 class="text-base font-black text-copper">✕ ${esc(c.exc_title)}</h3>
+                            <ul class="space-y-2 text-sm font-bold opacity-80">
                                 ${(details.excludes || []).map(x => `<li class="flex items-start gap-1.5"><span class="text-copper shrink-0">•</span><span>${esc(x)}</span></li>`).join("")}
                             </ul>
                         </div>
                         <div class="p-5 rounded-3xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 space-y-3">
-                            <h3 class="text-sm font-black text-champagne-dark dark:text-champagne">🎒 ${esc(c.bring_title)}</h3>
-                            <ul class="space-y-2 text-xs font-bold opacity-85">
+                            <h3 class="text-base font-black text-champagne-dark dark:text-champagne">🎒 ${esc(c.bring_title)}</h3>
+                            <ul class="space-y-2 text-sm font-bold opacity-85">
                                 ${(details.bring || []).map(x => `<li class="flex items-start gap-1.5"><span class="text-champagne-dark dark:text-champagne shrink-0">•</span><span>${esc(x)}</span></li>`).join("")}
                             </ul>
                         </div>
@@ -567,7 +567,7 @@ function renderTourPage() {
                         <section class="p-5 sm:p-7 rounded-3xl bg-white dark:bg-carbon-800 border border-carbon-900/10 dark:border-white/10 space-y-4">
                             <div class="flex items-center justify-between gap-2">
                                 <h2 class="text-base sm:text-lg font-black">📸 ${esc(stripHeading)}</h2>
-                                <span class="px-2.5 py-1 rounded-full bg-sea/15 text-sea text-[11px] font-black">${esc(g.moments_verified_badge || "✓ Official Mosa Sign")}</span>
+                                <span class="px-2.5 py-1 rounded-full bg-sea/15 text-sea text-xs font-black">${esc(g.moments_verified_badge || "✓ Official Mosa Sign")}</span>
                             </div>
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                 ${realStrip.map(item => {
@@ -579,8 +579,8 @@ function renderTourPage() {
                                             class="group relative ${ratio} rounded-2xl overflow-hidden bg-carbon-900 border border-carbon-900/10 dark:border-white/10 text-start">
                                             <img src="${esc(assetUrl(item.src))}" alt="${esc(mTitle)}" loading="lazy" class="w-full h-full object-cover ${posCls} group-hover:scale-105 transition duration-500">
                                             <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-carbon-950/90 via-transparent to-transparent"></div>
-                                            ${item.verifiedSign ? `<span class="absolute top-2 start-2 px-2 py-0.5 rounded-full bg-sea text-carbon-950 text-[9px] font-black">✓ Mosa</span>` : ""}
-                                            <span class="absolute bottom-2 inset-x-2 text-white text-[10.5px] font-black line-clamp-2">${esc(mTitle)}</span>
+                                            ${item.verifiedSign ? `<span class="absolute top-2 start-2 px-2 py-0.5 rounded-full bg-sea text-carbon-950 text-[10px] font-black">✓ Mosa</span>` : ""}
+                                            <span class="absolute bottom-2 inset-x-2 text-white text-xs font-black line-clamp-2">${esc(mTitle)}</span>
                                         </button>
                                     `;
                                 }).join("")}
@@ -708,12 +708,12 @@ function renderTourPage() {
         mobBar.innerHTML = `
             <div class="flex items-center justify-between gap-2.5">
                 <div class="min-w-0 text-white">
-                    <div class="text-[10px] text-champagne font-bold truncate">${esc(dur)} · ${esc(details.departureWindow)}</div>
-                    <div class="text-base font-black leading-tight">${fmtPrice(quote.total)} <span class="text-[10px] font-normal text-white/65">(${tourState.adults}+${tourState.children})</span></div>
+                    <div class="text-xs text-champagne font-bold truncate">${esc(dur)} · ${esc(details.departureWindow)}</div>
+                    <div class="text-lg font-black leading-tight">${fmtPrice(quote.total)} <span class="text-xs font-normal text-white/75">(${tourState.adults}+${tourState.children})</span></div>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
-                    <button type="button" onclick="toggleAiWidget(true)" class="p-2.5 rounded-xl bg-white/10 text-sea border border-white/15 text-xs font-black">AI</button>
-                    <button type="button" id="mob-sticky-book-btn" class="px-5 py-2.5 rounded-xl bg-champagne text-carbon-950 font-black text-xs shadow-md">${esc(g.book_now)}</button>
+                    <button type="button" onclick="toggleAiWidget(true)" class="px-3 py-2.5 rounded-xl bg-white/10 text-sea border border-white/15 text-xs font-black">AI</button>
+                    <button type="button" id="mob-sticky-book-btn" class="px-5 py-3 rounded-xl bg-champagne text-carbon-950 font-black text-sm shadow-md">${esc(g.book_now)}</button>
                 </div>
             </div>
         `;

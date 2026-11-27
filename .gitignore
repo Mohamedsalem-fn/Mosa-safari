@@ -18,3 +18,4 @@ hostinger/*/api/_lib/
 hostinger/**/.mosa_secrets.php
 hostinger/**/.mosa_vault/
 assets/photos/
+graphify-out/

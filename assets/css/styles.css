@@ -438,14 +438,14 @@ body.ai-sheet-open { overflow: hidden; }
 
 /* ---------- Phones (< 640px): Fluid rem + Native Mobile App Shell ---------- */
 @media (max-width: 639px) {
-    /* Fluid root rem scaling: 13px on 320px -> 14.5px on 400px -> 15px on 430px+ */
-    html { font-size: clamp(13px, 3.65vw, 15px); }
+    /* Fluid root rem scaling: crisp 15px on 360px -> 16px on 380px -> 16.5px on 393px+ */
+    html { font-size: clamp(15px, 4.2vw, 16.5px); }
 
-    /* #mobile-app-shell already carries pb-24 for the floating bottom pill bar */
+    /* #mobile-app-shell carries pb-28 for the floating bottom pill bar */
     body { padding-bottom: 0; }
 
     /* Compact Mobile App Footer override */
-    #mobile-app-shell footer { padding-block: 1.25rem; text-align: center; }
+    #mobile-app-shell footer { padding-block: 1.35rem; text-align: center; }
 
     /* Booking & Compare Modals -> Native Bottom Sheet */
     #booking-modal, #compare-modal { padding: 0; align-items: flex-end; }
@@ -454,8 +454,8 @@ body.ai-sheet-open { overflow: hidden; }
         max-height: 90dvh;
         border-radius: 1.35rem 1.35rem 0 0;
     }
-    #booking-modal > div > div:first-child { padding: 0.8rem 0.95rem; }
-    #booking-modal h3 { font-size: 0.98rem; }
+    #booking-modal > div > div:first-child { padding: 0.85rem 1rem; }
+    #booking-modal h3 { font-size: 1.1rem; }
     #booking-progress-bars { padding-inline: 0.95rem; gap: 0.3rem; }
     #booking-body { padding: 0.85rem 0.95rem; }
     #booking-modal > div > div:last-child {
@@ -538,7 +538,7 @@ body.ai-sheet-open { overflow: hidden; }
 
 /* ---------- Ultra-Small Phones (320px - 359px) ---------- */
 @media (max-width: 359px) {
-    #m-hero h1 { font-size: 1.42rem; }
+    #m-hero h1 { font-size: 1.55rem; }
 }
 
 /* ===================================================================
